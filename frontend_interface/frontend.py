@@ -1,30 +1,45 @@
 import streamlit as st
-
-import streamlit as st
-
 import numpy as np
+# Page Configuration
+st.set_page_config(page_title="Smart Interview Coach", layout="wide")
 
 
-# Method 1: Uploading a Video File
-st.title("Upload Video")
-video_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
-if video_file:
-    st.video(video_file)
+#making the sidebar  
+with st.sidebar:
+    st.title("⚙️ Dashboard")
+    st.info("Capstone Project: Smart Interview Coach")
+    st.divider()
+    st.subheader("Candidate Details")
+    name=st.text_input("Full Name",placeholder="Suraj Sharma")
+    role=st.selectbox("Target Role",["Data Scientist", "ML Engineer", "Software Dev"])
+    st.divider()
+    if st.button("End Interview Session"):
+        st.warning("Session Ended.Generating Report...")
 
 
-st.title("Live Camera Feed")
 
+#making the main UI area 
+st.title("🤖 AI Interview Room")
+st.markdown("---")
 
+#basically it tells the width of the two containers
+col1,col2=st.columns([1,1])
 
-st.sidebar.title("AI-POWERED-INTERVIEW-PREPARATION-COACH")
+with col1:
+    st.subheader("Video/Audio Input")
+    #placeholder the video feed
+    st.image("https://via.placeholder.com/640x480.png?text=Camera+Feed+Placeholder")
+    st.write("🎤 Status: Listening...")
 
-
-
-values=["AI_ENGINEER","DEVOPS ENGINEER","DATA SCIENTIST"]
-selected_role=st.selectbox("Choose your job role...",values)
-
-if st.button("Choose the following...."):
-    options=["Hard","Medium","Easy"]
-    st.selectbox("Choose the difficulty",options)
-
-user_video=st.camera_input("Camera")
+with col2:
+    st.subheader("Interview Transcript")
+    # Chat UI container
+    with st.container(height=300, border=True):
+        st.chat_message("assistant").write("Hello Suraj! Can you explain the difference between a list and a tuple in Python?")
+        st.chat_message("user").write("Lists are mutable while tuples are immutable.")
+    
+    user_input = st.chat_input("Type your answer here...")
+st.divider()
+st.subheader("Live Feedback")
+st.progress(75, text="Confidence Level")
+st.caption("AI Insight: You are speaking a bit fast. Try to slow down for better clarity.")

@@ -1,1 +1,3 @@
+.ENV
 myenv/
+__pycache__/
