@@ -8,9 +8,11 @@ import threading
 
 from AI_BACKEND.rag_retriever import (
     fetch_questions_for_role_exact,
+    fetch_questions_for_role_random_mix,
     list_roles,
     load_vectordb,
 )
+from AI_BACKEND.evaluator import evaluate_technical_answer
 
 # Page Configuration
 st.set_page_config(page_title="Smart Interview Coach", layout="wide")
@@ -18,65 +20,52 @@ st.set_page_config(page_title="Smart Interview Coach", layout="wide")
 st.markdown(
     """
 <style>
-  /* Clean, professional theme (minimal glass) */
-  .block-container { padding-top: 1.25rem; padding-bottom: 2.25rem; max-width: 1200px; }
-  .stApp { background: #0b1220; }
-  section[data-testid="stSidebar"] { background: #0b1220; border-right: 1px solid rgba(148,163,184,0.14); }
-  section[data-testid="stSidebar"] * { color: rgba(226,232,240,0.92); }
+  /* Clean, readable UI that works with any Streamlit theme */
+  /* Streamlit top bar (Deploy/toolbar) can overlap content depending on theme.
+     Push the main view container down to ensure nothing hides behind the header. */
+  div[data-testid="stAppViewContainer"] { padding-top: 4.2rem; }
+  .block-container { padding-top: 0.9rem; padding-bottom: 2.25rem; max-width: 1200px; }
 
   .card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(148,163,184,0.16);
+    background: rgba(255, 255, 255, 0.70);
+    border: 1px solid rgba(15, 23, 42, 0.10);
     border-radius: 14px;
     padding: 16px 16px;
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.05);
+    backdrop-filter: blur(6px);
   }
+
   .brand {
-    font-size: 1.15rem;
-    font-weight: 750;
+    font-size: 1.05rem;
+    font-weight: 800;
     letter-spacing: -0.01em;
-    margin: 0.1rem 0 0.25rem 0;
-    color: rgba(226,232,240,0.95);
+    margin: 0.0rem 0 0.15rem 0;
   }
+
   .headline {
-    font-size: 1.65rem;
-    font-weight: 780;
+    font-size: 1.55rem;
+    font-weight: 850;
     letter-spacing: -0.02em;
-    margin: 0.1rem 0 0.35rem 0;
-    color: rgba(226,232,240,0.96);
+    margin: 0.0rem 0 0.25rem 0;
   }
-  .subtle { color: rgba(148,163,184,0.95); font-size: 0.95rem; margin: 0 0 0.25rem 0; }
+
+  .subtle { color: rgba(15, 23, 42, 0.65); font-size: 0.95rem; margin: 0 0 0.25rem 0; }
+
   .kpi {
     display: inline-block;
-    padding: 0.3rem 0.6rem;
+    padding: 0.28rem 0.55rem;
     border-radius: 999px;
-    border: 1px solid rgba(148,163,184,0.18);
-    background: rgba(2,6,23,0.25);
-    color: rgba(226,232,240,0.92);
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255, 255, 255, 0.72);
+    color: rgba(15, 23, 42, 0.88);
     font-size: 0.86rem;
     margin-right: 0.4rem;
   }
 
-  /* Buttons: primary/secondary */
-  div.stButton > button {
-    border-radius: 10px !important;
-    padding: 0.55rem 0.85rem !important;
-    border: 1px solid rgba(148,163,184,0.24) !important;
-  }
-  div.stButton > button[kind="primary"] {
-    background: linear-gradient(90deg, #6366f1, #22c55e) !important;
-    border: none !important;
-    color: white !important;
-    font-weight: 650 !important;
-  }
-  div.stButton > button[kind="secondary"] {
-    background: rgba(255,255,255,0.04) !important;
-    color: rgba(226,232,240,0.92) !important;
-  }
-  div.stButton > button:disabled {
-    opacity: 0.55 !important;
-  }
+  /* Softer buttons (don’t fight Streamlit theme) */
+  div.stButton > button { border-radius: 10px !important; padding: 0.55rem 0.85rem !important; }
 
-  /* Make containers look consistent */
+  /* Chat message rounding */
   [data-testid="stChatMessage"] { border-radius: 12px; }
 </style>
 """,
@@ -144,6 +133,8 @@ st.session_state.setdefault("interview_started", False)
 st.session_state.setdefault("question_list", [])
 st.session_state.setdefault("question_idx", 0)
 st.session_state.setdefault("last_answer", "")
+st.session_state.setdefault("evaluations_by_qid", {})
+st.session_state.setdefault("current_evaluation", None)
 
 
 #making the sidebar  
@@ -169,25 +160,31 @@ with st.sidebar:
     st.write("")
 
     start = st.button("Start interview", type="primary", use_container_width=True)
-    end = st.button("End session", type="secondary", use_container_width=True)
+    end = st.button("End session", use_container_width=True)
     if end:
         st.warning("Session Ended.Generating Report...")
         st.session_state["interview_started"] = False
         st.session_state["question_list"] = []
         st.session_state["question_idx"] = 0
         st.session_state["last_answer"] = ""
+        st.session_state["current_evaluation"] = None
 
 if start:
     try:
         vectordb = _get_vectordb()
-        # Exact role-based fetch: no seed query.
-        st.session_state["question_list"] = fetch_questions_for_role_exact(
+        # Random role-based mix: 6-7 technical + behavioural.
+        st.session_state["question_list"] = fetch_questions_for_role_random_mix(
             vectordb=vectordb,
             role_tag=role,
-            limit=50,
+            technical_min=6,
+            technical_max=7,
+            behavioural_count=3,
+            seed=None,
         )
         st.session_state["question_idx"] = 0
         st.session_state["interview_started"] = True
+        st.session_state["last_answer"] = ""
+        st.session_state["current_evaluation"] = None
         if speak_questions and st.session_state["question_list"]:
             _speak(st.session_state["question_list"][0].question_text)
     except Exception as e:
@@ -277,6 +274,8 @@ with col2:
         st.session_state["question_idx"] = (st.session_state["question_idx"] + 1) % len(
             st.session_state["question_list"]
         )
+        st.session_state["last_answer"] = ""
+        st.session_state["current_evaluation"] = None
         if speak_questions:
             q = st.session_state["question_list"][st.session_state["question_idx"]]
             _speak(q.question_text)
@@ -291,11 +290,53 @@ with col2:
 st.write("")
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.markdown("### Feedback (placeholder)")
-st.caption("Next: LLM scoring + suggestions will appear here.")
 st.progress(75, text="Confidence Level")
-if st.session_state["last_answer"]:
-    st.caption("Last answer captured (not evaluated yet)")
-    st.code(st.session_state["last_answer"][:500], language=None)
+
+if st.session_state["interview_started"] and st.session_state["question_list"]:
+    q = st.session_state["question_list"][st.session_state["question_idx"]]
+    qid = q.question_id or f"idx:{st.session_state['question_idx']}"
+
+    submit_disabled = not bool(st.session_state.get("last_answer", "").strip())
+
+    if st.button(
+        "Submit answer for technical feedback",
+        type="primary",
+        disabled=submit_disabled,
+        use_container_width=True,
+    ):
+        with st.spinner("Evaluating..."):
+            eval_result = evaluate_technical_answer(
+                question_text=q.question_text,
+                ideal_answer=q.ideal_answer or "",
+                user_answer=st.session_state["last_answer"],
+                role_tag=q.role_tag,
+                difficulty_level=q.difficulty_level,
+            )
+            st.session_state["evaluations_by_qid"][qid] = eval_result
+            st.session_state["current_evaluation"] = eval_result
+
+if st.session_state.get("current_evaluation"):
+    ev = st.session_state["current_evaluation"]
+    score = ev.get("technical_score", None)
+    if score is not None:
+        st.success(f"Technical score: {score}/100")
+    if ev.get("short_feedback"):
+        st.caption(ev["short_feedback"])
+    if ev.get("strengths"):
+        st.markdown("**Strengths**")
+        st.write("\n".join([f"- {s}" for s in ev["strengths"][:3]]))
+    if ev.get("improvements"):
+        st.markdown("**Improvements**")
+        st.write("\n".join([f"- {s}" for s in ev["improvements"][:3]]))
+    if ev.get("missing_points"):
+        st.markdown("**Missing points (keywords)**")
+        st.write("\n".join([f"- {m}" for m in ev["missing_points"][:6]]))
 else:
-    st.caption("No answer captured yet.")
+    if st.session_state["last_answer"]:
+        st.caption("Answer captured. Submit to get technical feedback.")
+    else:
+        st.caption("No answer captured yet.")
+
+if st.session_state["last_answer"] and not st.session_state.get("current_evaluation"):
+    st.code(st.session_state["last_answer"][:500], language=None)
 st.markdown("</div>", unsafe_allow_html=True)
