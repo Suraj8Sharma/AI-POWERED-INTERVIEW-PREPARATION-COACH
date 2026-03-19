@@ -1,4 +1,5 @@
 import os
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
@@ -146,4 +147,72 @@ def fetch_questions_for_role(
             )
         )
     return out
+
+
+def _is_behavioural(difficulty_level: Any) -> bool:
+    if difficulty_level is None:
+        return False
+    text = str(difficulty_level).strip().lower()
+    # Dataset uses "Behavioural" (sometimes with trailing space)
+    return "behavioural" in text or "behavioral" in text
+
+
+def fetch_questions_for_role_random_mix(
+    vectordb: Chroma,
+    role_tag: str,
+    technical_min: int = 6,
+    technical_max: int = 7,
+    behavioural_count: int = 3,
+    seed: int | None = None,
+    limit: int = 2000,
+) -> list[RetrievedQuestion]:
+    """
+    Fetch a random interview set for a role using metadata-only filtering:
+    - technical questions: difficulty_level in {Easy, Medium, Hard, ...} (i.e., not Behavioural)
+    - behavioural questions: difficulty_level contains "Behavioural"
+    """
+    rng = random.Random(seed)
+
+    where = {"role_tag": role_tag}
+    try:
+        data = vectordb.get(where=where, include=["documents", "metadatas"])
+    except TypeError:
+        data = vectordb._collection.get(where=where, include=["documents", "metadatas"])  # type: ignore[attr-defined]
+    except Exception:
+        data = vectordb._collection.get(where=where, include=["documents", "metadatas"])  # type: ignore[attr-defined]
+
+    docs = data.get("documents", []) or []
+    metadatas = data.get("metadatas", []) or []
+
+    all_qs: list[RetrievedQuestion] = []
+    for doc, md in zip(docs, metadatas):
+        md = dict(md or {})
+        all_qs.append(
+            RetrievedQuestion(
+                question_text=_clean_question_text(doc or ""),
+                question_id=md.get("question_id"),
+                role_tag=md.get("role_tag"),
+                difficulty_level=md.get("difficulty_level"),
+                subtopic=md.get("subtopic"),
+                ideal_answer=md.get("ideal_answer"),
+                metadata=md,
+            )
+        )
+
+    if limit is not None:
+        all_qs = all_qs[:limit]
+
+    behavioural = [q for q in all_qs if _is_behavioural(q.difficulty_level)]
+    technical = [q for q in all_qs if not _is_behavioural(q.difficulty_level)]
+
+    n_technical = rng.randint(technical_min, technical_max)
+    n_technical = min(n_technical, len(technical))
+    n_behavioural = min(behavioural_count, len(behavioural))
+
+    chosen_technical = rng.sample(technical, n_technical) if n_technical > 0 else []
+    chosen_behavioural = rng.sample(behavioural, n_behavioural) if n_behavioural > 0 else []
+
+    mixed = chosen_technical + chosen_behavioural
+    rng.shuffle(mixed)
+    return mixed
 
