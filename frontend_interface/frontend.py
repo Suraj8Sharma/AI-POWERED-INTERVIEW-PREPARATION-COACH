@@ -13,6 +13,7 @@ from AI_BACKEND.rag_retriever import (
     load_vectordb,
 )
 from AI_BACKEND.evaluator import evaluate_technical_answer
+from AI_BACKEND.audio_capture import record_audio, transcribe_audio
 
 # Page Configuration
 st.set_page_config(page_title="Smart Interview Coach", layout="wide")
@@ -62,7 +63,7 @@ st.markdown(
     margin-right: 0.4rem;
   }
 
-  /* Softer buttons (don’t fight Streamlit theme) */
+  /* Softer buttons (don't fight Streamlit theme) */
   div.stButton > button { border-radius: 10px !important; padding: 0.55rem 0.85rem !important; }
 
   /* Chat message rounding */
@@ -135,6 +136,8 @@ st.session_state.setdefault("question_idx", 0)
 st.session_state.setdefault("last_answer", "")
 st.session_state.setdefault("evaluations_by_qid", {})
 st.session_state.setdefault("current_evaluation", None)
+st.session_state.setdefault("stt_status", "")           # status text for mic panel
+st.session_state.setdefault("stt_transcript", "")        # last STT transcript
 
 
 #making the sidebar  
@@ -222,10 +225,80 @@ col1,col2=st.columns([1.1, 1.0], gap="large")
 
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("### Camera / Microphone")
-    st.caption("Placeholder now. We’ll plug OpenCV + Whisper here next.")
-    st.image("https://via.placeholder.com/640x420.png?text=Camera+Feed")
-    st.markdown('<span class="kpi">Mic • Listening</span>', unsafe_allow_html=True)
+    st.markdown("### 🎙️ Microphone (Speech-to-Text)")
+
+    interview_active = st.session_state["interview_started"] and st.session_state["question_list"]
+
+    # Recording duration slider
+    stt_seconds = st.slider(
+        "Recording duration (seconds)",
+        min_value=3, max_value=30, value=7, step=1,
+        disabled=not interview_active,
+    )
+
+    # ── 🎤 Speak Answer button ───────────────────────────────
+    speak_btn = st.button(
+        "🎤 Speak Answer",
+        type="primary",
+        use_container_width=True,
+        disabled=not interview_active,
+    )
+
+    if speak_btn and interview_active:
+        st.session_state["stt_status"] = "recording"
+        st.session_state["stt_transcript"] = ""
+
+        with st.spinner(f"🎙️ Recording for {stt_seconds}s — speak now!"):
+            try:
+                print(f"[FRONTEND STT] Starting recording for {stt_seconds}s...")
+                wav_path = record_audio(seconds=stt_seconds)
+                print(f"[FRONTEND STT] Recording done: {wav_path}")
+                st.session_state["stt_status"] = "transcribing"
+            except Exception as e:
+                print(f"[FRONTEND STT] Recording FAILED: {e}")
+                st.error(f"Recording failed: {e}")
+                st.session_state["stt_status"] = "error"
+                wav_path = None
+
+        if wav_path:
+            with st.spinner("🔄 Transcribing with Whisper (first time may take ~30s to load model)..."):
+                try:
+                    print("[FRONTEND STT] Starting transcription...")
+                    transcript = transcribe_audio(wav_path, model_name="base", lang="en")
+                    print(f"[FRONTEND STT] Transcription result: '{transcript}'")
+                except Exception as e:
+                    print(f"[FRONTEND STT] Transcription FAILED: {e}")
+                    import traceback; traceback.print_exc()
+                    st.error(f"Transcription failed: {e}")
+                    transcript = ""
+
+            if transcript:
+                st.session_state["last_answer"] = transcript
+                st.session_state["stt_transcript"] = transcript
+                st.session_state["stt_status"] = "done"
+                print(f"[FRONTEND STT] ✅ Answer set in session state: '{transcript[:80]}...'")
+                st.rerun()
+            else:
+                st.session_state["stt_status"] = "empty"
+                st.warning("No speech detected. Try again, speak louder or closer to the mic.")
+
+    # Show current STT status
+    stt_status = st.session_state.get("stt_status", "")
+    if stt_status == "done" and st.session_state.get("stt_transcript"):
+        st.caption("Last spoken answer:")
+        st.info(st.session_state["stt_transcript"][:500])
+        mic_label = "Mic • ✅ Answer captured"
+    elif stt_status == "recording":
+        mic_label = "Mic • 🔴 Recording..."
+    elif stt_status == "transcribing":
+        mic_label = "Mic • 🔄 Transcribing..."
+    elif stt_status == "error":
+        mic_label = "Mic • ❌ Error"
+    else:
+        mic_label = "Mic • Ready"
+
+    st.markdown(f'<span class="kpi">{mic_label}</span>', unsafe_allow_html=True)
+    st.caption("💡 Tip: You can also type your answer in the chat input on the right.")
     st.markdown("</div>", unsafe_allow_html=True)
 
 with col2:
