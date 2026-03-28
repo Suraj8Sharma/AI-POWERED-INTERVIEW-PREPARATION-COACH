@@ -15,10 +15,14 @@ import argparse
 import json
 import os
 import shutil
+import subprocess
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+import numpy as np
 
 
 # ---------------------------------------------------------------------------
@@ -38,65 +42,112 @@ def _transcripts_path() -> Path:
 
 
 # ---------------------------------------------------------------------------
-# ffmpeg helper  (needed by Whisper)
+# ffmpeg helper  (Whisper fallback only — PCM WAV loads without ffmpeg)
 # ---------------------------------------------------------------------------
+
+def _subprocess_kwargs() -> dict:
+    kw: dict = {"capture_output": True, "timeout": 20}
+    if sys.platform == "win32":
+        kw["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    return kw
+
+
+def _ffmpeg_version_ok(executable: str) -> bool:
+    try:
+        r = subprocess.run([executable, "-version"], **_subprocess_kwargs())
+        return r.returncode == 0
+    except Exception:
+        return False
+
 
 def _ensure_ffmpeg_on_path() -> None:
     """
-    Make sure Whisper can find an ``ffmpeg`` executable.
+    Ensure a working ``ffmpeg`` is on PATH for Whisper's file-based loader.
 
-    Strategy:
-    1. If ``ffmpeg`` is already on PATH → done.
-    2. Locate the binary bundled inside the ``imageio-ffmpeg`` package
-       (scan the ``binaries/`` folder directly — more reliable than
-       ``get_ffmpeg_exe()`` which can fail on some setups).
-    3. Set ``IMAGEIO_FFMPEG_EXE`` and prepend the folder to ``PATH``.
+    Verifies with ``ffmpeg -version`` — a broken shim on PATH (e.g. ``.cmd``
+    pointing at another machine) is ignored and we fall through to
+    ``imageio-ffmpeg``.
     """
-    # 1 — already available?
-    try:
-        if shutil.which("ffmpeg") is not None:
-            return
-    except Exception:
-        pass  # PATH might be None on some Windows Streamlit setups
+    candidates: list[str] = []
 
-    # 2 — find the binary shipped by imageio-ffmpeg
-    ffmpeg_path: str | None = None
+    try:
+        w = shutil.which("ffmpeg")
+        if w:
+            candidates.append(w)
+    except Exception:
+        pass
 
     try:
         import imageio_ffmpeg  # type: ignore
+
         pkg_dir = Path(imageio_ffmpeg.__file__).resolve().parent
         bin_dir = pkg_dir / "binaries"
         if bin_dir.is_dir():
-            # Look for any ffmpeg executable in the binaries folder
-            for f in bin_dir.iterdir():
-                if f.name.startswith("ffmpeg") and f.suffix == ".exe" and f.is_file():
-                    ffmpeg_path = str(f)
+            for f in sorted(bin_dir.iterdir()):
+                if f.is_file() and f.name.startswith("ffmpeg"):
+                    candidates.append(str(f))
                     break
+        from imageio_ffmpeg import get_ffmpeg_exe  # type: ignore
+
+        exe_iio = get_ffmpeg_exe()
+        if exe_iio and exe_iio not in candidates:
+            candidates.append(exe_iio)
     except ImportError:
         pass
+    except Exception:
+        pass
 
-    # 2b — fallback: try the official helper (may raise on broken installs)
-    if ffmpeg_path is None:
-        try:
-            from imageio_ffmpeg import get_ffmpeg_exe  # type: ignore
-            ffmpeg_path = get_ffmpeg_exe()
-        except Exception:
-            pass
+    seen: set[str] = set()
+    for c in candidates:
+        if not c or c in seen:
+            continue
+        seen.add(c)
+        if _ffmpeg_version_ok(c):
+            ffmpeg_dir = str(Path(c).resolve().parent)
+            current_path = os.environ.get("PATH") or ""
+            os.environ["PATH"] = ffmpeg_dir + os.pathsep + current_path
+            os.environ["IMAGEIO_FFMPEG_EXE"] = c
+            print(f"[STT] ffmpeg resolved → {c}")
+            return
 
-    if ffmpeg_path is None:
-        raise RuntimeError(
-            "ffmpeg was not found in PATH. Whisper requires ffmpeg for audio decoding.\n"
-            "Fix options:\n"
-            "1) Install system ffmpeg and ensure `ffmpeg.exe` is in PATH, OR\n"
-            "2) Install the Python helper:  pip install imageio-ffmpeg==0.5.1"
-        )
+    raise RuntimeError(
+        "No working ffmpeg found. Whisper needs ffmpeg only for non-PCM audio.\n"
+        "Fix options:\n"
+        "1) Install ffmpeg and add it to PATH, OR\n"
+        "2) pip install imageio-ffmpeg\n"
+        "Tip: WAV files saved by this app are decoded in-process and do not need ffmpeg."
+    )
 
-    # 3 — make it discoverable
-    ffmpeg_dir = str(Path(ffmpeg_path).parent)
-    current_path = os.environ.get("PATH") or ""
-    os.environ["PATH"] = ffmpeg_dir + os.pathsep + current_path
-    os.environ["IMAGEIO_FFMPEG_EXE"] = ffmpeg_path
-    print(f"[STT] ffmpeg resolved → {ffmpeg_path}")
+
+def _load_wav_for_whisper(wav_path: Path) -> np.ndarray:
+    """
+    Decode a PCM ``.wav`` to float32 mono [-1, 1] at 16 kHz without ffmpeg
+    (matches what ``record_audio`` writes).
+    """
+    from scipy import signal
+    from scipy.io.wavfile import read as wav_read
+
+    sr, data = wav_read(str(wav_path))
+    if data.size == 0:
+        raise ValueError("empty WAV")
+
+    if data.ndim == 2:
+        data = data.mean(axis=1)
+
+    if data.dtype == np.uint8:
+        audio = (data.astype(np.float32) - 128.0) / 128.0
+    elif np.issubdtype(data.dtype, np.floating):
+        audio = np.clip(data.astype(np.float32), -1.0, 1.0)
+    else:
+        ii = np.iinfo(data.dtype)
+        scale = float(max(abs(ii.min), ii.max))
+        audio = np.clip(data.astype(np.float32) / scale, -1.0, 1.0)
+
+    if sr != 16000:
+        n_new = max(1, int(round(len(audio) * 16000.0 / float(sr))))
+        audio = signal.resample(audio.astype(np.float64), n_new).astype(np.float32)
+
+    return np.ascontiguousarray(audio, dtype=np.float32)
 
 
 # ---------------------------------------------------------------------------
@@ -125,7 +176,6 @@ def record_audio(
     Path
         Absolute path to the saved WAV file.
     """
-    import numpy as np
     import sounddevice as sd
     from scipy.io.wavfile import write as wav_write
 
@@ -145,8 +195,8 @@ def record_audio(
     )
     sd.wait()
 
-    # float32 [-1, 1] -> int16
-    audio = np.squeeze(audio, axis=1)
+    # float32 [-1, 1] -> int16  (1 channel: squeeze all length-1 dims)
+    audio = np.squeeze(audio)
     audio_int16 = (audio * 32767.0).astype("int16")
 
     wav_write(str(wav_path), samplerate, audio_int16)
@@ -186,9 +236,6 @@ def transcribe_audio(
     wav_path = Path(wav_path)
     print(f"[STT] transcribe_audio called: {wav_path} (model={model_name}, lang={lang})")
 
-    _ensure_ffmpeg_on_path()
-    print("[STT] ffmpeg check passed.")
-
     try:
         import whisper  # type: ignore
     except ModuleNotFoundError as e:
@@ -206,8 +253,20 @@ def transcribe_audio(
         _WHISPER_CACHE[model_name] = model
         print(f"[STT] Whisper model '{model_name}' loaded and cached.")
 
-    print(f"[STT] Transcribing {wav_path.name} ...")
-    result = model.transcribe(str(wav_path), language=lang)
+    audio_np: np.ndarray | None = None
+    try:
+        audio_np = _load_wav_for_whisper(wav_path)
+        print(f"[STT] Loaded {wav_path.name} in-process (no ffmpeg). samples={len(audio_np)}")
+    except Exception as exc:
+        print(f"[STT] In-process WAV decode failed ({exc!r}); using Whisper+ffmpeg path.")
+
+    if audio_np is not None:
+        result = model.transcribe(audio_np, language=lang)
+    else:
+        _ensure_ffmpeg_on_path()
+        print("[STT] ffmpeg check passed.")
+        result = model.transcribe(str(wav_path), language=lang)
+
     text = (result.get("text") or "").strip()
     print(f"[STT] Transcription result: \"{text}\"")
     return text

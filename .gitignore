@@ -1,3 +1,5 @@
 .ENV
 myenv/
 __pycache__/
+# Downloaded MediaPipe task bundle (see video_analysis.ensure_pose_model_path)
+AI_BACKEND/video_capture/models/*.task
