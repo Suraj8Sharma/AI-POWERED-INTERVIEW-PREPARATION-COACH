@@ -1,0 +1,105 @@
+# Real Interview Window — Implementation Plan
+
+The synopsis and PRD define a multimodal interview coach with **three scoring dimensions**: Technical Proficiency, Communication Quality, and Body Language Confidence. The current frontend is a split 3-column layout that doesn't feel like a real interview. This plan redesigns it into a cohesive interview experience.
+
+## Synopsis/PRD Gap Analysis
+
+| Synopsis/PRD Requirement | Current Status | Action Needed |
+|---|---|---|
+| Real-time webcam capture + pose analysis | ✅ MediaPipe works but manual button click | Continuous auto-analysis during answer |
+| Speech-to-text (Whisper) | ✅ Working | Integrate inline (speak-to-answer flow) |
+| Filler word detection (um, uh, like…) | ❌ Not implemented | **NEW** `nlp_analysis.py` module |
+| Speaking pace (WPM) analysis | ❌ Not implemented | **NEW** in `nlp_analysis.py` |
+| Fluency metrics (vocabulary richness, clarity) | ❌ Not implemented | **NEW** in `nlp_analysis.py` |
+| 3D scoring (Technical + Communication + Confidence) | ❌ Only technical score | Wire NLP + body language into dashboard |
+| Results dashboard after session | ❌ "End session" just resets state | **NEW** session summary with all scores |
+| RAG-based question retrieval | ✅ Working | No change |
+| LLM answer evaluation | ✅ Working | No change |
+| TTS question reading | ✅ Working | No change |
+
+---
+
+## Proposed Changes
+
+### NLP Analysis Module
+
+#### [NEW] [nlp_analysis.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/nlp_analysis.py)
+
+Communication quality scoring module providing three sub-scores:
+
+- **Filler word detection**: Scans transcript for patterns (`um`, `uh`, `like`, `you know`, `sort of`, `kind of`, `basically`, `actually`). Returns filler count, fillers per 100 words, and filler percentage.
+- **Speaking pace (WPM)**: `word_count / duration_seconds * 60`. Scores against optimal range 130–160 WPM.
+- **Fluency metrics**: Vocabulary richness (unique words / total words), average sentence length, clarity score.
+- **`analyze_communication(transcript, duration_seconds) → dict`**: Main API returning composite communication score (0–100) with breakdowns.
+
+---
+
+### Frontend Redesign  
+
+#### [MODIFY] [frontend.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/frontend_interface/frontend.py)
+
+Complete redesign into a **real interview window** layout:
+
+**New Layout:**
+```
+┌──────────────────────────────────────────────────────────┐
+│  Smart Interview Coach           [Status] [Q 3/10]       │  ← Header bar
+├────────────────────────────┬─────────────────────────────┤
+│                            │                             │
+│   📹 LIVE VIDEO FEED      │   💬 INTERVIEW PANEL        │
+│   (camera_input, large)    │   AI Question (chat bubble) │
+│                            │   ─────────────────         │
+│   Body Language Metrics:   │   Your Answer:              │
+│   Openness | Engagement    │   [🎤 Speak Answer]         │
+│   Posture  | Fidgeting     │   [or type below]           │
+│                            │   ─────────────────         │
+│                            │   [Submit] [Next Q] [Skip]  │
+├────────────────────────────┴─────────────────────────────┤
+│  📊 LIVE FEEDBACK PANEL                                  │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐        │
+│  │ Technical   │ │Communication│ │ Confidence   │        │
+│  │ Score: 78   │ │ Score: 65   │ │ Score: 82    │        │
+│  │ ████████░░  │ │ ██████░░░░  │ │ █████████░   │        │
+│  └─────────────┘ └─────────────┘ └─────────────┘        │
+│  Strengths: ... | Improvements: ... | Filler words: 3   │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Key behavior changes:**
+1. **Video feed is always visible** during interview — camera_input on the left, body language metrics update on each snapshot/analysis
+2. **Speak Answer button** records mic → Whisper transcription → fills answer automatically. Duration slider stays inline.
+3. **Per-question feedback** shows all 3 scores after submission (Technical from LLM, Communication from NLP, Confidence from body language)
+4. **Session end** generates a **results dashboard** with aggregated scores across all questions, per-question breakdown, and improvement tips
+
+**Sidebar** stays lean: Name, Role selection, Start/End buttons, TTS toggle.
+
+---
+
+### Integration
+
+#### [MODIFY] [evaluator.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/evaluator.py)
+
+No changes to the evaluator itself — we just call it alongside `nlp_analysis.analyze_communication()` and body language metrics in the frontend to produce all 3 scores.
+
+---
+
+## Verification Plan
+
+### Manual Verification (User Testing)
+
+Since this is a Streamlit app with hardware dependencies (mic + webcam), manual testing is the primary verification method:
+
+1. **Start the app**: `streamlit run frontend_interface/frontend.py`
+2. **Select a role** and click "Start Interview" → verify questions load and TTS reads the question
+3. **Test video feed**: Camera should show live preview in the left panel. Click "Analyze Snapshot" → verify body language metrics appear (openness, engagement, posture, fidgeting)
+4. **Test speech input**: Click "🎤 Speak Answer" → speak for 5–7 seconds → verify transcript appears in the answer area
+5. **Submit answer** → verify all 3 scores appear:
+   - Technical Score (from LLM/heuristic)
+   - Communication Score (filler words, WPM, fluency)
+   - Confidence Score (from body language)
+6. **Navigate questions**: Click Next → verify new question loads, previous evaluation is stored
+7. **End session** → verify results dashboard appears with aggregated scores and per-question breakdown
+8. **Test NLP module independently**: Run `python -c "from AI_BACKEND.nlp_analysis import analyze_communication; print(analyze_communication('This is um a test of like the um communication analysis module you know', 10.0))"`
+
+> [!IMPORTANT]
+> This will be a significant rewrite of [frontend.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/frontend_interface/frontend.py) (~584 lines). The backend modules ([rag_retriever.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/rag_retriever.py), [evaluator.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/evaluator.py), [video_analysis.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/video_capture/video_analysis.py), [record_and_transcribe.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/audio_capture/record_and_transcribe.py)) remain unchanged — only the frontend and the new NLP module are affected.

@@ -1,0 +1,82 @@
+# AI-Powered Interview Preparation Coach — Implementation Analysis
+
+## Architecture Overview
+
+```
+AI-POWERED-INTERVIEW-PREPARATION-COACH/
+├── AI_BACKEND/
+│   ├── rag_retriever.py        ← Question retrieval from ChromaDB
+│   ├── evaluator.py            ← LLM-based answer evaluation
+│   ├── audio_capture/          ← Speech-to-Text (Whisper)
+│   ├── video_capture/          ← Body language analysis (MediaPipe)
+│   ├── questions.csv           ← Interview question dataset
+│   ├── rag_backend.ipynb       ← ChromaDB ingestion notebook
+│   └── chroma_db/              ← Generated vector store
+├── frontend_interface/
+│   └── frontend.py             ← Streamlit UI (single page)
+├── requirements.txt
+└── .ENV                        ← HuggingFace API token
+```
+
+---
+
+## ✅ What's IMPLEMENTED & Working
+
+| # | Feature | Files | Details |
+|---|---------|-------|---------|
+| 1 | **Question Bank (RAG)** | [rag_retriever.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/rag_retriever.py), [questions.csv](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/questions.csv) | ~42 KB CSV ingested into ChromaDB via [rag_backend.ipynb](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/rag_backend.ipynb). Role-based filtering, difficulty levels, subtopics. |
+| 2 | **Role-Based Retrieval** | [rag_retriever.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/rag_retriever.py) | 3 retrieval strategies: exact metadata, semantic search, and random mix (6–7 technical + 3 behavioural). |
+| 3 | **LLM Answer Evaluation** | [evaluator.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/evaluator.py) | Uses Llama-3.1-8B via HuggingFace Inference API. Returns score (0–100), strengths, improvements, missing points. Heuristic fallback if LLM fails. |
+| 4 | **Speech-to-Text (STT)** | [record_and_transcribe.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/audio_capture/record_and_transcribe.py) | Records mic audio → WAV → OpenAI Whisper transcription. In-process WAV decoding (no ffmpeg needed for PCM). Model caching. |
+| 5 | **Text-to-Speech (TTS)** | [frontend.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/frontend_interface/frontend.py#L134-L150) | pyttsx3 reads questions aloud. Female voice selection (Zira). Toggle in sidebar. |
+| 6 | **Body Language Analysis** | [video_analysis.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/video_capture/video_analysis.py) | MediaPipe Pose → computes openness, fidgeting, engagement, posture. Two modes: snapshot (browser camera) and multi-second webcam session. |
+| 7 | **Streamlit Frontend** | [frontend.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/frontend_interface/frontend.py) | 3-column layout: Mic panel, Video coach, Interview chat. Sidebar for config. Feedback section with technical + body language scores. |
+| 8 | **Interview Flow** | [frontend.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/frontend_interface/frontend.py#L201-L221) | Start → random questions → answer (typed or spoken) → evaluate → next. Tracks evaluations by question ID. |
+
+---
+
+## ⚠️ What's PARTIALLY Implemented
+
+| # | Feature | Current State | What's Missing |
+|---|---------|---------------|----------------|
+| 1 | **Session Report** | "End session" button shows `st.warning("Generating Report...")` then resets state | No actual report is generated — scores are lost on end. Should produce a PDF/summary of all answers + scores. |
+| 2 | **Ideal Answer Display** | Checkbox shows ideal answer for reference | No side-by-side comparison view with user's answer. |
+| 3 | **Answer History** | `evaluations_by_qid` dict tracks all evaluations | But it's never displayed as a summary/history panel — data is discarded on "End session". |
+
+---
+
+## ❌ What's NOT Implemented (Expected for a Complete Interview Coach)
+
+| # | Feature | Why It's Expected |
+|---|---------|------------------|
+| 1 | **Session Summary / PDF Report** | Users need a takeaway report with all Q&A, scores, and improvement tips after the interview ends. |
+| 2 | **Progress Tracking / History** | No database to store past sessions. Each run is stateless — users can't track improvement over time. |
+| 3 | **User Authentication** | No login system. The "Full Name" field is just a text input with no persistence. |
+| 4 | **Resume/Job Description Parsing** | An interview coach should tailor questions based on the user's resume or target job description. |
+| 5 | **Difficulty Progression** | Questions are random — no adaptive difficulty based on performance (e.g., harder questions if scoring well). |
+| 6 | **Behavioural Answer Evaluation** | [evaluator.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/evaluator.py) only handles technical scoring. Behavioural questions (STAR method) need a different evaluation prompt. |
+| 7 | **Real-Time Video Feedback** | Body language analysis is triggered manually (button click). No continuous real-time overlay during the interview. |
+| 8 | **Communication Skills Scoring** | No evaluation of clarity, fluency, filler words ("um", "uh"), pace, etc. from the audio. |
+| 9 | **Practice Mode vs. Timed Mode** | No distinction — there's only one mode. A timed interview mode would simulate real pressure. |
+| 10 | **README / Documentation** | No README.md on the repo. No setup instructions, no architecture docs. |
+
+---
+
+## 🔧 Code Quality Issues
+
+| Issue | Location | Note |
+|-------|----------|------|
+| Debug/test files in repo | [HELLO.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/HELLO.py), [test.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/test.py), [test_voice.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/test_voice.py), [debug_whisper.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/debug_whisper.py), [test_stt.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/test_stt.py) | Should be in a `tests/` directory or removed |
+| [check.txt](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/check.txt) in repo | Root | Just says "hello checking the connection" — should be removed |
+| ChromaDB binary in git | `AI_BACKEND/chroma_db/` | **Now fixed** — added to `.gitignore` |
+| No `README.md` | Root | Missing setup instructions, features list, screenshots |
+| Typo in `HELLO.py` | Line 6 | `"text-generaion"` → `"text-generation"` |
+| `.ENV` token exposed | Root | Token `hf_btIX...` is in the `.ENV` file. Though `.ENV` is gitignored, it appears in commit history |
+
+---
+
+## Summary
+
+> **The core interview pipeline is functional**: question retrieval → present question (with TTS) → answer via typing or speech (STT) → LLM evaluation → body language analysis. The app works end-to-end as a prototype.
+>
+> **Key gaps**: no session reports, no progress tracking, no resume parsing, no communication skills analysis, and no documentation.
