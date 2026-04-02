@@ -1,0 +1,49 @@
+# Walkthrough — Real Interview Window UI
+
+## Changes Made
+
+### 1. [NEW] NLP Communication Analysis Module
+[nlp_analysis.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/nlp_analysis.py)
+
+- **Filler word detection**: 8+ patterns (um, uh, like, you know, sort of, kind of, basically, actually)
+- **Speaking pace (WPM)**: Optimal range 130–160 WPM
+- **Fluency metrics**: Vocabulary richness, sentence clarity, average sentence length
+- **API**: [analyze_communication(transcript, duration_seconds) → dict](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/nlp_analysis.py#139-219)
+
+### 2. [REWRITE] Frontend — Real Interview Window
+[frontend.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/frontend_interface/frontend.py)
+
+**Before**: 3-column split layout (Mic | Video | Chat), manual button clicks for everything, only technical scoring.
+
+**After**:
+- **2-column interview layout**: Video Coach (left) + Interview Panel (right)
+- **Question displayed in styled bubble** with role, difficulty, topic KPIs
+- **Inline speech capture**: 🎤 Speak Answer → auto-transcribe → fills answer
+- **3D scoring on submit**: Technical (LLM) + Communication (NLP) + Confidence (body language)
+- **Live feedback panel** below with score pills, detailed feedback, fillers, WPM
+- **End-of-session report**: Aggregated scores, per-question breakdown with expanders, personalized improvement tips
+- **Premium dark theme** with glassmorphism, gradients, smooth transitions
+
+### 3. [UPDATED] .gitignore
+[.gitignore](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/.gitignore) — Added `chroma_db/`, `audio_inputs/`, IDE configs, Jupyter, OS files
+
+## Verification
+
+| Check | Result |
+|-------|--------|
+| Python syntax | ✅ `ast.parse` passed |
+| All imports | ✅ `nlp_analysis`, `evaluator`, `audio_capture` all import cleanly |
+| NLP module test | ✅ Detected fillers, WPM=126, fluency=78, composite=78 |
+
+## How to Test
+
+```bash
+streamlit run frontend_interface/frontend.py
+```
+
+1. Select role → **Start** → verify questions load + TTS reads
+2. Take a camera snapshot → **Analyze Posture** → verify body language metrics
+3. Click **🎤 Speak Answer** → speak → verify transcript appears
+4. Click **✅ Submit** → verify all 3 scores appear (Technical, Communication, Confidence)
+5. Click **⏭ Next Q** → new question → repeat
+6. Click **⏹ End** → verify results dashboard with all scores and per-question breakdown
