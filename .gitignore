@@ -1,5 +1,42 @@
+# ── Environment / Secrets ──────────────────────────────
 .ENV
+.env
+*.env
+
+# ── Python ─────────────────────────────────────────────
 myenv/
+venv/
+.venv/
+env/
 __pycache__/
-# Downloaded MediaPipe task bundle (see video_analysis.ensure_pose_model_path)
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── IDE / Editor ───────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Jupyter ────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── ChromaDB (generated vector store — regenerate via rag_backend.ipynb) ──
+AI_BACKEND/chroma_db/
+
+# ── Audio recordings (generated at runtime) ───────────
+AI_BACKEND/audio_capture/audio_inputs/
+
+# ── Downloaded MediaPipe model (see video_analysis.ensure_pose_model_path) ──
 AI_BACKEND/video_capture/models/*.task
+
+# ── Misc ───────────────────────────────────────────────
+*.log
+check.txt
