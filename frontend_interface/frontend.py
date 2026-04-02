@@ -1,6 +1,16 @@
-import streamlit as st
-import numpy as np
+import io
+import sys
 from pathlib import Path
+
+import numpy as np
+import streamlit as st
+from PIL import Image
+
+# Ensure project root is on sys.path (Streamlit sets cwd/script dir; this avoids
+# ModuleNotFoundError: AI_BACKEND when the app is launched from another folder.)
+APP_ROOT = Path(__file__).resolve().parents[1]
+if str(APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(APP_ROOT))
 
 # Backend: role-based retrieval from Chroma
 import pyttsx3
@@ -73,8 +83,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-APP_ROOT = Path(__file__).resolve().parents[1]
 CHROMA_DIR = APP_ROOT / "AI_BACKEND" / "chroma_db"
+
+
+def _camera_input_to_rgb(camera_image) -> np.ndarray | None:
+    """Decode ``st.camera_input`` value to RGB uint8 ``ndarray``."""
+    if camera_image is None:
+        return None
+    try:
+        img = Image.open(io.BytesIO(camera_image.getvalue()))
+        return np.asarray(img.convert("RGB"), dtype=np.uint8)
+    except Exception:
+        return None
 
 
 @st.cache_resource
@@ -138,6 +158,9 @@ st.session_state.setdefault("evaluations_by_qid", {})
 st.session_state.setdefault("current_evaluation", None)
 st.session_state.setdefault("stt_status", "")           # status text for mic panel
 st.session_state.setdefault("stt_transcript", "")        # last STT transcript
+st.session_state.setdefault("body_language", None)      # last MediaPipe metrics dict
+st.session_state.setdefault("body_language_status", "")  # idle | capturing | done | error
+st.session_state.setdefault("body_language_preview_rgb", None)  # last pose overlay for st.image
 
 
 #making the sidebar  
@@ -171,6 +194,9 @@ with st.sidebar:
         st.session_state["question_idx"] = 0
         st.session_state["last_answer"] = ""
         st.session_state["current_evaluation"] = None
+        st.session_state["body_language"] = None
+        st.session_state["body_language_status"] = ""
+        st.session_state["body_language_preview_rgb"] = None
 
 if start:
     try:
@@ -220,14 +246,16 @@ if st.session_state["interview_started"] and st.session_state["question_list"]:
 else:
     st.markdown('<div class="subtle" style="margin: 0.25rem 0 0.75rem 0;">Select a role and start an interview to begin.</div>', unsafe_allow_html=True)
 
-#basically it tells the width of the two containers
-col1,col2=st.columns([1.1, 1.0], gap="large")
+interview_active = (
+    st.session_state["interview_started"] and st.session_state["question_list"]
+)
+
+# Mic | Video dashboard | Interview chat
+col1, col2, col3 = st.columns([1.05, 1.15, 1.0], gap="medium")
 
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("### 🎙️ Microphone (Speech-to-Text)")
-
-    interview_active = st.session_state["interview_started"] and st.session_state["question_list"]
 
     # Recording duration slider
     stt_seconds = st.slider(
@@ -298,10 +326,134 @@ with col1:
         mic_label = "Mic • Ready"
 
     st.markdown(f'<span class="kpi">{mic_label}</span>', unsafe_allow_html=True)
-    st.caption("💡 Tip: You can also type your answer in the chat input on the right.")
+    st.caption("💡 Tip: You can also type your answer in the chat column on the right.")
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 with col2:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("### 📹 Video coach")
+    st.caption(
+        "Browser camera preview, snapshot analysis with pose overlay, or a multi-second sample."
+    )
+
+    if not interview_active:
+        st.info(
+            "Start an interview from the sidebar to turn on the camera and body-language tools."
+        )
+
+    cam = st.camera_input(
+        "Interview camera",
+        disabled=not interview_active,
+        key="dashboard_interview_camera",
+        help="Frame your upper body, then use the shutter — your browser streams video here.",
+    )
+
+    rs1, rs2 = st.columns(2)
+    with rs1:
+        snap_btn = st.button(
+            "Analyze snapshot",
+            use_container_width=True,
+            disabled=not (interview_active and cam is not None),
+            help="Runs MediaPipe on the current photo and draws a skeleton.",
+            key="bl_snapshot_btn",
+        )
+    with rs2:
+        multi_btn = st.button(
+            "Multi-second sample",
+            use_container_width=True,
+            disabled=not interview_active,
+            help="Opens the system webcam for several seconds (better fidgeting estimate).",
+            key="bl_multi_btn",
+        )
+
+    bl_seconds = st.slider(
+        "Multi-sample duration (seconds)",
+        min_value=3,
+        max_value=15,
+        value=7,
+        step=1,
+        key="bl_seconds",
+        disabled=not interview_active,
+        help="Used only with **Multi-second sample** (native camera window).",
+    )
+
+    if snap_btn and interview_active:
+        rgb = _camera_input_to_rgb(cam)
+        if rgb is None:
+            st.warning("Take a picture with the camera widget above first.")
+        else:
+            with st.spinner("Estimating pose from snapshot…"):
+                try:
+                    from AI_BACKEND.video_capture import analyze_camera_snapshot_rgb
+
+                    raw = analyze_camera_snapshot_rgb(rgb, draw_skeleton=True)
+                    st.session_state["body_language"] = {
+                        k: v for k, v in raw.items() if k != "annotated_rgb"
+                    }
+                    st.session_state["body_language_preview_rgb"] = raw.get(
+                        "annotated_rgb"
+                    )
+                    st.session_state["body_language_status"] = (
+                        "error" if raw.get("error") else "done"
+                    )
+                except Exception as e:
+                    st.session_state["body_language"] = {
+                        "error": str(e),
+                        "summary": str(e),
+                    }
+                    st.session_state["body_language_preview_rgb"] = None
+                    st.session_state["body_language_status"] = "error"
+
+    if multi_btn and interview_active:
+        st.session_state["body_language_status"] = "capturing"
+        st.session_state["body_language_preview_rgb"] = None
+        with st.spinner(
+            f"📹 Webcam window — stay in frame for {bl_seconds}s…"
+        ):
+            try:
+                from AI_BACKEND.video_capture import analyze_webcam_session
+
+                st.session_state["body_language"] = analyze_webcam_session(
+                    seconds=float(bl_seconds),
+                    camera_index=0,
+                )
+                if st.session_state["body_language"].get("error"):
+                    st.session_state["body_language_status"] = "error"
+                else:
+                    st.session_state["body_language_status"] = "done"
+            except Exception as e:
+                st.session_state["body_language"] = {"error": str(e), "summary": str(e)}
+                st.session_state["body_language_status"] = "error"
+
+    prev = st.session_state.get("body_language_preview_rgb")
+    if prev is not None:
+        st.image(
+            prev,
+            caption="Last snapshot — pose overlay",
+            use_container_width=True,
+        )
+
+    bl = st.session_state.get("body_language")
+    if bl and not bl.get("error"):
+        pr = bl.get("probabilities") or {}
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+            st.metric("Openness", f"{pr.get('openness', bl.get('openness', 0)):.0%}")
+        with m2:
+            st.metric("Fidgeting", f"{pr.get('fidgeting', bl.get('fidgeting', 0)):.0%}")
+        with m3:
+            st.metric("Engagement", f"{pr.get('engagement', bl.get('engagement', 0)):.0%}")
+        with m4:
+            st.metric("Posture", f"{pr.get('posture', bl.get('posture', 0)):.0%}")
+        if bl.get("summary"):
+            st.caption(bl["summary"])
+    elif bl and bl.get("error"):
+        st.warning(bl.get("summary") or bl["error"])
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with col3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("### Interview")
     with st.container(height=320, border=True):
@@ -362,8 +514,25 @@ with col2:
 
 st.write("")
 st.markdown('<div class="card">', unsafe_allow_html=True)
-st.markdown("### Feedback (placeholder)")
-st.progress(75, text="Confidence Level")
+st.markdown("### Feedback")
+
+bl_fb = st.session_state.get("body_language")
+if bl_fb and not bl_fb.get("error") and bl_fb.get("pose_visible_fraction", 0) > 0:
+    o = float(bl_fb.get("openness", 0.5))
+    e = float(bl_fb.get("engagement", 0.5))
+    p = float(bl_fb.get("posture", 0.5))
+    f = float(bl_fb.get("fidgeting", 0.5))
+    composite = float(np.clip((o + e + p + (1.0 - f)) / 4.0, 0.0, 1.0))
+    st.progress(
+        composite,
+        text=f"Non-verbal composite (openness, engagement, posture, calm) • {composite:.0%}",
+    )
+    st.caption(bl_fb.get("summary", ""))
+else:
+    st.progress(
+        0.0,
+        text="Use the **Video coach** column during an interview for a non-verbal score.",
+    )
 
 if st.session_state["interview_started"] and st.session_state["question_list"]:
     q = st.session_state["question_list"][st.session_state["question_idx"]]
