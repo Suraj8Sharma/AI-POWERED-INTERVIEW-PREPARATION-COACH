@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="PrepLoom — Practice mock interviews with AI feedback on technical skills, communication, and presence." />
+    <title>Practice — PrepLoom</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h1 class="brand">PrepLoom</h1>
+        <p class="brand-sub">Multimodal mock-interview practice</p>
+        <p id="appAuthHint" class="sidebar-auth-hint"></p>
+    </div>
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+        <label class="field-label">👤 Candidate</label>
+        <input type="text" id="candidateName" class="input" placeholder="Your name" />
+    </div>
+
+    <div class="sidebar-section">
+        <label class="field-label">🎯 Interview Setup</label>
+
+        <div class="toggle-row">
+            <label class="toggle" id="ttsToggle">
+                <input type="checkbox" id="ttsCheckbox" checked />
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">🔊 Read questions aloud</span>
+        </div>
+
+        <label class="field-label" style="margin-top:0.6rem;">Target Role</label>
+        <select id="roleSelect" class="input">
+            <option value="">Loading roles…</option>
+        </select>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-actions">
+        <button id="startBtn" class="btn btn-primary">▶ Start</button>
+        <button id="endBtn" class="btn btn-secondary">⏹ End</button>
+    </div>
+
+    <div class="sidebar-footer">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusLabel">Idle</span>
+    </div>
+    <p class="sidebar-back"><a href="/">← Back to PrepLoom</a></p>
+</aside>
+
+<main class="main" id="main">
+
+    <section id="welcomeView" class="view">
+        <div class="welcome-card">
+            <div class="welcome-emoji">🎯</div>
+            <h2 class="welcome-title">Ready to practice?</h2>
+            <p class="welcome-sub">Choose a role in the sidebar and click <strong>Start</strong> to begin your mock interview.</p>
+            <div class="welcome-features">
+                <div class="feature-chip"><span>📚</span> Technical scoring</div>
+                <div class="feature-chip"><span>🗣️</span> Communication analysis</div>
+                <div class="feature-chip"><span>📹</span> Presence &amp; posture</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="interviewView" class="view hidden">
+
+        <div class="interview-header">
+            <div>
+                <h2 class="iv-header">Interview room</h2>
+                <div class="kpi-row" id="kpiRow">
+                    <span class="kpi"><b>Role</b> • <span id="kpiRole">—</span></span>
+                    <span class="kpi"><b>Q</b> • <span id="kpiQ">—</span></span>
+                    <span class="kpi"><b>Level</b> • <span id="kpiLevel">—</span></span>
+                    <span class="kpi"><b>Topic</b> • <span id="kpiTopic">—</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="interview-grid">
+
+            <div class="iv-card" id="videoPanel">
+                <h3 class="panel-title">📹 Video coach</h3>
+                <div class="video-wrapper">
+                    <video id="videoPreview" autoplay playsinline muted></video>
+                    <canvas id="snapshotCanvas" class="hidden"></canvas>
+                </div>
+                <button id="postureBtn" class="btn btn-accent" disabled>🔍 Analyze posture</button>
+
+                <div id="bodyMetrics" class="metrics-grid hidden">
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricOpenness">—</div>
+                        <div class="metric-label">Openness</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricFidgeting">—</div>
+                        <div class="metric-label">Fidgeting</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricEngage">—</div>
+                        <div class="metric-label">Engagement</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="metricPosture">—</div>
+                        <div class="metric-label">Posture</div>
+                    </div>
+                </div>
+                <p id="blSummary" class="caption hidden"></p>
+            </div>
+
+            <div class="iv-card" id="interviewPanel">
+                <h3 class="panel-title">💬 Interview</h3>
+
+                <div class="q-bubble" id="questionBubble">
+                    🤖 Loading question…
+                </div>
+
+                <div class="section-label">YOUR ANSWER</div>
+
+                <div class="answer-controls">
+                    <div class="slider-row">
+                        <label for="recDuration">Recording: <span id="recDurLabel">7</span>s</label>
+                        <input type="range" id="recDuration" min="3" max="60" value="7" />
+                    </div>
+
+                    <div class="btn-row">
+                        <button id="speakBtn" class="btn btn-primary" disabled>🎤 Speak answer</button>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showIdealCheck" /> Show ideal answer
+                        </label>
+                    </div>
+                </div>
+
+                <div id="sttStatus" class="stt-status hidden"></div>
+
+                <textarea id="transcriptArea" class="textarea hidden" rows="4" placeholder="Your transcribed answer will appear here…" readonly></textarea>
+
+                <div id="idealAnswer" class="ideal-box hidden">
+                    <div class="ideal-header">📝 Ideal answer</div>
+                    <p id="idealText"></p>
+                </div>
+
+                <div class="type-answer-row">
+                    <input type="text" id="typeInput" class="input type-input" placeholder="Or type your answer here…" disabled />
+                    <button id="sendTypedBtn" class="btn btn-ghost" disabled>↵</button>
+                </div>
+
+                <div class="action-row">
+                    <button id="submitBtn" class="btn btn-primary" disabled>✅ Submit</button>
+                    <button id="nextBtn" class="btn btn-secondary" disabled>⏭ Next Q</button>
+                    <button id="repeatBtn" class="btn btn-ghost" disabled>🔁 Repeat</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="iv-card" id="feedbackPanel">
+            <h3 class="panel-title">📊 Feedback</h3>
+
+            <div id="feedbackContent" class="feedback-empty">
+                <p class="caption">Speak or type your answer, then Submit for evaluation.</p>
+            </div>
+
+            <div id="feedbackScores" class="hidden">
+                <div class="score-row" id="scoreRow"></div>
+                <div class="feedback-details" id="feedbackDetails"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reportView" class="view hidden">
+        <div class="report-header">
+            <h2 class="iv-header">📊 Interview report</h2>
+            <p class="iv-sub" id="reportSub"></p>
+        </div>
+
+        <div class="score-cards-row" id="reportScores"></div>
+
+        <h3 class="section-title">Per-question breakdown</h3>
+        <div id="reportBreakdown"></div>
+
+        <h3 class="section-title">💡 Improvement tips</h3>
+        <div id="reportTips"></div>
+
+        <button id="newInterviewBtn" class="btn btn-primary btn-wide">🔄 Start new interview</button>
+    </section>
+
+</main>
+
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

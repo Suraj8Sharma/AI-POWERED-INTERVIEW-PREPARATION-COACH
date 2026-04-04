@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="PrepLoom — Weave confidence into every interview. AI-powered mock interviews with feedback on technical depth, communication, and presence." />
+    <title>PrepLoom — AI interview preparation</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/site.css" />
+</head>
+<body class="site">
+<div class="site-wrap">
+    <header class="site-nav" role="navigation" aria-label="Primary">
+        <a class="site-nav__brand" href="/">
+            <span class="site-nav__mark" aria-hidden="true">PL</span>
+            PrepLoom
+        </a>
+        <nav class="site-nav__links" aria-label="Main">
+            <a class="site-nav__link site-nav__link--active" href="/">Home</a>
+            <a class="site-nav__link" href="/features">Features</a>
+            <a class="site-nav__link" href="/about">About</a>
+            <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
+        </nav>
+        <div class="site-nav__auth" id="navAuthSlot">
+            <span id="navUserEmail" class="nav-user-email hidden" aria-live="polite"></span>
+            <button type="button" id="navLogout" class="btn-nav-outline hidden">Log out</button>
+            <div id="navAuthButtons">
+                <button type="button" class="btn-nav-outline" data-open-modal="modal-signin">Sign in</button>
+                <button type="button" class="btn-nav-primary" data-open-modal="modal-signup">Sign up</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <section class="hero" aria-labelledby="hero-title">
+            <p class="hero__eyebrow">Interview preparation, reimagined</p>
+            <h1 id="hero-title" class="hero__title">Weave confidence into every interview.</h1>
+            <p class="hero__lead">PrepLoom combines role-aware technical questions, communication analysis, and optional video feedback so you walk in prepared—not rehearsed.</p>
+            <div class="hero__actions">
+                <a class="btn-hero-primary" href="/app">Start practicing</a>
+                <a class="btn-hero-secondary" href="/features">Explore features</a>
+            </div>
+        </section>
+
+        <div class="section-head">
+            <h2>Why PrepLoom</h2>
+            <p>One focused workspace for the skills interviewers actually score—without the noise of generic question banks.</p>
+        </div>
+
+        <div class="grid-3">
+            <article class="card-pl">
+                <div class="card-pl__icon" aria-hidden="true">📚</div>
+                <h3>Technical depth</h3>
+                <p>Practice with questions matched to your target role, with structured feedback on correctness and reasoning.</p>
+            </article>
+            <article class="card-pl">
+                <div class="card-pl__icon" aria-hidden="true">🗣️</div>
+                <h3>Communication</h3>
+                <p>Clarity, pacing, and structure matter. PrepLoom surfaces how you sound—not just what you know.</p>
+            </article>
+            <article class="card-pl">
+                <div class="card-pl__icon" aria-hidden="true">📹</div>
+                <h3>Presence</h3>
+                <p>Optional camera-based cues help you notice posture and engagement before the real room.</p>
+            </article>
+        </div>
+
+        <div class="section-head">
+            <h2>Ready when you are</h2>
+            <p>Open the practice room, pick a role, and run a full mock session in your browser.</p>
+        </div>
+        <div class="hero__actions" style="justify-content: flex-start;">
+            <a class="btn-hero-primary" href="/app">Go to practice room</a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <span>© 2026 PrepLoom. All rights reserved.</span>
+            <div class="site-footer__links">
+                <a href="/features">Features</a>
+                <a href="/about">About</a>
+                <a href="/app">Practice</a>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signin-title">Sign in</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+        </div>
+        <p class="modal__note">MongoDB stores your account; you receive a JWT stored in this browser.</p>
+        <p id="signinError" class="modal-error" hidden></p>
+        <form id="formSignin">
+            <div class="modal__field">
+                <label for="signin-email">Email</label>
+                <input id="signin-email" name="email" type="email" autocomplete="username" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signin-password">Password</label>
+                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Sign in</button>
+        </form>
+        <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
+    </div>
+</div>
+
+<div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signup-title">Create account</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+        </div>
+        <p class="modal__note">Password must be at least 8 characters. You can use Practice without an account.</p>
+        <p id="signupError" class="modal-error" hidden></p>
+        <form id="formSignup">
+            <div class="modal__field">
+                <label for="signup-name">Name <span class="modal-optional">(optional)</span></label>
+                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Your name" maxlength="120" />
+            </div>
+            <div class="modal__field">
+                <label for="signup-email">Email</label>
+                <input id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signup-password">Password</label>
+                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Create account</button>
+        </form>
+        <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
+    </div>
+</div>
+
+<script src="/static/js/site.js"></script>
+<script src="/static/js/auth.js"></script>
+</body>
+</html>
