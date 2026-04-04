@@ -1,0 +1,17 @@
+# Real Interview Window UI — Task List
+
+## Phase 1: NLP Communication Analysis Module
+- [x] Create [AI_BACKEND/nlp_analysis.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/AI_BACKEND/nlp_analysis.py) — filler word detection, WPM, fluency scoring
+
+## Phase 2: Frontend Redesign
+- [x] Redesign [frontend_interface/frontend.py](file:///c:/Users/DELL/Desktop/AI-POWERED-INTERVIEW-PREPARATION-COACH/frontend_interface/frontend.py) — real interview window UI
+  - [x] Live video feed with continuous body language analysis
+  - [x] Integrated mic recording (click to answer, auto-transcribe)
+  - [x] Interview chat flow (question → speak → feedback per question)
+  - [x] 3-dimensional scoring: Technical, Communication, Confidence
+  - [x] End-of-session results dashboard with all scores
+
+## Phase 3: Integration & Polish
+- [x] Wire NLP analysis into evaluation pipeline
+- [x] Session report generation on "End Interview"
+- [x] Testing and verification
