@@ -156,7 +156,7 @@ if (window.speechSynthesis) {
 async function startWebcam() {
     try {
         mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+            video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: true,
         });
         videoPreview.srcObject = mediaStream;
@@ -250,7 +250,12 @@ endBtn.addEventListener("click", async () => {
 //  Render question
 // ═══════════════════════════════════════════════════════════════════════════
 function renderQuestion(q) {
-    questionBubble.textContent = "🤖 " + q.question_text;
+    const bubbleText = questionBubble.querySelector(".q-bubble-text");
+    if (bubbleText) {
+        bubbleText.textContent = q.question_text;
+    } else {
+        questionBubble.textContent = "🤖 " + q.question_text;
+    }
     kpiRole.textContent  = q.role_tag;
     kpiQ.textContent     = (q.index + 1) + "/" + totalQuestions;
     kpiLevel.textContent = q.difficulty_level;
@@ -500,7 +505,7 @@ postureBtn.addEventListener("click", async () => {
         show(blSummary);
     } finally {
         postureBtn.disabled = false;
-        postureBtn.innerHTML = "🔍 Analyze Posture";
+        postureBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Analyze Posture';
     }
 });
 
