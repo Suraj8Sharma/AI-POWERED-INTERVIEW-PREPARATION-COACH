@@ -6,36 +6,58 @@
     <meta name="description" content="PrepLoom — Practice mock interviews with AI feedback on technical skills, communication, and presence." />
     <title>Practice — PrepLoom</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/css/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/style.css?v=20260418" />
 </head>
 <body>
 
+<!-- ═══════ Ambient background orbs ═══════ -->
+<div class="ambient-bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<!-- ═══════ SIDEBAR ═══════ -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h1 class="brand">PrepLoom</h1>
-        <p class="brand-sub">Multimodal mock-interview practice</p>
+        <div class="brand-row">
+            <div class="brand-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div>
+                <h1 class="brand">PrepLoom</h1>
+                <p class="brand-sub">AI Interview Coach</p>
+            </div>
+        </div>
         <p id="appAuthHint" class="sidebar-auth-hint"></p>
     </div>
+
     <div class="sidebar-divider"></div>
 
     <div class="sidebar-section">
-        <label class="field-label">👤 Candidate</label>
-        <input type="text" id="candidateName" class="input" placeholder="Your name" />
+        <label class="field-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Candidate
+        </label>
+        <input type="text" id="candidateName" class="input" placeholder="Enter your name" />
     </div>
 
     <div class="sidebar-section">
-        <label class="field-label">🎯 Interview Setup</label>
+        <label class="field-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Interview Setup
+        </label>
 
         <div class="toggle-row">
             <label class="toggle" id="ttsToggle">
                 <input type="checkbox" id="ttsCheckbox" checked />
                 <span class="toggle-slider"></span>
             </label>
-            <span class="toggle-label">🔊 Read questions aloud</span>
+            <span class="toggle-label">Read questions aloud</span>
         </div>
 
-        <label class="field-label" style="margin-top:0.6rem;">Target Role</label>
+        <label class="field-label" style="margin-top:0.8rem;">Target Role</label>
         <select id="roleSelect" class="input">
             <option value="">Loading roles…</option>
         </select>
@@ -44,8 +66,14 @@
     <div class="sidebar-divider"></div>
 
     <div class="sidebar-actions">
-        <button id="startBtn" class="btn btn-primary">▶ Start</button>
-        <button id="endBtn" class="btn btn-secondary">⏹ End</button>
+        <button id="startBtn" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Start
+        </button>
+        <button id="endBtn" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+            End
+        </button>
     </div>
 
     <div class="sidebar-footer">
@@ -55,85 +83,160 @@
     <p class="sidebar-back"><a href="/">← Back to PrepLoom</a></p>
 </aside>
 
+<!-- ═══════ MAIN CONTENT ═══════ -->
 <main class="main" id="main">
 
+    <!-- ─── WELCOME VIEW ─── -->
     <section id="welcomeView" class="view">
         <div class="welcome-card">
-            <div class="welcome-emoji">🎯</div>
-            <h2 class="welcome-title">Ready to practice?</h2>
-            <p class="welcome-sub">Choose a role in the sidebar and click <strong>Start</strong> to begin your mock interview.</p>
+            <div class="welcome-glow"></div>
+            <div class="welcome-icon-wrap">
+                <div class="welcome-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#welcomeGrad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <defs><linearGradient id="welcomeGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6C63FF"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+            </div>
+            <h2 class="welcome-title">Ready to ace your interview?</h2>
+            <p class="welcome-sub">Select a role from the sidebar and press <strong>Start</strong> to begin your AI-powered mock interview session.</p>
             <div class="welcome-features">
-                <div class="feature-chip"><span>📚</span> Technical scoring</div>
-                <div class="feature-chip"><span>🗣️</span> Communication analysis</div>
-                <div class="feature-chip"><span>📹</span> Presence &amp; posture</div>
+                <div class="feature-chip">
+                    <span class="chip-icon chip-icon--blue">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    </span>
+                    Technical scoring
+                </div>
+                <div class="feature-chip">
+                    <span class="chip-icon chip-icon--teal">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    </span>
+                    Communication analysis
+                </div>
+                <div class="feature-chip">
+                    <span class="chip-icon chip-icon--purple">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </span>
+                    Presence &amp; posture
+                </div>
+            </div>
+
+            <div class="welcome-steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <p>Enter your name &amp; choose a role</p>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <p>Answer questions via voice or text</p>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <p>Get instant AI feedback &amp; report</p>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- ─── INTERVIEW VIEW ─── -->
     <section id="interviewView" class="view hidden">
 
         <div class="interview-header">
             <div>
-                <h2 class="iv-header">Interview room</h2>
+                <h2 class="iv-header">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;opacity:.7"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Interview Room
+                </h2>
                 <div class="kpi-row" id="kpiRow">
-                    <span class="kpi"><b>Role</b> • <span id="kpiRole">—</span></span>
-                    <span class="kpi"><b>Q</b> • <span id="kpiQ">—</span></span>
-                    <span class="kpi"><b>Level</b> • <span id="kpiLevel">—</span></span>
-                    <span class="kpi"><b>Topic</b> • <span id="kpiTopic">—</span></span>
+                    <span class="kpi"><b>Role</b> <span class="kpi-sep">•</span> <span id="kpiRole">—</span></span>
+                    <span class="kpi"><b>Q</b> <span class="kpi-sep">•</span> <span id="kpiQ">—</span></span>
+                    <span class="kpi"><b>Level</b> <span class="kpi-sep">•</span> <span id="kpiLevel">—</span></span>
+                    <span class="kpi"><b>Topic</b> <span class="kpi-sep">•</span> <span id="kpiTopic">—</span></span>
                 </div>
             </div>
         </div>
 
+        <!-- Video Coach Panel (full width on top) -->
         <div class="interview-grid">
-
             <div class="iv-card" id="videoPanel">
-                <h3 class="panel-title">📹 Video coach</h3>
-                <div class="video-wrapper">
-                    <video id="videoPreview" autoplay playsinline muted></video>
-                    <canvas id="snapshotCanvas" class="hidden"></canvas>
-                </div>
-                <button id="postureBtn" class="btn btn-accent" disabled>🔍 Analyze posture</button>
+                <h3 class="panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    Video Coach
+                </h3>
 
-                <div id="bodyMetrics" class="metrics-grid hidden">
-                    <div class="metric-card">
-                        <div class="metric-value" id="metricOpenness">—</div>
-                        <div class="metric-label">Openness</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value" id="metricFidgeting">—</div>
-                        <div class="metric-label">Fidgeting</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value" id="metricEngage">—</div>
-                        <div class="metric-label">Engagement</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value" id="metricPosture">—</div>
-                        <div class="metric-label">Posture</div>
+                <div class="video-left">
+                    <div class="video-wrapper">
+                        <video id="videoPreview" autoplay playsinline muted></video>
+                        <canvas id="snapshotCanvas" class="hidden"></canvas>
+                        <div class="video-overlay">
+                            <span class="video-badge">LIVE</span>
+                        </div>
                     </div>
                 </div>
-                <p id="blSummary" class="caption hidden"></p>
+
+                <div class="video-right">
+                    <button id="postureBtn" class="btn btn-accent" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Analyze Posture
+                    </button>
+
+                    <div id="bodyMetrics" class="metrics-grid hidden">
+                        <div class="metric-card">
+                            <div class="metric-value" id="metricOpenness">—</div>
+                            <div class="metric-label">Openness</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="metricFidgeting">—</div>
+                            <div class="metric-label">Fidgeting</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="metricEngage">—</div>
+                            <div class="metric-label">Engagement</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="metricPosture">—</div>
+                            <div class="metric-label">Posture</div>
+                        </div>
+                    </div>
+                    <p id="blSummary" class="caption hidden"></p>
+                </div>
             </div>
+        </div>
 
+        <!-- Q&A + Feedback side by side below -->
+        <div class="interview-grid-lower">
             <div class="iv-card" id="interviewPanel">
-                <h3 class="panel-title">💬 Interview</h3>
+                <h3 class="panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Interview
+                </h3>
 
                 <div class="q-bubble" id="questionBubble">
-                    🤖 Loading question…
+                    <div class="q-bubble-avatar">AI</div>
+                    <div class="q-bubble-text">Loading question…</div>
                 </div>
 
                 <div class="section-label">YOUR ANSWER</div>
 
                 <div class="answer-controls">
                     <div class="slider-row">
-                        <label for="recDuration">Recording: <span id="recDurLabel">7</span>s</label>
+                        <label for="recDuration">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Recording: <span id="recDurLabel">7</span>s
+                        </label>
                         <input type="range" id="recDuration" min="3" max="60" value="7" />
                     </div>
 
                     <div class="btn-row">
-                        <button id="speakBtn" class="btn btn-primary" disabled>🎤 Speak answer</button>
+                        <button id="speakBtn" class="btn btn-primary btn-speak" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            Speak Answer
+                        </button>
                         <label class="checkbox-label">
-                            <input type="checkbox" id="showIdealCheck" /> Show ideal answer
+                            <input type="checkbox" id="showIdealCheck" />
+                            Show ideal answer
                         </label>
                     </div>
                 </div>
@@ -143,52 +246,77 @@
                 <textarea id="transcriptArea" class="textarea hidden" rows="4" placeholder="Your transcribed answer will appear here…" readonly></textarea>
 
                 <div id="idealAnswer" class="ideal-box hidden">
-                    <div class="ideal-header">📝 Ideal answer</div>
+                    <div class="ideal-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        Ideal Answer
+                    </div>
                     <p id="idealText"></p>
                 </div>
 
                 <div class="type-answer-row">
                     <input type="text" id="typeInput" class="input type-input" placeholder="Or type your answer here…" disabled />
-                    <button id="sendTypedBtn" class="btn btn-ghost" disabled>↵</button>
+                    <button id="sendTypedBtn" class="btn btn-ghost btn-send" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </button>
                 </div>
 
                 <div class="action-row">
-                    <button id="submitBtn" class="btn btn-primary" disabled>✅ Submit</button>
-                    <button id="nextBtn" class="btn btn-secondary" disabled>⏭ Next Q</button>
-                    <button id="repeatBtn" class="btn btn-ghost" disabled>🔁 Repeat</button>
+                    <button id="submitBtn" class="btn btn-success" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Submit
+                    </button>
+                    <button id="nextBtn" class="btn btn-secondary" disabled>
+                        Next
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <button id="repeatBtn" class="btn btn-ghost" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        Repeat
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <div class="iv-card" id="feedbackPanel">
-            <h3 class="panel-title">📊 Feedback</h3>
+            <!-- Feedback Panel -->
+            <div class="iv-card" id="feedbackPanel">
+                <h3 class="panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Feedback
+                </h3>
 
-            <div id="feedbackContent" class="feedback-empty">
-                <p class="caption">Speak or type your answer, then Submit for evaluation.</p>
-            </div>
+                <div id="feedbackContent" class="feedback-empty">
+                    <p class="caption">Speak or type your answer, then Submit for evaluation.</p>
+                </div>
 
-            <div id="feedbackScores" class="hidden">
-                <div class="score-row" id="scoreRow"></div>
-                <div class="feedback-details" id="feedbackDetails"></div>
+                <div id="feedbackScores" class="hidden">
+                    <div class="score-row" id="scoreRow"></div>
+                    <div class="feedback-details" id="feedbackDetails"></div>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- ─── REPORT VIEW ─── -->
     <section id="reportView" class="view hidden">
         <div class="report-header">
-            <h2 class="iv-header">📊 Interview report</h2>
+            <h2 class="iv-header">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;opacity:.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Interview Report
+            </h2>
             <p class="iv-sub" id="reportSub"></p>
         </div>
 
         <div class="score-cards-row" id="reportScores"></div>
 
-        <h3 class="section-title">Per-question breakdown</h3>
+        <h3 class="section-title">Per-question Breakdown</h3>
         <div id="reportBreakdown"></div>
 
-        <h3 class="section-title">💡 Improvement tips</h3>
+        <h3 class="section-title">💡 Improvement Tips</h3>
         <div id="reportTips"></div>
 
-        <button id="newInterviewBtn" class="btn btn-primary btn-wide">🔄 Start new interview</button>
+        <button id="newInterviewBtn" class="btn btn-primary btn-wide">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Start New Interview
+        </button>
     </section>
 
 </main>
