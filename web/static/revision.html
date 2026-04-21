@@ -38,6 +38,32 @@
             <h1>Revision Hub</h1>
             <p>Quick refreshers, mnemonics, flashcards, and pitfalls to watch. Review before your next practice session or real interview.</p>
         </header>
+        <section class="content-block">
+            <h2>Project Overview (Professor Brief)</h2>
+            <p><strong>Project:</strong> PrepLoom - AI-Powered Interview Preparation Coach</p>
+            <p><strong>Goal:</strong> Simulate technical interviews and give feedback on technical depth, communication quality, and confidence/body language.</p>
+            <h3 style="margin-top: 1rem;">Complete End-to-End Flow</h3>
+            <ol style="margin-top: 0.6rem; padding-left: 1.2rem;">
+                <li><strong>Role selection + session start:</strong> Candidate selects target role, app creates interview session.</li>
+                <li><strong>Question generation:</strong> Role-specific questions are fetched from a RAG-powered question bank (ChromaDB + curated dataset).</li>
+                <li><strong>Question delivery:</strong> Question is shown in the UI and can be read aloud using browser TTS.</li>
+                <li><strong>Answer capture:</strong> Candidate can type or speak. Spoken answer is transcribed to text using Whisper STT.</li>
+                <li><strong>Body language analysis:</strong> Webcam snapshots/live frames are analyzed using MediaPipe pose signals (openness, posture, engagement, fidgeting).</li>
+                <li><strong>Evaluation:</strong> Technical answer is scored with LLM-based evaluator; communication is scored using NLP metrics (filler words, pace, fluency).</li>
+                <li><strong>Next question loop:</strong> Interview continues until completion with per-question scoring.</li>
+                <li><strong>Final report:</strong> Session-level aggregate report provides overall score, dimension-wise averages, and improvement tips.</li>
+            </ol>
+            <h3 style="margin-top: 1rem;">What We Have Already Built</h3>
+            <ul>
+                <li>FastAPI backend with interview APIs, auth endpoints, and report endpoint</li>
+                <li>RAG-based role-specific question retrieval</li>
+                <li>LLM technical evaluation + NLP communication analysis</li>
+                <li>Speech input (STT), optional question voice output (TTS)</li>
+                <li>Body language analysis from webcam frames</li>
+                <li>Web UI pages: Home, Features, Revision, About, and Practice room</li>
+            </ul>
+            <p><strong>Current Status:</strong> Working full-stack prototype with measurable multi-dimensional interview feedback.</p>
+        </section>
 
         <section class="content-block">
             <h2>🔗 Big-O Essentials</h2>
