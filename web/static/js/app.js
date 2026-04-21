@@ -32,6 +32,8 @@ const kpiTopic = $("kpiTopic");
 const videoPreview    = $("videoPreview");
 const snapshotCanvas  = $("snapshotCanvas");
 const postureBtn      = $("postureBtn");
+const continuousAnalysisBtn = $("continuousAnalysisBtn");
+const liveStatusText  = $("liveStatusText");
 const bodyMetrics     = $("bodyMetrics");
 const metricOpenness  = $("metricOpenness");
 const metricFidgeting = $("metricFidgeting");
@@ -41,12 +43,13 @@ const blSummary       = $("blSummary");
 
 // Interview
 const questionBubble  = $("questionBubble");
-const recDuration     = $("recDuration");
-const recDurLabel     = $("recDurLabel");
 const speakBtn        = $("speakBtn");
+const speakBtnText    = $("speakBtnText");
 const showIdealCheck  = $("showIdealCheck");
 const sttStatus       = $("sttStatus");
 const transcriptArea  = $("transcriptArea");
+const recordingIndicator = $("recordingIndicator");
+const recordingTimer  = $("recordingTimer");
 const idealAnswer     = $("idealAnswer");
 const idealText       = $("idealText");
 const typeInput       = $("typeInput");
@@ -81,6 +84,13 @@ let mediaStream     = null;
 let mediaRecorder   = null;
 let audioChunks     = [];
 let isRecording     = false;
+let recordingStartTime = 0;
+let recordingTimerInterval = null;
+let liveRecognition = null;
+let recognitionRestartRequested = false;
+let liveTranscriptFinal = "";
+
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Helpers
@@ -88,6 +98,11 @@ let isRecording     = false;
 function show(el)   { el.classList.remove("hidden"); }
 function hide(el)   { el.classList.add("hidden"); }
 function scoreColor(s) { return s >= 70 ? "green" : s >= 45 ? "amber" : "red"; }
+function formatClock(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
 
 const PREPLOOM_TOKEN_KEY = "preploom_token";
 
@@ -128,6 +143,60 @@ function switchView(view) {
     show(view);
 }
 
+function setSpeakButtonState(recording = false, elapsedSeconds = 0) {
+    speakBtn.classList.toggle("recording", recording);
+    speakBtnText.textContent = recording
+        ? `Stop Recording ${formatClock(elapsedSeconds)}`
+        : "Speak Answer";
+}
+
+function setRecordingUI(recording = false, elapsedSeconds = 0) {
+    isRecording = recording;
+    setSpeakButtonState(recording, elapsedSeconds);
+    speakBtn.disabled = !sessionId;
+    nextBtn.disabled = recording || !sessionId;
+    repeatBtn.disabled = recording || !sessionId;
+    typeInput.disabled = recording || !sessionId;
+    sendTypedBtn.disabled = recording || !sessionId;
+
+    if (recording) {
+        recordingTimer.textContent = formatClock(elapsedSeconds);
+        show(recordingIndicator);
+    } else {
+        recordingTimer.textContent = "0:00";
+        hide(recordingIndicator);
+    }
+}
+
+function updateTranscript(text) {
+    transcriptArea.value = text;
+    if (text.trim()) {
+        show(transcriptArea);
+    }
+}
+
+function setLiveAnalysisState(active) {
+    continuousAnalysisBtn.classList.toggle("active", active);
+    continuousAnalysisBtn.disabled = !sessionId;
+    liveStatusText.textContent = active ? "Live Posture On" : "Live Posture Ready";
+}
+
+function startRecordingTimer() {
+    if (recordingTimerInterval) clearInterval(recordingTimerInterval);
+    recordingTimerInterval = setInterval(() => {
+        if (!isRecording || !recordingStartTime) return;
+        const elapsedSeconds = Math.max(0, Math.floor((Date.now() - recordingStartTime) / 1000));
+        setRecordingUI(true, elapsedSeconds);
+    }, 250);
+}
+
+function stopRecordingTimer() {
+    if (recordingTimerInterval) {
+        clearInterval(recordingTimerInterval);
+        recordingTimerInterval = null;
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  TTS (browser speechSynthesis)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -166,6 +235,9 @@ async function startWebcam() {
 }
 
 function stopWebcam() {
+    stopLiveTranscript();
+    stopRecordingTimer();
+    setRecordingUI(false);
     if (mediaStream) {
         mediaStream.getTracks().forEach(t => t.stop());
         mediaStream = null;
@@ -194,10 +266,6 @@ function stopWebcam() {
 // ═══════════════════════════════════════════════════════════════════════════
 //  Slider update
 // ═══════════════════════════════════════════════════════════════════════════
-recDuration.addEventListener("input", () => {
-    recDurLabel.textContent = recDuration.value;
-});
-
 // ═══════════════════════════════════════════════════════════════════════════
 //  START Interview
 // ═══════════════════════════════════════════════════════════════════════════
@@ -239,7 +307,13 @@ startBtn.addEventListener("click", async () => {
 // ═══════════════════════════════════════════════════════════════════════════
 endBtn.addEventListener("click", async () => {
     if (!sessionId) return;
+    if (isRecording) {
+        await stopAnswerRecording();
+    }
     stopWebcam();
+    if (isAnalyzingContinuous) {
+        stopContinuousAnalysis();
+    }
     window.speechSynthesis.cancel();
     setStatus(false);
     enableControls(false);
@@ -266,7 +340,8 @@ function resetInterviewUI() {
     lastAnswer = "";
     answerDuration = 0;
     bodyLanguageData = null;
-    transcriptArea.value = "";
+    liveTranscriptFinal = "";
+    updateTranscript("");
     hide(transcriptArea);
     hide(sttStatus);
     hide(feedbackScores);
@@ -277,32 +352,226 @@ function resetInterviewUI() {
     hide(blSummary);
     showIdealCheck.checked = false;
     typeInput.value = "";
+    stopLiveTranscript();
+    stopRecordingTimer();
+    setRecordingUI(false);
+
+    if (isAnalyzingContinuous) {
+        stopContinuousAnalysis();
+    }
+    setLiveAnalysisState(false);
 }
 
 function enableControls(on) {
     speakBtn.disabled   = !on;
-    postureBtn.disabled = !on;
+    continuousAnalysisBtn.disabled = !on;
     typeInput.disabled   = !on;
     sendTypedBtn.disabled = !on;
     submitBtn.disabled  = true;
     nextBtn.disabled    = !on;
     repeatBtn.disabled  = !on;
+    setSpeakButtonState(false);
+    setLiveAnalysisState(isAnalyzingContinuous);
 }
 
 function updateSubmitState() {
-    submitBtn.disabled = !lastAnswer.trim();
+    submitBtn.disabled = isRecording || !lastAnswer.trim();
+}
+
+function startLiveTranscript() {
+    if (!SpeechRecognitionCtor) return false;
+
+    liveTranscriptFinal = "";
+    recognitionRestartRequested = true;
+    liveRecognition = new SpeechRecognitionCtor();
+    liveRecognition.lang = "en-US";
+    liveRecognition.continuous = true;
+    liveRecognition.interimResults = true;
+
+    liveRecognition.onresult = (event) => {
+        let interimTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            const text = result[0]?.transcript || "";
+            if (result.isFinal) {
+                liveTranscriptFinal = `${liveTranscriptFinal} ${text}`.trim();
+            } else {
+                interimTranscript += text;
+            }
+        }
+
+        const transcript = `${liveTranscriptFinal} ${interimTranscript}`.trim();
+        if (!transcript) return;
+
+        lastAnswer = transcript;
+        updateTranscript(transcript);
+        updateSubmitState();
+    };
+
+    liveRecognition.onerror = (event) => {
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+            recognitionRestartRequested = false;
+            sttStatus.className = "stt-status transcribing";
+            sttStatus.textContent = "Live transcript preview is unavailable in this browser session.";
+            show(sttStatus);
+        }
+    };
+
+    liveRecognition.onend = () => {
+        if (!isRecording || !recognitionRestartRequested) {
+            liveRecognition = null;
+            return;
+        }
+
+        try {
+            liveRecognition.start();
+        } catch (e) {
+            console.warn("Speech recognition restart skipped:", e);
+        }
+    };
+
+    try {
+        liveRecognition.start();
+        return true;
+    } catch (e) {
+        liveRecognition = null;
+        return false;
+    }
+}
+
+function stopLiveTranscript() {
+    recognitionRestartRequested = false;
+    if (!liveRecognition) return;
+
+    try {
+        liveRecognition.stop();
+    } catch (e) {
+        console.warn("Speech recognition stop skipped:", e);
+    }
+    liveRecognition = null;
+}
+
+async function startAnswerRecording() {
+    if (!mediaStream) {
+        alert("Microphone not available. Please allow mic access.");
+        return;
+    }
+
+    const audioTrack = mediaStream.getAudioTracks()[0];
+    if (!audioTrack) {
+        alert("Microphone track not found. Please refresh and allow mic access.");
+        return;
+    }
+
+    audioChunks = [];
+    answerDuration = 0;
+    liveTranscriptFinal = "";
+    lastAnswer = "";
+    updateTranscript("");
+    hide(transcriptArea);
+    updateSubmitState();
+
+    if (!isAnalyzingContinuous) {
+        startContinuousAnalysis();
+    }
+
+    sttStatus.className = "stt-status recording";
+    sttStatus.textContent = "Recording now. Speak naturally and click again to stop.";
+    show(sttStatus);
+
+    const liveTranscriptStarted = startLiveTranscript();
+    if (!liveTranscriptStarted) {
+        sttStatus.textContent = "Recording now. Live transcript preview is unavailable, but final transcription will still appear after you stop.";
+    }
+
+    const audioStream = new MediaStream([audioTrack]);
+    try {
+        mediaRecorder = new MediaRecorder(audioStream, { mimeType: "audio/webm" });
+    } catch (e) {
+        mediaRecorder = new MediaRecorder(audioStream);
+    }
+
+    mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunks.push(event.data);
+    };
+
+    recordingStartTime = Date.now();
+    setRecordingUI(true, 0);
+    startRecordingTimer();
+    mediaRecorder.start();
+    updateSubmitState();
+}
+
+async function stopAnswerRecording() {
+    if (!mediaRecorder || mediaRecorder.state !== "recording") return;
+
+    const recordingDone = new Promise((resolve) => {
+        mediaRecorder.onstop = resolve;
+    });
+
+    mediaRecorder.stop();
+    stopLiveTranscript();
+    stopRecordingTimer();
+    await recordingDone;
+
+    answerDuration = Math.max(1, (Date.now() - recordingStartTime) / 1000);
+    recordingStartTime = 0;
+    setRecordingUI(false);
+
+    sttStatus.className = "stt-status transcribing";
+    sttStatus.textContent = "Transcribing with Whisper…";
+    show(sttStatus);
+
+    try {
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const wavBlob = await convertToWav(audioBlob);
+
+        const formData = new FormData();
+        formData.append("audio", wavBlob, "recording.wav");
+
+        const data = await api("/api/transcribe", { method: "POST", body: formData });
+        const transcript = (data.transcript || "").trim();
+
+        if (transcript) {
+            lastAnswer = transcript;
+            updateTranscript(transcript);
+            sttStatus.className = "stt-status done";
+            sttStatus.textContent = "Transcription complete.";
+        } else if (lastAnswer.trim()) {
+            sttStatus.className = "stt-status done";
+            sttStatus.textContent = "Live transcript captured. Final transcription returned empty.";
+        } else {
+            sttStatus.className = "stt-status recording";
+            sttStatus.textContent = "No speech detected. Try again and speak a bit louder.";
+        }
+    } catch (e) {
+        sttStatus.className = "stt-status recording";
+        sttStatus.textContent = "Transcription failed: " + e.message;
+    } finally {
+        mediaRecorder = null;
+        updateSubmitState();
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  SPEAK ANSWER (Audio recording)
 // ═══════════════════════════════════════════════════════════════════════════
 speakBtn.addEventListener("click", async () => {
+    if (isRecording) {
+        await stopAnswerRecording();
+        return;
+    }
+
+    await startAnswerRecording();
+    return;
+
     if (!mediaStream) {
         alert("Microphone not available. Please allow mic access.");
         return;
     }
 
-    const seconds = parseInt(recDuration.value) || 7;
+    const seconds = 7;
     speakBtn.disabled = true;
 
     // Show recording status
@@ -436,8 +705,7 @@ function submitTypedAnswer() {
     if (!text) return;
     lastAnswer = text;
     answerDuration = Math.max(1.0, text.split(/\s+/).length / 2.5);
-    transcriptArea.value = text;
-    show(transcriptArea);
+    updateTranscript(text);
     typeInput.value = "";
     updateSubmitState();
 }
@@ -462,7 +730,7 @@ showIdealCheck.addEventListener("change", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 //  ANALYZE POSTURE
 // ═══════════════════════════════════════════════════════════════════════════
-postureBtn.addEventListener("click", async () => {
+if (postureBtn) postureBtn.addEventListener("click", async () => {
     if (!mediaStream) return;
 
     postureBtn.disabled = true;
@@ -506,6 +774,148 @@ postureBtn.addEventListener("click", async () => {
     } finally {
         postureBtn.disabled = false;
         postureBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Analyze Posture';
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CONTINUOUS POSTURE ANALYSIS (WebSocket)
+// ═══════════════════════════════════════════════════════════════════════════
+let continuousAnalysisSocket = null;
+let isAnalyzingContinuous = false;
+let frameIntervalId = null;
+
+async function startContinuousAnalysis() {
+    if (isAnalyzingContinuous || !mediaStream) return;
+    
+    isAnalyzingContinuous = true;
+    setLiveAnalysisState(true);
+    blSummary.textContent = "🔄 Starting continuous analysis…";
+    show(blSummary);
+    
+    // Get protocol (ws or wss depending on page protocol)
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/analyze-posture`;
+    
+    try {
+        continuousAnalysisSocket = new WebSocket(wsUrl);
+        
+        continuousAnalysisSocket.onopen = () => {
+            blSummary.textContent = "✅ Live analysis active";
+            show(bodyMetrics);
+            show(blSummary);
+            startFrameCapture();
+        };
+        
+        continuousAnalysisSocket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                
+                if (data.error) {
+                    console.warn("Analysis error:", data.error);
+                    return;
+                }
+                
+                // Update metrics in real-time
+                const pr = data.probabilities || data;
+                if (pr.openness !== undefined) {
+                    metricOpenness.textContent = Math.round((pr.openness || 0) * 100) + "%";
+                }
+                if (pr.fidgeting !== undefined) {
+                    metricFidgeting.textContent = Math.round((pr.fidgeting || 0) * 100) + "%";
+                }
+                if (pr.engagement !== undefined) {
+                    metricEngage.textContent = Math.round((pr.engagement || 0) * 100) + "%";
+                }
+                if (pr.posture !== undefined) {
+                    metricPosture.textContent = Math.round((pr.posture || 0) * 100) + "%";
+                }
+                
+                // Update summary if available
+                if (data.summary) {
+                    blSummary.textContent = "✅ " + data.summary;
+                }
+                
+                // Store latest data
+                bodyLanguageData = data;
+            } catch (e) {
+                console.error("Failed to parse message:", e);
+            }
+        };
+        
+        continuousAnalysisSocket.onerror = (error) => {
+            blSummary.textContent = "❌ Connection error";
+            console.error("WebSocket error:", error);
+        };
+        
+        continuousAnalysisSocket.onclose = () => {
+            if (isAnalyzingContinuous) {
+                stopContinuousAnalysis();
+            }
+        };
+    } catch (e) {
+        blSummary.textContent = "❌ Could not connect: " + e.message;
+        isAnalyzingContinuous = false;
+        setLiveAnalysisState(false);
+    }
+}
+
+function stopContinuousAnalysis() {
+    isAnalyzingContinuous = false;
+    
+    if (frameIntervalId) {
+        clearInterval(frameIntervalId);
+        frameIntervalId = null;
+    }
+    
+    if (continuousAnalysisSocket) {
+        continuousAnalysisSocket.close();
+        continuousAnalysisSocket = null;
+    }
+    
+    blSummary.textContent = "⏸️ Analysis paused";
+}
+
+function startFrameCapture() {
+    if (frameIntervalId) clearInterval(frameIntervalId);
+    
+    // Capture frames at ~15 FPS (every 67ms)
+    frameIntervalId = setInterval(() => {
+        if (!mediaStream || !continuousAnalysisSocket || continuousAnalysisSocket.readyState !== WebSocket.OPEN) {
+            return;
+        }
+        
+        try {
+            const video = videoPreview;
+            snapshotCanvas.width = video.videoWidth || 640;
+            snapshotCanvas.height = video.videoHeight || 480;
+            const ctx = snapshotCanvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
+            
+            // Convert to base64 and send
+            snapshotCanvas.toBlob((blob) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+                    if (continuousAnalysisSocket && continuousAnalysisSocket.readyState === WebSocket.OPEN) {
+                        continuousAnalysisSocket.send(JSON.stringify({ frame: base64 }));
+                    }
+                };
+                reader.readAsDataURL(blob);
+            }, "image/jpeg", 0.8);
+        } catch (e) {
+            console.error("Frame capture error:", e);
+        }
+    }, 67); // ~15 FPS
+}
+
+// Event listener for continuous analysis toggle
+continuousAnalysisBtn.addEventListener("click", () => {
+    if (isAnalyzingContinuous) {
+        stopContinuousAnalysis();
+        setLiveAnalysisState(false);
+    } else {
+        startContinuousAnalysis();
+        setLiveAnalysisState(true);
     }
 });
 

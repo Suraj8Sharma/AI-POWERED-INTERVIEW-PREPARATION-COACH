@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="PrepLoom features — Technical practice, communication analysis, and video presence feedback for interview prep." />
-    <title>Features — PrepLoom</title>
+    <meta name="description" content="Revision Hub — Quick reviews, flashcards, tips and reminders for technical interviews. Strengthen what you practiced with PrepLoom." />
+    <title>Revision — PrepLoom</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
@@ -18,8 +18,8 @@
         </a>
         <nav class="site-nav__links" aria-label="Main">
             <a class="site-nav__link" href="/">Home</a>
-            <a class="site-nav__link site-nav__link--active" href="/features">Features</a>
-            <a class="site-nav__link" href="/revision">Revision</a>
+            <a class="site-nav__link" href="/features">Features</a>
+            <a class="site-nav__link site-nav__link--active" href="/revision">Revision</a>
             <a class="site-nav__link" href="/about">About</a>
             <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
         </nav>
@@ -35,32 +35,72 @@
 
     <main class="site-main">
         <header class="page-hero">
-            <h1>Features</h1>
-            <p>PrepLoom is built around how real interviews are scored: substance, signal, and presence. Here is what you get in the practice room today.</p>
+            <h1>Revision Hub</h1>
+            <p>Quick refreshers, mnemonics, flashcards, and pitfalls to watch. Review before your next practice session or real interview.</p>
         </header>
 
         <section class="content-block">
-            <h2>Role-aware technical questions</h2>
-            <p>Draw from a structured bank aligned to your target role. Each session mixes behavioural and technical prompts so you rehearse both storytelling and depth.</p>
+            <h2>🔗 Big-O Essentials</h2>
+            <ul>
+                <li><strong>O(1)</strong>: Hash table lookup, array index access</li>
+                <li><strong>O(log n)</strong>: Binary search</li>
+                <li><strong>O(n)</strong>: Single loop, two pointers</li>
+                <li><strong>O(n log n)</strong>: Quick/Merge sort, Heapsort</li>
+                <li><strong>O(n²)</strong>: Nested loops, Bubble/Insertion sort</li>
+            </ul>
+            <p><em>Tip:</em> Always state your intuition before optimizing—interviewers value reasoning.</p>
         </section>
 
         <section class="content-block">
-            <h2>Answer evaluation</h2>
-            <p>Submit spoken or typed answers for feedback on reasoning and accuracy. Ideal answers can be revealed when you want to compare against a strong baseline.</p>
+            <h2>🎯 Array/String Patterns</h2>
+            <ul>
+                <li><strong>Two Pointers:</strong> Valid Palindrome, Container With Most Water</li>
+                <li><strong>Sliding Window:</strong> Longest Substring Without Repeat, Max Sum Subarray</li>
+                <li><strong>Fast/Slow Pointers:</strong> Linked List Cycle, Happy Number</li>
+                <li><strong>Merge Intervals:</strong> Meeting Rooms, Insert Interval</li>
+            </ul>
+            <p><em>Pro tip:</em> Visualize with pen/paper—don't code blind.</p>
         </section>
 
         <section class="content-block">
-            <h2>Communication signals</h2>
-            <p>Metrics such as clarity and structure help you notice habits—rambling, filler, or pacing—before a hiring manager does.</p>
+            <h2>⭐ Behavioral STAR</h2>
+            <p><strong>Situation → Task → Action → Result</strong></p>
+            <ul>
+                <li><strong>Failure:</strong> "What went wrong? What was your specific role? Precise actions taken? Quantified impact?"</li>
+                <li><strong>Conflict:</strong> "I disagreed with X because Y. Proposed Z. Collaborated on solution."</li>
+                <li><strong>Leadership:</strong> "Led N-person team. Scoped problem. Delegated tasks. Delivered 20% ahead."</li>
+            </ul>
+            <p>Practice 2-3 stories per category. Time under 2min.</p>
         </section>
 
         <section class="content-block">
-            <h2>Video and posture (optional)</h2>
-            <p>Enable your camera for lightweight cues on openness, engagement, and posture. Use it as a nudge, not a verdict—comfort still comes first.</p>
+            <h2>💬 Communication Reminders</h2>
+            <ul>
+                <li><strong>Structure:</strong> "Three reasons: First... Second... Third."</li>
+                <li><strong>Think Aloud:</strong> "Approaching with hashmap because time-critical lookup."</li>
+                <li><strong>Edge Cases:</strong> Always mention: empty, single, max-size, all-duplicates.</li>
+                <li><strong>Close Strong:</strong> "Time complexity: O(n), space: O(1). Alternative: pointers for O(n) time."</li>
+            </ul>
+            <p>Avoid: filler words ("like", "um"), rambling without structure.</p>
         </section>
 
-        <div class="hero__actions" style="margin-top: 1rem;">
-            <a class="btn-hero-primary" href="/app">Open practice room</a>
+        <section class="content-block">
+            <h2>⚡ Quick Flashcards</h2>
+            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: var(--pl-radius-sm); border: 1px solid var(--pl-border);">
+                    <strong>Q:</strong> SQL indexes? <details style="margin-top: 0.5rem;"><summary>Answer</summary>Speed up SELECT WHERE/GROUP BY. Slow INSERT/UPDATE. Composite for multi-col queries.</details>
+                </div>
+                <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: var(--pl-radius-sm); border: 1px solid var(--pl-border);">
+                    <strong>Q:</strong> RESTful API status codes? <details><summary>Answer</summary>200 OK, 201 Created, 400 Bad Req, 401 Unauthorized, 404 Not Found, 500 Internal.</details>
+                </div>
+                <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: var(--pl-radius-sm); border: 1px solid var(--pl-border);">
+                    <strong>Q:</strong> CAP Theorem? <details><summary>Answer</summary>Consistency, Availability, Partition tolerance. Pick 2.</details>
+                </div>
+            </div>
+        </section>
+
+        <div class="hero__actions" style="margin-top: 2rem;">
+            <a class="btn-hero-primary" href="/app">Practice What You Reviewed</a>
         </div>
     </main>
 
@@ -131,3 +171,4 @@
 <script src="/static/js/auth.js"></script>
 </body>
 </html>
+

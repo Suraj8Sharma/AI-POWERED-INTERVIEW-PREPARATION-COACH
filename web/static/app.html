@@ -177,10 +177,12 @@
                 </div>
 
                 <div class="video-right">
-                    <button id="postureBtn" class="btn btn-accent" disabled>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        Analyze Posture
-                    </button>
+                    <div class="button-row" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <button id="continuousAnalysisBtn" class="btn btn-secondary" disabled title="Live posture analysis turns on automatically while you speak" style="flex: 1;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="12" r="8"/><path d="M12 3v6m0 6v6"/></svg>
+                            <span id="liveStatusText">Live Posture Ready</span>
+                        </button>
+                    </div>
 
                     <div id="bodyMetrics" class="metrics-grid hidden">
                         <div class="metric-card">
@@ -221,29 +223,25 @@
                 <div class="section-label">YOUR ANSWER</div>
 
                 <div class="answer-controls">
-                    <div class="slider-row">
-                        <label for="recDuration">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            Recording: <span id="recDurLabel">7</span>s
-                        </label>
-                        <input type="range" id="recDuration" min="3" max="60" value="7" />
-                    </div>
-
                     <div class="btn-row">
                         <button id="speakBtn" class="btn btn-primary btn-speak" disabled>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                            Speak Answer
+                            <span id="speakBtnText">Speak Answer</span>
                         </button>
                         <label class="checkbox-label">
                             <input type="checkbox" id="showIdealCheck" />
-                            Show ideal answer
+                            Show ideal
                         </label>
+                    </div>
+                    <div id="recordingIndicator" class="recording-indicator hidden">
+                        <span class="recording-dot"></span>
+                        <span id="recordingTimer">0:00</span>
                     </div>
                 </div>
 
                 <div id="sttStatus" class="stt-status hidden"></div>
 
-                <textarea id="transcriptArea" class="textarea hidden" rows="4" placeholder="Your transcribed answer will appear here…" readonly></textarea>
+                <textarea id="transcriptArea" class="textarea hidden" rows="4" placeholder="Your transcript will appear live while you speak…" readonly></textarea>
 
                 <div id="idealAnswer" class="ideal-box hidden">
                     <div class="ideal-header">

@@ -20,14 +20,18 @@ import logging
 import sys
 import uuid
 import time
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
+import base64
+import json
+
 import numpy as np
 from PIL import Image
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Form, UploadFile, HTTPException
+from fastapi import Depends, FastAPI, File, Form, UploadFile, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -49,7 +53,7 @@ from web.mongo_db import get_db
 async def lifespan(app: FastAPI):
     try:
         db = get_db()
-        await db.users.create_index("email", unique=True)
+        await asyncio.wait_for(db.users.create_index("email", unique=True), timeout=3)
     except Exception as e:
         logging.getLogger("uvicorn.error").warning("MongoDB users index: %s", e)
     yield
@@ -108,6 +112,11 @@ async def serve_features():
 @app.get("/about")
 async def serve_about():
     return FileResponse(STATIC_DIR / "about.html")
+
+
+@app.get("/revision")
+async def serve_revision():
+    return FileResponse(STATIC_DIR / "revision.html")
 
 
 @app.get("/app")
@@ -310,6 +319,92 @@ async def analyze_posture(image: UploadFile = File(...)):
     # Remove non-serializable fields
     result = {k: v for k, v in raw.items() if k not in ("annotated_rgb",)}
     return result
+
+
+@app.websocket("/ws/analyze-posture")
+async def websocket_analyze_posture(websocket: WebSocket):
+    """
+    WebSocket endpoint for continuous frame-by-frame posture analysis.
+    
+    Client sends messages with base64-encoded JPEG frames.
+    Server responds with real-time metrics.
+    
+    Message format: {"frame": "base64_jpeg_data"}
+    Response format: {"metrics": {...}, "summary": "...", "timestamp": ...}
+    """
+    await websocket.accept()
+    frame_count = 0
+    error_count = 0
+    
+    try:
+        from AI_BACKEND.video_capture import analyze_camera_snapshot_rgb
+    except ImportError as e:
+        await websocket.send_json({"error": f"Video module import failed: {e}"})
+        await websocket.close()
+        return
+
+    try:
+        while True:
+            try:
+                # Receive frame data
+                data = await websocket.receive_text()
+                msg = json.loads(data)
+                frame_data = msg.get("frame", "")
+                
+                if not frame_data:
+                    await websocket.send_json({"error": "No frame data provided"})
+                    continue
+                
+                # Decode base64 JPEG
+                try:
+                    image_bytes = base64.b64decode(frame_data)
+                    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+                    rgb = np.asarray(img, dtype=np.uint8)
+                except Exception as e:
+                    error_count += 1
+                    await websocket.send_json({"error": f"Could not decode frame: {e}"})
+                    if error_count > 10:
+                        await websocket.close()
+                        break
+                    continue
+                
+                # Analyze pose
+                try:
+                    raw = analyze_camera_snapshot_rgb(rgb, draw_skeleton=False)
+                    result = {k: v for k, v in raw.items() if k not in ("annotated_rgb",)}
+                    
+                    # Add frame counter
+                    frame_count += 1
+                    result["frame_count"] = frame_count
+                    result["timestamp"] = time.time()
+                    
+                    # Send metrics back
+                    await websocket.send_json(result)
+                    error_count = 0  # Reset error count on success
+                    
+                except Exception as e:
+                    error_count += 1
+                    await websocket.send_json({
+                        "error": f"Analysis failed: {str(e)}",
+                        "frame_count": frame_count,
+                        "timestamp": time.time()
+                    })
+                    if error_count > 10:
+                        await websocket.close()
+                        break
+                
+            except json.JSONDecodeError:
+                await websocket.send_json({"error": "Invalid JSON format"})
+                continue
+                
+    except WebSocketDisconnect:
+        logging.getLogger("uvicorn.error").info(f"WebSocket disconnected after {frame_count} frames")
+    except Exception as e:
+        logging.getLogger("uvicorn.error").error(f"WebSocket error: {e}")
+        try:
+            await websocket.close()
+        except:
+            pass
 
 
 @app.get("/api/report/{session_id}")
