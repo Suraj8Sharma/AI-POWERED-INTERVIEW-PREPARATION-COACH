@@ -3,14 +3,557 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Revision Hub — Quick reviews, flashcards, tips and reminders for technical interviews. Strengthen what you practiced with PrepLoom." />
-    <title>Revision — PrepLoom</title>
+    <meta name="description" content="Revision Hub — Flashcards, cheat sheets, and deep dives for technical interviews. Powered by PrepLoom." />
+    <title>Revision Hub — PrepLoom</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
+    <style>
+        /* ── Revision-specific styles ── */
+        .rev-hero {
+            position: relative;
+            text-align: center;
+            padding: 3.5rem 0 3rem;
+            overflow: hidden;
+        }
+        .rev-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(108,99,255,0.18), transparent);
+            pointer-events: none;
+        }
+        .rev-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--pl-teal);
+            margin-bottom: 1rem;
+            padding: 0.35rem 0.9rem;
+            border: 1px solid rgba(45,212,191,0.2);
+            border-radius: 999px;
+            background: rgba(45,212,191,0.07);
+        }
+        .rev-hero__eyebrow .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--pl-teal);
+            animation: blink 2s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .rev-hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 650;
+            letter-spacing: -0.03em;
+            background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.72) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+        .rev-hero p {
+            color: var(--pl-muted);
+            font-size: 1.02rem;
+            max-width: 50ch;
+            margin: 0 auto 2rem;
+        }
+        /* Nav tabs */
+        .rev-tabs {
+            display: flex;
+            gap: 0.35rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .rev-tab {
+            padding: 0.55rem 1.15rem;
+            border-radius: 999px;
+            border: 1px solid var(--pl-border);
+            background: transparent;
+            color: var(--pl-muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .rev-tab:hover { color: var(--pl-text); border-color: var(--pl-border-strong); background: rgba(255,255,255,0.04); }
+        .rev-tab.active { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff; box-shadow: 0 4px 18px rgba(108,99,255,0.35); }
+
+        /* Sections */
+        .rev-section { display: none; animation: revIn 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .rev-section.active { display: block; }
+        @keyframes revIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+        /* Section headings */
+        .rev-section-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.35rem;
+            color: var(--pl-text);
+        }
+        .rev-section-sub { color: var(--pl-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+        /* ── Big-O table ── */
+        .bigo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .bigo-card {
+            padding: 1.25rem 1rem;
+            border: 1px solid var(--pl-border);
+            border-radius: 14px;
+            background: rgba(14,16,24,0.6);
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            cursor: default;
+        }
+        .bigo-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .bigo-card.o1  { border-color: rgba(34,197,94,0.25); }
+        .bigo-card.olog{ border-color: rgba(45,212,191,0.25); }
+        .bigo-card.on  { border-color: rgba(108,99,255,0.25); }
+        .bigo-card.onlog{ border-color: rgba(167,139,250,0.25); }
+        .bigo-card.on2 { border-color: rgba(245,158,11,0.25); }
+        .bigo-card.oexp{ border-color: rgba(239,68,68,0.25); }
+        .bigo-notation {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+        .bigo-card.o1   .bigo-notation { color: #22c55e; }
+        .bigo-card.olog .bigo-notation { color: #2dd4bf; }
+        .bigo-card.on   .bigo-notation { color: #a78bfa; }
+        .bigo-card.onlog .bigo-notation { color: #818cf8; }
+        .bigo-card.on2  .bigo-notation { color: #f59e0b; }
+        .bigo-card.oexp .bigo-notation { color: #ef4444; }
+        .bigo-name { font-size: 0.78rem; font-weight: 600; color: var(--pl-text); margin-bottom: 0.2rem; }
+        .bigo-example { font-size: 0.72rem; color: var(--pl-muted); line-height: 1.45; }
+        .bigo-bar-wrap { height: 4px; background: rgba(255,255,255,0.06); border-radius: 99px; margin-top: 0.75rem; overflow: hidden; }
+        .bigo-bar { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+        .bigo-card.o1   .bigo-bar { background: #22c55e; width: 5%; }
+        .bigo-card.olog .bigo-bar { background: #2dd4bf; width: 18%; }
+        .bigo-card.on   .bigo-bar { background: #a78bfa; width: 38%; }
+        .bigo-card.onlog .bigo-bar { background: #818cf8; width: 55%; }
+        .bigo-card.on2  .bigo-bar { background: #f59e0b; width: 78%; }
+        .bigo-card.oexp .bigo-bar { background: #ef4444; width: 100%; }
+        .bigo-tip {
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
+            background: rgba(108,99,255,0.07);
+            border: 1px solid rgba(108,99,255,0.15);
+            font-size: 0.85rem;
+            color: var(--pl-muted);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .bigo-tip strong { color: var(--pl-accent-light, #a78bfa); }
+
+        /* ── DS Patterns ── */
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .pattern-card {
+            border: 1px solid var(--pl-border);
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(14,16,24,0.6);
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .pattern-card:hover { transform: translateY(-2px); border-color: rgba(108,99,255,0.2); }
+        .pattern-card__head {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--pl-border);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .pattern-card__icon {
+            width: 34px; height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .pattern-card__title { font-size: 0.88rem; font-weight: 700; }
+        .pattern-card__body { padding: 0.85rem 1rem; }
+        .pattern-pill-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.65rem; }
+        .pattern-pill {
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: var(--pl-muted);
+        }
+        .pattern-card__ex { font-size: 0.78rem; color: var(--pl-muted); line-height: 1.5; }
+        .pattern-card__ex strong { color: var(--pl-text); }
+
+        /* ── Flashcards ── */
+        .flashcard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .flashcard {
+            perspective: 1000px;
+            height: 180px;
+            cursor: pointer;
+        }
+        .flashcard__inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard__inner { transform: rotateY(180deg); }
+        .flashcard__front, .flashcard__back {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 14px;
+            border: 1px solid var(--pl-border);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .flashcard__front {
+            background: rgba(14,16,24,0.75);
+            transition: border-color 0.2s;
+        }
+        .flashcard:hover .flashcard__front { border-color: rgba(108,99,255,0.25); }
+        .flashcard__back {
+            background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(45,212,191,0.05));
+            border-color: rgba(108,99,255,0.2);
+            transform: rotateY(180deg);
+        }
+        .flashcard__tag {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--pl-teal);
+            margin-bottom: 0.5rem;
+        }
+        .flashcard__q { font-size: 0.95rem; font-weight: 600; color: var(--pl-text); line-height: 1.45; }
+        .flashcard__a { font-size: 0.82rem; color: var(--pl-muted); line-height: 1.55; }
+        .flashcard__hint {
+            margin-top: auto;
+            padding-top: 0.6rem;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.2);
+            letter-spacing: 0.04em;
+        }
+        .flashcard-counter {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--pl-muted);
+            margin-bottom: 1rem;
+        }
+        .fc-progress {
+            height: 3px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 99px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .fc-progress__bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pl-accent), #a78bfa);
+            border-radius: 99px;
+            transition: width 0.4s ease;
+        }
+        .fc-controls {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .fc-btn {
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            border: 1px solid var(--pl-border-strong);
+            background: transparent;
+            color: var(--pl-text);
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .fc-btn:hover { background: rgba(255,255,255,0.05); }
+        .fc-btn.primary { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff; }
+        .fc-btn.primary:hover { background: #7c74ff; }
+
+        /* ── STAR Behavioral ── */
+        .star-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .star-card {
+            padding: 1.35rem 1.1rem;
+            border-radius: 14px;
+            border: 1px solid var(--pl-border);
+            background: rgba(14,16,24,0.6);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .star-card:hover { transform: translateY(-2px); }
+        .star-letter {
+            font-size: 2.2rem;
+            font-weight: 800;
+            font-family: 'Fraunces', serif;
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+        .star-card:nth-child(1) .star-letter { color: #6C63FF; }
+        .star-card:nth-child(2) .star-letter { color: #2dd4bf; }
+        .star-card:nth-child(3) .star-letter { color: #f59e0b; }
+        .star-card:nth-child(4) .star-letter { color: #22c55e; }
+        .star-card:nth-child(1) { border-color: rgba(108,99,255,0.2); }
+        .star-card:nth-child(2) { border-color: rgba(45,212,191,0.2); }
+        .star-card:nth-child(3) { border-color: rgba(245,158,11,0.2); }
+        .star-card:nth-child(4) { border-color: rgba(34,197,94,0.2); }
+        .star-word { font-size: 0.85rem; font-weight: 700; color: var(--pl-text); margin-bottom: 0.3rem; }
+        .star-desc { font-size: 0.78rem; color: var(--pl-muted); line-height: 1.5; }
+        .star-scenarios {
+            display: grid;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+        }
+        .star-scenario {
+            padding: 1rem 1.1rem;
+            border-radius: 12px;
+            border: 1px solid var(--pl-border);
+            background: rgba(14,16,24,0.5);
+            transition: border-color 0.2s;
+        }
+        .star-scenario:hover { border-color: rgba(255,255,255,0.1); }
+        .star-scenario__label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--pl-accent-light, #a78bfa);
+            margin-bottom: 0.4rem;
+        }
+        .star-scenario__text { font-size: 0.85rem; color: var(--pl-muted); line-height: 1.55; font-style: italic; }
+
+        /* ── Communication ── */
+        .comm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .comm-card {
+            padding: 1.2rem;
+            border-radius: 14px;
+            border: 1px solid var(--pl-border);
+            background: rgba(14,16,24,0.6);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .comm-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.1); }
+        .comm-card__icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .comm-card__title { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--pl-text); }
+        .comm-card__body { font-size: 0.8rem; color: var(--pl-muted); line-height: 1.55; }
+        .comm-card__ex {
+            margin-top: 0.6rem;
+            padding: 0.55rem 0.7rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border-left: 2px solid rgba(108,99,255,0.4);
+            font-size: 0.76rem;
+            color: rgba(240,242,247,0.5);
+            font-style: italic;
+        }
+        .filler-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .filler-pill {
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #f87171;
+            text-decoration: line-through;
+            opacity: 0.85;
+        }
+
+        /* ── System Design ── */
+        .sysdesign-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .sysdesign-card {
+            padding: 1.2rem;
+            border-radius: 14px;
+            border: 1px solid var(--pl-border);
+            background: rgba(14,16,24,0.6);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .sysdesign-card:hover { transform: translateY(-2px); border-color: rgba(45,212,191,0.2); }
+        .sysdesign-card__head {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin-bottom: 0.65rem;
+        }
+        .sysdesign-card__dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .sysdesign-card__title { font-size: 0.88rem; font-weight: 700; color: var(--pl-text); }
+        .sysdesign-card__body { font-size: 0.8rem; color: var(--pl-muted); line-height: 1.6; }
+        .sysdesign-card__tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.65rem; }
+        .sysdesign-tag {
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(45,212,191,0.07);
+            border: 1px solid rgba(45,212,191,0.15);
+            color: var(--pl-teal);
+        }
+        .cap-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 0.82rem;
+        }
+        .cap-table th {
+            padding: 0.6rem 0.85rem;
+            text-align: left;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--pl-muted);
+            border-bottom: 1px solid var(--pl-border);
+        }
+        .cap-table td {
+            padding: 0.65rem 0.85rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--pl-muted);
+            vertical-align: top;
+        }
+        .cap-table td:first-child { color: var(--pl-text); font-weight: 600; }
+        .cap-table tr:hover td { background: rgba(255,255,255,0.015); }
+        .cap-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .cap-badge.good { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+        .cap-badge.tradeoff { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+        .cap-badge.bad { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+
+        /* ── Progress tracker ── */
+        .progress-bar-section { margin-bottom: 2rem; }
+        .progress-item { margin-bottom: 0.85rem; }
+        .progress-item__top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.35rem;
+        }
+        .progress-item__label { font-size: 0.82rem; font-weight: 600; color: var(--pl-text); }
+        .progress-item__val { font-size: 0.78rem; color: var(--pl-muted); font-family: 'JetBrains Mono', monospace; }
+        .progress-bar {
+            height: 6px;
+            border-radius: 99px;
+            background: rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        .progress-bar__fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* ── CTA ── */
+        .rev-cta {
+            text-align: center;
+            padding: 3rem 0 1rem;
+        }
+        .rev-cta h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.6rem;
+            font-weight: 650;
+            margin-bottom: 0.5rem;
+        }
+        .rev-cta p { color: var(--pl-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+        /* Animated entrance */
+        [data-animate] {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        [data-animate].visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Accent glow titles */
+        .accent-gradient-text {
+            background: linear-gradient(135deg, var(--pl-accent) 0%, #a78bfa 50%, var(--pl-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 600px) {
+            .flashcard { height: 200px; }
+            .bigo-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
 </head>
 <body class="site">
 <div class="site-wrap">
+    <!-- ── NAV ── -->
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
             <span class="site-nav__mark" aria-hidden="true">PL</span>
@@ -34,100 +577,547 @@
     </header>
 
     <main class="site-main">
-        <header class="page-hero">
-            <h1>Revision Hub</h1>
-            <p>Quick refreshers, mnemonics, flashcards, and pitfalls to watch. Review before your next practice session or real interview.</p>
-        </header>
-        <section class="content-block">
-            <h2>Project Overview (Professor Brief)</h2>
-            <p><strong>Project:</strong> PrepLoom - AI-Powered Interview Preparation Coach</p>
-            <p><strong>Goal:</strong> Simulate technical interviews and give feedback on technical depth, communication quality, and confidence/body language.</p>
-            <h3 style="margin-top: 1rem;">Complete End-to-End Flow</h3>
-            <ol style="margin-top: 0.6rem; padding-left: 1.2rem;">
-                <li><strong>Role selection + session start:</strong> Candidate selects target role, app creates interview session.</li>
-                <li><strong>Question generation:</strong> Role-specific questions are fetched from a RAG-powered question bank (ChromaDB + curated dataset).</li>
-                <li><strong>Question delivery:</strong> Question is shown in the UI and can be read aloud using browser TTS.</li>
-                <li><strong>Answer capture:</strong> Candidate can type or speak. Spoken answer is transcribed to text using Whisper STT.</li>
-                <li><strong>Body language analysis:</strong> Webcam snapshots/live frames are analyzed using MediaPipe pose signals (openness, posture, engagement, fidgeting).</li>
-                <li><strong>Evaluation:</strong> Technical answer is scored with LLM-based evaluator; communication is scored using NLP metrics (filler words, pace, fluency).</li>
-                <li><strong>Next question loop:</strong> Interview continues until completion with per-question scoring.</li>
-                <li><strong>Final report:</strong> Session-level aggregate report provides overall score, dimension-wise averages, and improvement tips.</li>
-            </ol>
-            <h3 style="margin-top: 1rem;">What We Have Already Built</h3>
-            <ul>
-                <li>FastAPI backend with interview APIs, auth endpoints, and report endpoint</li>
-                <li>RAG-based role-specific question retrieval</li>
-                <li>LLM technical evaluation + NLP communication analysis</li>
-                <li>Speech input (STT), optional question voice output (TTS)</li>
-                <li>Body language analysis from webcam frames</li>
-                <li>Web UI pages: Home, Features, Revision, About, and Practice room</li>
-            </ul>
-            <p><strong>Current Status:</strong> Working full-stack prototype with measurable multi-dimensional interview feedback.</p>
-        </section>
 
-        <section class="content-block">
-            <h2>🔗 Big-O Essentials</h2>
-            <ul>
-                <li><strong>O(1)</strong>: Hash table lookup, array index access</li>
-                <li><strong>O(log n)</strong>: Binary search</li>
-                <li><strong>O(n)</strong>: Single loop, two pointers</li>
-                <li><strong>O(n log n)</strong>: Quick/Merge sort, Heapsort</li>
-                <li><strong>O(n²)</strong>: Nested loops, Bubble/Insertion sort</li>
-            </ul>
-            <p><em>Tip:</em> Always state your intuition before optimizing—interviewers value reasoning.</p>
-        </section>
+        <!-- ── HERO ── -->
+        <div class="rev-hero">
+            <div class="rev-hero__eyebrow">
+                <span class="dot"></span>
+                Interview Revision Hub
+            </div>
+            <h1>Study smarter.<br><span class="accent-gradient-text">Ace the room.</span></h1>
+            <p>Everything you need to review before your next session — complexities, patterns, flashcards, behavioral frameworks, and system design.</p>
 
-        <section class="content-block">
-            <h2>🎯 Array/String Patterns</h2>
-            <ul>
-                <li><strong>Two Pointers:</strong> Valid Palindrome, Container With Most Water</li>
-                <li><strong>Sliding Window:</strong> Longest Substring Without Repeat, Max Sum Subarray</li>
-                <li><strong>Fast/Slow Pointers:</strong> Linked List Cycle, Happy Number</li>
-                <li><strong>Merge Intervals:</strong> Meeting Rooms, Insert Interval</li>
-            </ul>
-            <p><em>Pro tip:</em> Visualize with pen/paper—don't code blind.</p>
-        </section>
+            <!-- Tab navigation -->
+            <div class="rev-tabs" role="tablist" aria-label="Revision topics">
+                <button class="rev-tab active" data-tab="complexity" role="tab">⏱ Complexity</button>
+                <button class="rev-tab" data-tab="patterns" role="tab">🔗 DS Patterns</button>
+                <button class="rev-tab" data-tab="flashcards" role="tab">🃏 Flashcards</button>
+                <button class="rev-tab" data-tab="behavioral" role="tab">⭐ Behavioral</button>
+                <button class="rev-tab" data-tab="communication" role="tab">💬 Communication</button>
+                <button class="rev-tab" data-tab="sysdesign" role="tab">🏗 System Design</button>
+            </div>
+        </div>
 
-        <section class="content-block">
-            <h2>⭐ Behavioral STAR</h2>
-            <p><strong>Situation → Task → Action → Result</strong></p>
-            <ul>
-                <li><strong>Failure:</strong> "What went wrong? What was your specific role? Precise actions taken? Quantified impact?"</li>
-                <li><strong>Conflict:</strong> "I disagreed with X because Y. Proposed Z. Collaborated on solution."</li>
-                <li><strong>Leadership:</strong> "Led N-person team. Scoped problem. Delegated tasks. Delivered 20% ahead."</li>
-            </ul>
-            <p>Practice 2-3 stories per category. Time under 2min.</p>
-        </section>
+        <!-- ════════════════════════════════════════════════
+             TAB 1 — COMPLEXITY
+        ════════════════════════════════════════════════ -->
+        <section class="rev-section active" id="tab-complexity" role="tabpanel">
+            <h2 class="rev-section-title">Big-O Complexity Reference</h2>
+            <p class="rev-section-sub">Hover any card to see the relative cost. Master the shape of each curve before your interview.</p>
 
-        <section class="content-block">
-            <h2>💬 Communication Reminders</h2>
-            <ul>
-                <li><strong>Structure:</strong> "Three reasons: First... Second... Third."</li>
-                <li><strong>Think Aloud:</strong> "Approaching with hashmap because time-critical lookup."</li>
-                <li><strong>Edge Cases:</strong> Always mention: empty, single, max-size, all-duplicates.</li>
-                <li><strong>Close Strong:</strong> "Time complexity: O(n), space: O(1). Alternative: pointers for O(n) time."</li>
-            </ul>
-            <p>Avoid: filler words ("like", "um"), rambling without structure.</p>
-        </section>
-
-        <section class="content-block">
-            <h2>⚡ Quick Flashcards</h2>
-            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
-                <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: var(--pl-radius-sm); border: 1px solid var(--pl-border);">
-                    <strong>Q:</strong> SQL indexes? <details style="margin-top: 0.5rem;"><summary>Answer</summary>Speed up SELECT WHERE/GROUP BY. Slow INSERT/UPDATE. Composite for multi-col queries.</details>
+            <div class="bigo-grid" data-animate>
+                <div class="bigo-card o1">
+                    <div class="bigo-notation">O(1)</div>
+                    <div class="bigo-name">Constant</div>
+                    <div class="bigo-example">Hash lookup · Array index · Stack push/pop</div>
+                    <div class="bigo-bar-wrap"><div class="bigo-bar"></div></div>
                 </div>
-                <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: var(--pl-radius-sm); border: 1px solid var(--pl-border);">
-                    <strong>Q:</strong> RESTful API status codes? <details><summary>Answer</summary>200 OK, 201 Created, 400 Bad Req, 401 Unauthorized, 404 Not Found, 500 Internal.</details>
+                <div class="bigo-card olog">
+                    <div class="bigo-notation">O(log n)</div>
+                    <div class="bigo-name">Logarithmic</div>
+                    <div class="bigo-example">Binary search · BST lookup · Balanced tree ops</div>
+                    <div class="bigo-bar-wrap"><div class="bigo-bar"></div></div>
                 </div>
-                <div style="background: rgba(255,255,255,0.04); padding: 1rem; border-radius: var(--pl-radius-sm); border: 1px solid var(--pl-border);">
-                    <strong>Q:</strong> CAP Theorem? <details><summary>Answer</summary>Consistency, Availability, Partition tolerance. Pick 2.</details>
+                <div class="bigo-card on">
+                    <div class="bigo-notation">O(n)</div>
+                    <div class="bigo-name">Linear</div>
+                    <div class="bigo-example">Single pass · Two pointers · BFS/DFS</div>
+                    <div class="bigo-bar-wrap"><div class="bigo-bar"></div></div>
+                </div>
+                <div class="bigo-card onlog">
+                    <div class="bigo-notation">O(n log n)</div>
+                    <div class="bigo-name">Linearithmic</div>
+                    <div class="bigo-example">Merge sort · Heap sort · Quick sort (avg)</div>
+                    <div class="bigo-bar-wrap"><div class="bigo-bar"></div></div>
+                </div>
+                <div class="bigo-card on2">
+                    <div class="bigo-notation">O(n²)</div>
+                    <div class="bigo-name">Quadratic</div>
+                    <div class="bigo-example">Nested loops · Bubble sort · Selection sort</div>
+                    <div class="bigo-bar-wrap"><div class="bigo-bar"></div></div>
+                </div>
+                <div class="bigo-card oexp">
+                    <div class="bigo-notation">O(2ⁿ)</div>
+                    <div class="bigo-name">Exponential</div>
+                    <div class="bigo-example">Subset enumeration · Recursive Fibonacci</div>
+                    <div class="bigo-bar-wrap"><div class="bigo-bar"></div></div>
+                </div>
+            </div>
+
+            <div class="bigo-tip" data-animate>
+                <strong>Interview tip:</strong> Always lead with your intuition <em>before</em> optimising. Interviewers score your reasoning process as heavily as the final answer. Say: <em>"My initial approach is O(n²) — I see a hashmap optimisation that brings this to O(n) time and O(n) space."</em>
+            </div>
+
+            <!-- Common operations table -->
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Common operation complexities</h3>
+            <div style="overflow-x:auto;" data-animate>
+                <table class="cap-table">
+                    <thead>
+                        <tr>
+                            <th>Structure</th>
+                            <th>Access</th>
+                            <th>Search</th>
+                            <th>Insert</th>
+                            <th>Delete</th>
+                            <th>Space</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Array</td><td><span class="cap-badge good">O(1)</span></td><td><span class="cap-badge tradeoff">O(n)</span></td><td><span class="cap-badge tradeoff">O(n)</span></td><td><span class="cap-badge tradeoff">O(n)</span></td><td><span class="cap-badge good">O(n)</span></td></tr>
+                        <tr><td>Hash Table</td><td><span class="cap-badge tradeoff">O(1)‡</span></td><td><span class="cap-badge good">O(1)‡</span></td><td><span class="cap-badge good">O(1)‡</span></td><td><span class="cap-badge good">O(1)‡</span></td><td><span class="cap-badge tradeoff">O(n)</span></td></tr>
+                        <tr><td>Linked List</td><td><span class="cap-badge bad">O(n)</span></td><td><span class="cap-badge bad">O(n)</span></td><td><span class="cap-badge good">O(1)</span></td><td><span class="cap-badge good">O(1)</span></td><td><span class="cap-badge tradeoff">O(n)</span></td></tr>
+                        <tr><td>BST (bal.)</td><td><span class="cap-badge tradeoff">O(log n)</span></td><td><span class="cap-badge tradeoff">O(log n)</span></td><td><span class="cap-badge tradeoff">O(log n)</span></td><td><span class="cap-badge tradeoff">O(log n)</span></td><td><span class="cap-badge tradeoff">O(n)</span></td></tr>
+                        <tr><td>Heap (min/max)</td><td><span class="cap-badge good">O(1)</span></td><td><span class="cap-badge bad">O(n)</span></td><td><span class="cap-badge tradeoff">O(log n)</span></td><td><span class="cap-badge tradeoff">O(log n)</span></td><td><span class="cap-badge tradeoff">O(n)</span></td></tr>
+                        <tr><td>Graph (adj. list)</td><td>—</td><td><span class="cap-badge tradeoff">O(V+E)</span></td><td><span class="cap-badge good">O(1)</span></td><td><span class="cap-badge tradeoff">O(E)</span></td><td><span class="cap-badge tradeoff">O(V+E)</span></td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size:0.72rem;color:var(--pl-muted);margin-top:-0.5rem;margin-bottom:1.5rem;">‡ Average case. Worst case is O(n) due to hash collisions.</p>
+            </div>
+
+            <!-- Progress tracker -->
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Self-assessment — Complexity topics</h3>
+            <div class="progress-bar-section" data-animate>
+                <div class="progress-item">
+                    <div class="progress-item__top"><span class="progress-item__label">Big-O notation & analysis</span><span class="progress-item__val">Advanced</span></div>
+                    <div class="progress-bar"><div class="progress-bar__fill" style="width:85%;background:linear-gradient(90deg,#22c55e,#2dd4bf)"></div></div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-item__top"><span class="progress-item__label">Space complexity tradeoffs</span><span class="progress-item__val">Intermediate</span></div>
+                    <div class="progress-bar"><div class="progress-bar__fill" style="width:62%;background:linear-gradient(90deg,#6C63FF,#a78bfa)"></div></div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-item__top"><span class="progress-item__label">Amortised analysis</span><span class="progress-item__val">Beginner</span></div>
+                    <div class="progress-bar"><div class="progress-bar__fill" style="width:35%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
                 </div>
             </div>
         </section>
 
-        <div class="hero__actions" style="margin-top: 2rem;">
-            <a class="btn-hero-primary" href="/app">Practice What You Reviewed</a>
+        <!-- ════════════════════════════════════════════════
+             TAB 2 — DS PATTERNS
+        ════════════════════════════════════════════════ -->
+        <section class="rev-section" id="tab-patterns" role="tabpanel">
+            <h2 class="rev-section-title">Data Structure Patterns</h2>
+            <p class="rev-section-sub">Recognise the pattern within the first 60 seconds. Each card maps a technique to its canonical LeetCode examples.</p>
+
+            <div class="pattern-grid" data-animate>
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(108,99,255,0.12);color:#a78bfa;">👆</div>
+                        <div class="pattern-card__title">Two Pointers</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">O(n) time</span><span class="pattern-pill">O(1) space</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> sorted array, palindrome check, pair sums.<br><br>
+                            Valid Palindrome · 3Sum · Container With Most Water · Remove Duplicates
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(45,212,191,0.1);color:#2dd4bf;">🪟</div>
+                        <div class="pattern-card__title">Sliding Window</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">O(n) time</span><span class="pattern-pill">variable space</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> subarray/substring of max/min length or value.<br><br>
+                            Longest Substring No Repeat · Max Sum Subarray · Minimum Window Substring
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;">🐇</div>
+                        <div class="pattern-card__title">Fast & Slow Pointers</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">O(n) time</span><span class="pattern-pill">O(1) space</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> cycle detection, middle of linked list.<br><br>
+                            Linked List Cycle · Happy Number · Find Duplicate Number
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(34,197,94,0.1);color:#22c55e;">🗃</div>
+                        <div class="pattern-card__title">Merge Intervals</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">O(n log n)</span><span class="pattern-pill">O(n) space</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> overlapping ranges, scheduling problems.<br><br>
+                            Merge Intervals · Insert Interval · Meeting Rooms II
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(239,68,68,0.08);color:#f87171;">🌲</div>
+                        <div class="pattern-card__title">Tree BFS / DFS</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">O(n) time</span><span class="pattern-pill">O(h) space</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> level-order traversal, path sums, subtree problems.<br><br>
+                            Level Order · Max Depth · Path Sum · Symmetric Tree
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(167,139,250,0.1);color:#c4b5fd;">🗺</div>
+                        <div class="pattern-card__title">Graph BFS / DFS</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">O(V+E)</span><span class="pattern-pill">visited set</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> connected components, shortest path (BFS), island problems.<br><br>
+                            Number of Islands · Clone Graph · Course Schedule
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(45,212,191,0.08);color:#2dd4bf;">💾</div>
+                        <div class="pattern-card__title">Dynamic Programming</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">varies</span><span class="pattern-pill">memoisation / tabulation</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> overlapping subproblems + optimal substructure.<br><br>
+                            Climbing Stairs · Coin Change · Longest Common Subsequence
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pattern-card">
+                    <div class="pattern-card__head">
+                        <div class="pattern-card__icon" style="background:rgba(108,99,255,0.1);color:#818cf8;">🔙</div>
+                        <div class="pattern-card__title">Backtracking</div>
+                    </div>
+                    <div class="pattern-card__body">
+                        <div class="pattern-pill-row">
+                            <span class="pattern-pill">O(b^d)</span><span class="pattern-pill">O(d) space</span>
+                        </div>
+                        <div class="pattern-card__ex">
+                            <strong>Use when:</strong> permutations, subsets, constraint satisfaction.<br><br>
+                            Subsets · Permutations · N-Queens · Word Search
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bigo-tip" data-animate>
+                <strong>Pattern recognition tip:</strong> Before writing code, say aloud: <em>"This looks like a [pattern] problem because [reasoning]. I'll use [data structure] which gives me [complexity]."</em> Interviewers love this narration — it signals experience even if your code has minor bugs.
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════
+             TAB 3 — FLASHCARDS
+        ════════════════════════════════════════════════ -->
+        <section class="rev-section" id="tab-flashcards" role="tabpanel">
+            <h2 class="rev-section-title">Quick-fire Flashcards</h2>
+            <p class="rev-section-sub">Click a card to reveal the answer. Test yourself before every practice session.</p>
+
+            <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">12</span> &nbsp;·&nbsp; <span id="fc-flipped-count">0</span> revealed</div>
+            <div class="fc-progress"><div class="fc-progress__bar" id="fc-progress-bar" style="width:0%"></div></div>
+
+            <div class="flashcard-grid" id="flashcard-container" data-animate></div>
+
+            <div class="fc-controls">
+                <button class="fc-btn" id="fc-reset">↺ Reset all</button>
+                <button class="fc-btn primary" id="fc-reveal-all">Reveal all</button>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════
+             TAB 4 — BEHAVIORAL
+        ════════════════════════════════════════════════ -->
+        <section class="rev-section" id="tab-behavioral" role="tabpanel">
+            <h2 class="rev-section-title">Behavioral — STAR Framework</h2>
+            <p class="rev-section-sub">Every behavioral answer must hit all four stages. Practice 2–3 polished stories per category. Aim for under 2 minutes each.</p>
+
+            <div class="star-grid" data-animate>
+                <div class="star-card">
+                    <div class="star-letter">S</div>
+                    <div class="star-word">Situation</div>
+                    <div class="star-desc">Set the scene briefly. Give enough context that the interviewer understands the stakes without a long backstory. One or two sentences maximum.</div>
+                </div>
+                <div class="star-card">
+                    <div class="star-letter">T</div>
+                    <div class="star-word">Task</div>
+                    <div class="star-desc">Clarify your specific responsibility. The interviewer wants to know what <em>you</em> owned — not what your team did collectively.</div>
+                </div>
+                <div class="star-card">
+                    <div class="star-letter">A</div>
+                    <div class="star-word">Action</div>
+                    <div class="star-desc">Detail the 2–3 concrete steps you personally took. Use "I" not "we". This is where most of your time should go — 60% of the answer.</div>
+                </div>
+                <div class="star-card">
+                    <div class="star-letter">R</div>
+                    <div class="star-word">Result</div>
+                    <div class="star-desc">Always quantify. "Reduced load time by 40%", "shipped 2 weeks ahead", "reduced churn by 15%". If you can't quantify, qualify with an observable outcome.</div>
+                </div>
+            </div>
+
+            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Common scenarios &amp; story starters</h3>
+            <div class="star-scenarios" data-animate>
+                <div class="star-scenario">
+                    <div class="star-scenario__label">Conflict / disagreement</div>
+                    <div class="star-scenario__text">"I disagreed with [X] because [concrete technical or strategic reason]. I prepared [evidence/data] and proposed [alternative]. We landed on [compromise] and I committed fully to the agreed direction."</div>
+                </div>
+                <div class="star-scenario">
+                    <div class="star-scenario__label">Failure / setback</div>
+                    <div class="star-scenario__text">"We missed [metric/deadline] because [root cause I contributed to]. My specific mistake was [action]. I immediately [mitigation]. Going forward I implemented [system change] and since then [positive outcome]."</div>
+                </div>
+                <div class="star-scenario">
+                    <div class="star-scenario__label">Leadership without authority</div>
+                    <div class="star-scenario__text">"I saw that [problem] was falling between teams. Without formal authority I [action to align stakeholders]. I created [artifact — doc, meeting, prototype] and got buy-in by [approach]. The result was [outcome]."</div>
+                </div>
+                <div class="star-scenario">
+                    <div class="star-scenario__label">Handling ambiguity</div>
+                    <div class="star-scenario__text">"The requirements were unclear. Rather than waiting, I [first clarifying action]. I then scoped the problem to [constraint] and shipped an [MVP/timebox] to validate assumptions before committing to the full build."</div>
+                </div>
+                <div class="star-scenario">
+                    <div class="star-scenario__label">Technical deep-dive</div>
+                    <div class="star-scenario__text">"The system was experiencing [symptom]. I hypothesised [cause]. I used [tooling/method] to confirm. The fix was [technical action]. After deployment [measurable improvement] — I also added [monitoring] so we'd catch this class of issue earlier."</div>
+                </div>
+            </div>
+
+            <div class="bigo-tip" data-animate>
+                <strong>Practice drill:</strong> Record yourself on your phone answering one question. Play it back and note every "um", "like", or filler. Then answer again — time yourself. Under 90 seconds is the sweet spot for most behavioral questions in an hour-long loop.
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════
+             TAB 5 — COMMUNICATION
+        ════════════════════════════════════════════════ -->
+        <section class="rev-section" id="tab-communication" role="tabpanel">
+            <h2 class="rev-section-title">Communication &amp; Presence</h2>
+            <p class="rev-section-sub">PrepLoom scores you on these dimensions. Internalise these habits before your session so they become automatic.</p>
+
+            <div class="comm-grid" data-animate>
+                <div class="comm-card">
+                    <div class="comm-card__icon" style="background:rgba(108,99,255,0.1);">🧱</div>
+                    <div class="comm-card__title">Structure your answer</div>
+                    <div class="comm-card__body">Lead with your conclusion, then support it. Don't build up to the answer — start with it.</div>
+                    <div class="comm-card__ex">"There are three reasons. First… Second… Third… Therefore [conclusion]."</div>
+                </div>
+                <div class="comm-card">
+                    <div class="comm-card__icon" style="background:rgba(45,212,191,0.08);">🔊</div>
+                    <div class="comm-card__title">Think aloud</div>
+                    <div class="comm-card__body">Narrate your reasoning in real time. Silence looks like confusion; thinking aloud looks like experience.</div>
+                    <div class="comm-card__ex">"I'm considering a greedy approach because the subproblems seem independent…"</div>
+                </div>
+                <div class="comm-card">
+                    <div class="comm-card__icon" style="background:rgba(245,158,11,0.08);">⚡</div>
+                    <div class="comm-card__title">Address edge cases</div>
+                    <div class="comm-card__body">Before submitting code or finalising an answer, always run through: empty, single element, duplicates, max size, negative inputs.</div>
+                    <div class="comm-card__ex">"Edge cases to consider: empty array, single element, all duplicates, negative values…"</div>
+                </div>
+                <div class="comm-card">
+                    <div class="comm-card__icon" style="background:rgba(34,197,94,0.08);">🏁</div>
+                    <div class="comm-card__title">Close strong</div>
+                    <div class="comm-card__body">When you finish, summarise your solution's tradeoffs. This signals senior-level thinking.</div>
+                    <div class="comm-card__ex">"Time: O(n log n), Space: O(1). A hash approach would trade space for O(n) time."</div>
+                </div>
+                <div class="comm-card">
+                    <div class="comm-card__icon" style="background:rgba(167,139,250,0.1);">🎯</div>
+                    <div class="comm-card__title">Clarify before coding</div>
+                    <div class="comm-card__body">Always ask 1–2 clarifying questions. It buys thinking time and signals you don't rush into solutions without understanding requirements.</div>
+                    <div class="comm-card__ex">"Can the array be sorted? Are there duplicate values? What's the expected input size?"</div>
+                </div>
+                <div class="comm-card">
+                    <div class="comm-card__icon" style="background:rgba(239,68,68,0.07);">📹</div>
+                    <div class="comm-card__title">Presence &amp; posture</div>
+                    <div class="comm-card__body">Shoulders back, chin level, eye contact with the camera (not the screen). Open body language signals confidence even when you feel uncertain.</div>
+                    <div class="comm-card__ex">Look into the webcam lens when finishing a statement — it reads as direct eye contact.</div>
+                </div>
+            </div>
+
+            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.75rem;color:var(--pl-text);" data-animate>Filler words to eliminate</h3>
+            <div class="filler-grid" data-animate>
+                <span class="filler-pill">um</span>
+                <span class="filler-pill">uh</span>
+                <span class="filler-pill">like</span>
+                <span class="filler-pill">you know</span>
+                <span class="filler-pill">so basically</span>
+                <span class="filler-pill">kind of</span>
+                <span class="filler-pill">sort of</span>
+                <span class="filler-pill">right?</span>
+                <span class="filler-pill">literally</span>
+                <span class="filler-pill">just</span>
+                <span class="filler-pill">actually</span>
+            </div>
+            <p style="font-size:0.8rem;color:var(--pl-muted);margin-bottom:2rem;" data-animate>Replace every filler with a half-second of deliberate silence. Silence sounds confident on a call — fillers sound nervous.</p>
+
+            <div class="bigo-tip" data-animate>
+                <strong>WPM target:</strong> Aim for <strong style="color:var(--pl-text)">140–170 words per minute</strong> for technical explanations. Slower is fine for complex reasoning. PrepLoom's communication score flags if you're going over 200 WPM (hard to follow) or under 100 WPM (sounds uncertain).
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════
+             TAB 6 — SYSTEM DESIGN
+        ════════════════════════════════════════════════ -->
+        <section class="rev-section" id="tab-sysdesign" role="tabpanel">
+            <h2 class="rev-section-title">System Design Foundations</h2>
+            <p class="rev-section-sub">For senior and mid-level roles. Know the tradeoffs cold — interviewers want to see you reason about scale, not just name buzzwords.</p>
+
+            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Core concepts</h3>
+            <div class="sysdesign-grid" data-animate>
+                <div class="sysdesign-card">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#6C63FF;"></div>
+                        <div class="sysdesign-card__title">CAP Theorem</div>
+                    </div>
+                    <div class="sysdesign-card__body">A distributed system can only guarantee two of three: Consistency, Availability, and Partition Tolerance. Since partitions are unavoidable, you choose CP or AP depending on your use case.</div>
+                    <div class="sysdesign-card__tags">
+                        <span class="sysdesign-tag">Consistency</span>
+                        <span class="sysdesign-tag">Availability</span>
+                        <span class="sysdesign-tag">Partition</span>
+                    </div>
+                </div>
+                <div class="sysdesign-card">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#2dd4bf;"></div>
+                        <div class="sysdesign-card__title">Load Balancing</div>
+                    </div>
+                    <div class="sysdesign-card__body">Distributes incoming requests across multiple servers. Round-robin, least connections, and IP-hash are common strategies. L4 (transport) vs L7 (application) balancing have different tradeoffs.</div>
+                    <div class="sysdesign-card__tags">
+                        <span class="sysdesign-tag">Horizontal scale</span>
+                        <span class="sysdesign-tag">L4/L7</span>
+                        <span class="sysdesign-tag">Health checks</span>
+                    </div>
+                </div>
+                <div class="sysdesign-card">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#f59e0b;"></div>
+                        <div class="sysdesign-card__title">Caching</div>
+                    </div>
+                    <div class="sysdesign-card__body">Redis / Memcached for in-memory caching. Know cache-aside, write-through, and write-behind patterns. Expiry policies: TTL, LRU, LFU. Cache stampede and cache invalidation are classic hard problems.</div>
+                    <div class="sysdesign-card__tags">
+                        <span class="sysdesign-tag">Redis</span>
+                        <span class="sysdesign-tag">LRU / LFU</span>
+                        <span class="sysdesign-tag">Cache-aside</span>
+                    </div>
+                </div>
+                <div class="sysdesign-card">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#22c55e;"></div>
+                        <div class="sysdesign-card__title">Database sharding</div>
+                    </div>
+                    <div class="sysdesign-card__body">Horizontal partitioning of data across multiple nodes. Key sharding strategies: range-based, hash-based, directory-based. Hot shards and cross-shard queries are common failure modes to discuss.</div>
+                    <div class="sysdesign-card__tags">
+                        <span class="sysdesign-tag">Horizontal partition</span>
+                        <span class="sysdesign-tag">Hot shard</span>
+                        <span class="sysdesign-tag">Rebalancing</span>
+                    </div>
+                </div>
+                <div class="sysdesign-card">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#a78bfa;"></div>
+                        <div class="sysdesign-card__title">Message Queues</div>
+                    </div>
+                    <div class="sysdesign-card__body">Kafka, RabbitMQ, SQS for async decoupling. At-least-once vs exactly-once delivery. Consumer groups, offset management, dead-letter queues. Use for fan-out, rate limiting, event sourcing.</div>
+                    <div class="sysdesign-card__tags">
+                        <span class="sysdesign-tag">Kafka</span>
+                        <span class="sysdesign-tag">At-least-once</span>
+                        <span class="sysdesign-tag">DLQ</span>
+                    </div>
+                </div>
+                <div class="sysdesign-card">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#f87171;"></div>
+                        <div class="sysdesign-card__title">CDN &amp; Edge</div>
+                    </div>
+                    <div class="sysdesign-card__body">CloudFront, Fastly, Cloudflare for static assets and edge compute. Cache-control headers, origin shield, invalidation strategies. Use for latency reduction and DDoS absorption.</div>
+                    <div class="sysdesign-card__tags">
+                        <span class="sysdesign-tag">PoPs</span>
+                        <span class="sysdesign-tag">Cache-control</span>
+                        <span class="sysdesign-tag">Edge compute</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>CAP theorem database guide</h3>
+            <div style="overflow-x:auto;" data-animate>
+                <table class="cap-table">
+                    <thead>
+                        <tr><th>Database</th><th>Type</th><th>Guarantees</th><th>Use for</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>PostgreSQL / MySQL</td><td>RDBMS</td><td><span class="cap-badge good">CP</span> ACID</td><td>Financial transactions, strong consistency</td></tr>
+                        <tr><td>DynamoDB</td><td>NoSQL KV</td><td><span class="cap-badge tradeoff">AP</span> eventual</td><td>High scale, flexible schema, low-latency reads</td></tr>
+                        <tr><td>Cassandra</td><td>Wide-column</td><td><span class="cap-badge tradeoff">AP</span> tunable</td><td>Write-heavy, time-series, globally distributed</td></tr>
+                        <tr><td>MongoDB</td><td>Document</td><td><span class="cap-badge tradeoff">CP</span> configurable</td><td>Semi-structured data, rapid iteration</td></tr>
+                        <tr><td>Redis</td><td>In-memory</td><td><span class="cap-badge good">CP</span></td><td>Cache, session, pub/sub, leaderboards</td></tr>
+                        <tr><td>Elasticsearch</td><td>Search</td><td><span class="cap-badge tradeoff">AP</span></td><td>Full-text search, log analytics</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>System design interview checklist</h3>
+            <div class="sysdesign-grid" data-animate style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+                <div class="sysdesign-card" style="border-color:rgba(108,99,255,0.15);">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#6C63FF;"></div>
+                        <div class="sysdesign-card__title">1. Clarify requirements</div>
+                    </div>
+                    <div class="sysdesign-card__body" style="font-size:0.78rem;">Ask about scale (users/day, data volume), read/write ratio, latency SLA, consistency requirements, and geographic distribution before drawing anything.</div>
+                </div>
+                <div class="sysdesign-card" style="border-color:rgba(45,212,191,0.15);">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#2dd4bf;"></div>
+                        <div class="sysdesign-card__title">2. Capacity estimation</div>
+                    </div>
+                    <div class="sysdesign-card__body" style="font-size:0.78rem;">Back-of-envelope: QPS, storage per day/year, bandwidth. Use round numbers. Showing you can estimate order of magnitude matters more than precision.</div>
+                </div>
+                <div class="sysdesign-card" style="border-color:rgba(245,158,11,0.15);">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#f59e0b;"></div>
+                        <div class="sysdesign-card__title">3. High-level design</div>
+                    </div>
+                    <div class="sysdesign-card__body" style="font-size:0.78rem;">Sketch the main components: clients, LB, app servers, cache, DB, CDN. Label data flows. Don't go deep on any single component yet.</div>
+                </div>
+                <div class="sysdesign-card" style="border-color:rgba(34,197,94,0.15);">
+                    <div class="sysdesign-card__head">
+                        <div class="sysdesign-card__dot" style="background:#22c55e;"></div>
+                        <div class="sysdesign-card__title">4. Deep dive</div>
+                    </div>
+                    <div class="sysdesign-card__body" style="font-size:0.78rem;">Let the interviewer guide which component to zoom in on. Discuss schema design, indexing strategy, replication, failover, and bottlenecks.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── CTA ── -->
+        <div class="rev-cta" data-animate>
+            <h2>Now put it into practice.</h2>
+            <p>Open the practice room and run a timed mock with an AI interviewer using what you've just reviewed.</p>
+            <a class="btn-hero-primary" href="/app">Start a practice session →</a>
         </div>
+
     </main>
 
     <footer class="site-footer">
@@ -143,6 +1133,7 @@
     </footer>
 </div>
 
+<!-- ── Modals ── -->
 <div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
     <div class="modal">
         <div class="modal__header">
@@ -165,14 +1156,13 @@
         <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
     </div>
 </div>
-
 <div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
     <div class="modal">
         <div class="modal__header">
             <h2 id="signup-title">Create account</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
         </div>
-        <p class="modal__note">Password must be at least 8 characters. You can use Practice without an account.</p>
+        <p class="modal__note">Password must be at least 8 characters.</p>
         <p id="signupError" class="modal-error" hidden></p>
         <form id="formSignup">
             <div class="modal__field">
@@ -195,6 +1185,120 @@
 
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
+<script>
+(function() {
+    /* ── Tab switching ── */
+    const tabs = document.querySelectorAll('.rev-tab');
+    const sections = document.querySelectorAll('.rev-section');
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var id = tab.getAttribute('data-tab');
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            sections.forEach(function(s) { s.classList.remove('active'); });
+            tab.classList.add('active');
+            var section = document.getElementById('tab-' + id);
+            if (section) {
+                section.classList.add('active');
+                animateSection(section);
+            }
+        });
+    });
+
+    /* ── Intersection observer for entrance animations ── */
+    function animateSection(root) {
+        var els = (root || document).querySelectorAll('[data-animate]');
+        var io = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var el = entry.target;
+                    var delay = el.getAttribute('data-delay') || 0;
+                    setTimeout(function() { el.classList.add('visible'); }, delay);
+                    io.unobserve(el);
+                }
+            });
+        }, { threshold: 0.08 });
+        els.forEach(function(el) { io.observe(el); });
+    }
+    animateSection(document);
+
+    /* ── Flashcards ── */
+    var flashcardsData = [
+        { tag: 'SQL', q: 'What do SQL indexes do and when should you avoid them?', a: 'Speed up SELECT / WHERE / ORDER BY via B-tree or hash structures. Avoid on columns with low cardinality or on tables with very high write volume — every write must update the index.' },
+        { tag: 'Networking', q: 'What is the difference between TCP and UDP?', a: 'TCP: connection-oriented, guaranteed ordered delivery, slower. UDP: connectionless, no delivery guarantee, lower latency. Use UDP for video/gaming where a dropped packet is better than retransmitting stale data.' },
+        { tag: 'REST', q: 'What do HTTP status codes 200, 201, 400, 401, 403, 404, 429, 500 mean?', a: '200 OK · 201 Created · 400 Bad Request · 401 Unauthenticated · 403 Forbidden · 404 Not Found · 429 Rate Limited · 500 Server Error.' },
+        { tag: 'System Design', q: 'Explain CAP theorem in one sentence.', a: 'A distributed system can guarantee at most two of Consistency, Availability, and Partition Tolerance — and since partitions happen in the real world, you choose CP or AP.' },
+        { tag: 'OOP', q: 'What are the four pillars of OOP?', a: 'Encapsulation (bundling data + behaviour), Abstraction (hiding implementation), Inheritance (reusing base class behaviour), Polymorphism (same interface, different implementations).' },
+        { tag: 'OS', q: 'Process vs thread — what is the key difference?', a: 'A process has its own memory space (expensive to create/switch). Threads share a process\'s memory (cheap, but require synchronisation). Prefer threads for parallelism within a single app.' },
+        { tag: 'ML', q: 'What is the bias–variance tradeoff?', a: 'High bias → underfitting (model too simple). High variance → overfitting (model memorises training data). The goal is to minimise both. Regularisation, cross-validation, and more data help.' },
+        { tag: 'Database', q: 'What is database normalisation and when do you denormalise?', a: 'Normalisation removes redundancy by splitting data into related tables (1NF→3NF). Denormalise when read performance is critical and joins are too costly — commonly in OLAP / data warehouses.' },
+        { tag: 'Concurrency', q: 'What is a deadlock and how do you prevent it?', a: 'Deadlock: two or more processes wait for each other to release locks. Prevent with: lock ordering (always acquire in same sequence), timeouts, or lock-free data structures.' },
+        { tag: 'Web', q: 'What happens between typing a URL and the page loading?', a: 'DNS resolution → TCP handshake → TLS handshake (HTTPS) → HTTP request → server processes → response sent → browser parses HTML/CSS/JS → renders page. Each step is a potential interview deep-dive.' },
+        { tag: 'Algorithms', q: 'When do you use BFS vs DFS?', a: 'BFS: shortest path in unweighted graphs, level-order traversal, "closest" problems. DFS: topological sort, cycle detection, path exploration, backtracking. BFS uses a queue; DFS uses a stack (or recursion).' },
+        { tag: 'Python', q: 'What is the GIL and how does it affect Python concurrency?', a: 'The Global Interpreter Lock allows only one thread to execute Python bytecode at a time. Use multiprocessing to bypass it for CPU-bound work; async/await for I/O-bound concurrency.' },
+    ];
+
+    var flippedCards = {};
+    var container = document.getElementById('flashcard-container');
+    var currentEl = document.getElementById('fc-current');
+    var totalEl = document.getElementById('fc-total');
+    var flippedCountEl = document.getElementById('fc-flipped-count');
+    var progressBar = document.getElementById('fc-progress-bar');
+
+    if (totalEl) totalEl.textContent = flashcardsData.length;
+
+    function updateFCStats() {
+        var count = Object.keys(flippedCards).filter(function(k) { return flippedCards[k]; }).length;
+        if (flippedCountEl) flippedCountEl.textContent = count;
+        if (progressBar) progressBar.style.width = Math.round((count / flashcardsData.length) * 100) + '%';
+    }
+
+    function buildCards() {
+        if (!container) return;
+        container.innerHTML = '';
+        flippedCards = {};
+        flashcardsData.forEach(function(card, i) {
+            var el = document.createElement('div');
+            el.className = 'flashcard';
+            el.innerHTML = '<div class="flashcard__inner">'
+                + '<div class="flashcard__front">'
+                + '<div class="flashcard__tag">' + card.tag + '</div>'
+                + '<div class="flashcard__q">' + card.q + '</div>'
+                + '<div class="flashcard__hint">click to reveal →</div>'
+                + '</div>'
+                + '<div class="flashcard__back">'
+                + '<div class="flashcard__tag">' + card.tag + ' — answer</div>'
+                + '<div class="flashcard__a">' + card.a + '</div>'
+                + '</div>'
+                + '</div>';
+            el.addEventListener('click', function() {
+                el.classList.toggle('flipped');
+                flippedCards[i] = el.classList.contains('flipped');
+                updateFCStats();
+            });
+            container.appendChild(el);
+        });
+        if (currentEl) currentEl.textContent = '1';
+        updateFCStats();
+    }
+
+    buildCards();
+
+    var resetBtn = document.getElementById('fc-reset');
+    var revealBtn = document.getElementById('fc-reveal-all');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', buildCards);
+    }
+    if (revealBtn) {
+        revealBtn.addEventListener('click', function() {
+            if (!container) return;
+            container.querySelectorAll('.flashcard').forEach(function(card, i) {
+                card.classList.add('flipped');
+                flippedCards[i] = true;
+            });
+            updateFCStats();
+        });
+    }
+})();
+</script>
 </body>
 </html>
-
