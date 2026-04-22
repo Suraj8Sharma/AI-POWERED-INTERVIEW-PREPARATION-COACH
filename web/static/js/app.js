@@ -89,6 +89,11 @@ let recordingTimerInterval = null;
 let liveRecognition = null;
 let recognitionRestartRequested = false;
 let liveTranscriptFinal = "";
+let activeTranscriptionRequestId = 0;
+let transcriptionSocket = null;
+let transcriptionSequence = 0;
+let lastStreamingTranscript = "";
+let lastStreamedSequence = -1;
 
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -175,6 +180,101 @@ function updateTranscript(text) {
     }
 }
 
+async function blobToBase64(blob) {
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+        reader.onerror = () => reject(reader.error || new Error("Could not read audio blob"));
+        reader.readAsDataURL(blob);
+    });
+}
+
+function startTranscriptionStream() {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws/transcribe-audio`;
+
+    transcriptionSequence = 0;
+    lastStreamingTranscript = "";
+    lastStreamedSequence = -1;
+
+    try {
+        transcriptionSocket = new WebSocket(wsUrl);
+    } catch (e) {
+        transcriptionSocket = null;
+        return false;
+    }
+
+    transcriptionSocket.onopen = () => {
+        if (!audioChunks.length) return;
+        const initialBlob = new Blob(audioChunks, { type: "audio/webm" });
+        sendStreamingAudio(initialBlob, false).catch((err) => {
+            console.warn("Initial streaming audio send skipped:", err);
+        });
+    };
+
+    transcriptionSocket.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.error) {
+                console.warn("Streaming transcription error:", data.error);
+                return;
+            }
+
+            const seq = Number(data.seq ?? -1);
+            const transcript = (data.transcript || "").trim();
+            if (seq < lastStreamedSequence || !transcript) return;
+
+            lastStreamedSequence = seq;
+            lastStreamingTranscript = transcript;
+            lastAnswer = transcript;
+            updateTranscript(transcript);
+            updateSubmitState();
+
+            if (isRecording) {
+                sttStatus.className = "stt-status recording";
+                sttStatus.textContent = "Recording now. Transcript is updating live.";
+                show(sttStatus);
+            } else {
+                sttStatus.className = "stt-status done";
+                sttStatus.textContent = data.final ? "Live transcript complete." : "Transcript refining…";
+                show(sttStatus);
+            }
+        } catch (e) {
+            console.error("Failed to parse transcription stream message:", e);
+        }
+    };
+
+    transcriptionSocket.onclose = () => {
+        transcriptionSocket = null;
+    };
+
+    transcriptionSocket.onerror = () => {
+        console.warn("Audio transcription WebSocket connection error");
+    };
+
+    return true;
+}
+
+function stopTranscriptionStream() {
+    if (transcriptionSocket) {
+        transcriptionSocket.close();
+        transcriptionSocket = null;
+    }
+}
+
+async function sendStreamingAudio(blob, final = false) {
+    if (!transcriptionSocket || transcriptionSocket.readyState !== WebSocket.OPEN) return;
+
+    const audio = await blobToBase64(blob);
+    transcriptionSequence += 1;
+    transcriptionSocket.send(JSON.stringify({
+        audio,
+        mime_type: blob.type || "audio/webm",
+        seq: transcriptionSequence,
+        final,
+    }));
+}
+
 function setLiveAnalysisState(active) {
     continuousAnalysisBtn.classList.toggle("active", active);
     continuousAnalysisBtn.disabled = !sessionId;
@@ -204,12 +304,20 @@ function speak(text) {
     if (!ttsCheckbox.checked || !text) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.95;
+
+    // Push browser TTS to full output volume and a slightly slower cadence
+    // so interview questions sound clearer and stronger.
+    utter.volume = 1.0;
+    utter.rate = 0.92;
     utter.pitch = 1.0;
-    // Prefer a female voice
+
     const voices = window.speechSynthesis.getVoices();
-    const female = voices.find(v => /zira|female|samantha|karen/i.test(v.name));
-    if (female) utter.voice = female;
+    const preferredVoice =
+        voices.find(v => /^en/i.test(v.lang || "") && v.localService) ||
+        voices.find(v => /^en/i.test(v.lang || "")) ||
+        voices.find(v => v.default) ||
+        null;
+    if (preferredVoice) utter.voice = preferredVoice;
     window.speechSynthesis.speak(utter);
 }
 
@@ -235,6 +343,7 @@ async function startWebcam() {
 }
 
 function stopWebcam() {
+    stopTranscriptionStream();
     stopLiveTranscript();
     stopRecordingTimer();
     setRecordingUI(false);
@@ -337,9 +446,13 @@ function renderQuestion(q) {
 }
 
 function resetInterviewUI() {
+    activeTranscriptionRequestId++;
     lastAnswer = "";
     answerDuration = 0;
     bodyLanguageData = null;
+    transcriptionSequence = 0;
+    lastStreamingTranscript = "";
+    lastStreamedSequence = -1;
     liveTranscriptFinal = "";
     updateTranscript("");
     hide(transcriptArea);
@@ -352,6 +465,7 @@ function resetInterviewUI() {
     hide(blSummary);
     showIdealCheck.checked = false;
     typeInput.value = "";
+    stopTranscriptionStream();
     stopLiveTranscript();
     stopRecordingTimer();
     setRecordingUI(false);
@@ -480,8 +594,9 @@ async function startAnswerRecording() {
     sttStatus.textContent = "Recording now. Speak naturally and click again to stop.";
     show(sttStatus);
 
+    const streamStarted = startTranscriptionStream();
     const liveTranscriptStarted = startLiveTranscript();
-    if (!liveTranscriptStarted) {
+    if (!streamStarted && !liveTranscriptStarted) {
         sttStatus.textContent = "Recording now. Live transcript preview is unavailable, but final transcription will still appear after you stop.";
     }
 
@@ -493,13 +608,21 @@ async function startAnswerRecording() {
     }
 
     mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) audioChunks.push(event.data);
+        if (event.data.size > 0) {
+            audioChunks.push(event.data);
+            if (transcriptionSocket && transcriptionSocket.readyState === WebSocket.OPEN) {
+                const cumulativeBlob = new Blob(audioChunks, { type: event.data.type || "audio/webm" });
+                sendStreamingAudio(cumulativeBlob, false).catch((err) => {
+                    console.warn("Streaming audio send skipped:", err);
+                });
+            }
+        }
     };
 
     recordingStartTime = Date.now();
     setRecordingUI(true, 0);
     startRecordingTimer();
-    mediaRecorder.start();
+    mediaRecorder.start(1000);
     updateSubmitState();
 }
 
@@ -518,40 +641,77 @@ async function stopAnswerRecording() {
     answerDuration = Math.max(1, (Date.now() - recordingStartTime) / 1000);
     recordingStartTime = 0;
     setRecordingUI(false);
+    mediaRecorder = null;
 
-    sttStatus.className = "stt-status transcribing";
-    sttStatus.textContent = "Transcribing with Whisper…";
-    show(sttStatus);
+    const requestId = ++activeTranscriptionRequestId;
+    const hadLiveTranscript = !!(lastStreamingTranscript.trim() || lastAnswer.trim());
 
-    try {
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        const wavBlob = await convertToWav(audioBlob);
-
-        const formData = new FormData();
-        formData.append("audio", wavBlob, "recording.wav");
-
-        const data = await api("/api/transcribe", { method: "POST", body: formData });
-        const transcript = (data.transcript || "").trim();
-
-        if (transcript) {
-            lastAnswer = transcript;
-            updateTranscript(transcript);
-            sttStatus.className = "stt-status done";
-            sttStatus.textContent = "Transcription complete.";
-        } else if (lastAnswer.trim()) {
-            sttStatus.className = "stt-status done";
-            sttStatus.textContent = "Live transcript captured. Final transcription returned empty.";
-        } else {
-            sttStatus.className = "stt-status recording";
-            sttStatus.textContent = "No speech detected. Try again and speak a bit louder.";
-        }
-    } catch (e) {
-        sttStatus.className = "stt-status recording";
-        sttStatus.textContent = "Transcription failed: " + e.message;
-    } finally {
-        mediaRecorder = null;
-        updateSubmitState();
+    if (hadLiveTranscript) {
+        sttStatus.className = "stt-status done";
+        sttStatus.textContent = "Live transcript ready. Refining in background…";
+    } else {
+        sttStatus.className = "stt-status transcribing";
+        sttStatus.textContent = "Transcribing with Whisper…";
     }
+    show(sttStatus);
+    updateSubmitState();
+
+    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+    const finalStreamingBlob = audioBlob;
+    audioChunks = [];
+
+    if (transcriptionSocket && transcriptionSocket.readyState === WebSocket.OPEN) {
+        sendStreamingAudio(finalStreamingBlob, true).catch((err) => {
+            console.warn("Final streaming audio send skipped:", err);
+        });
+        setTimeout(() => {
+            stopTranscriptionStream();
+        }, 1000);
+    } else {
+        stopTranscriptionStream();
+    }
+
+    (async () => {
+        try {
+            const wavBlob = await convertToWav(audioBlob);
+
+            const formData = new FormData();
+            formData.append("audio", wavBlob, "recording.wav");
+
+            const data = await api("/api/transcribe", { method: "POST", body: formData });
+            if (requestId !== activeTranscriptionRequestId) return;
+
+            const transcript = (data.transcript || "").trim();
+
+            if (transcript) {
+                lastAnswer = transcript;
+                updateTranscript(transcript);
+                sttStatus.className = "stt-status done";
+                sttStatus.textContent = hadLiveTranscript
+                    ? "Transcript refined."
+                    : "Transcription complete.";
+            } else if (lastAnswer.trim()) {
+                sttStatus.className = "stt-status done";
+                sttStatus.textContent = "Using live transcript.";
+            } else {
+                sttStatus.className = "stt-status recording";
+                sttStatus.textContent = "No speech detected. Try again and speak a bit louder.";
+            }
+        } catch (e) {
+            if (requestId !== activeTranscriptionRequestId) return;
+            if (lastAnswer.trim()) {
+                sttStatus.className = "stt-status done";
+                sttStatus.textContent = "Using live transcript. Background refinement failed.";
+            } else {
+                sttStatus.className = "stt-status recording";
+                sttStatus.textContent = "Transcription failed: " + e.message;
+            }
+        } finally {
+            if (requestId === activeTranscriptionRequestId) {
+                updateSubmitState();
+            }
+        }
+    })();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

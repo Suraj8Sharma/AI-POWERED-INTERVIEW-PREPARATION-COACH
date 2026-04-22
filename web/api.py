@@ -291,13 +291,98 @@ async def transcribe(audio: UploadFile = File(...)):
     wav_path.write_bytes(content)
 
     try:
-        text = transcribe_audio(wav_path, model_name="base", lang="en")
+        text = transcribe_audio(wav_path, model_name="tiny", lang="en")
     except Exception as e:
         raise HTTPException(500, f"Transcription failed: {e}")
     finally:
         wav_path.unlink(missing_ok=True)
 
     return {"transcript": text}
+
+
+@app.websocket("/ws/transcribe-audio")
+async def websocket_transcribe_audio(websocket: WebSocket):
+    """
+    Receive rolling browser audio blobs and return updated transcript text.
+
+    Client message:
+      {"audio": "<base64>", "mime_type": "audio/webm", "seq": 1, "final": false}
+    Server message:
+      {"transcript": "...", "seq": 1, "final": false}
+    """
+    await websocket.accept()
+
+    try:
+        from AI_BACKEND.audio_capture import transcribe_audio_bytes
+    except ImportError as e:
+        await websocket.send_json({"error": f"Audio module import failed: {e}"})
+        await websocket.close()
+        return
+
+    last_seq = -1
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            msg = json.loads(data)
+
+            audio_b64 = msg.get("audio", "")
+            mime_type = msg.get("mime_type", "audio/webm")
+            seq = int(msg.get("seq", 0))
+            is_final = bool(msg.get("final", False))
+
+            if not audio_b64:
+                await websocket.send_json({"error": "No audio payload provided"})
+                continue
+
+            if seq < last_seq:
+                await websocket.send_json({"error": "Out-of-order audio chunk ignored", "seq": seq})
+                continue
+
+            try:
+                audio_bytes = base64.b64decode(audio_b64)
+            except Exception as e:
+                await websocket.send_json({"error": f"Could not decode audio chunk: {e}", "seq": seq})
+                continue
+
+            suffix = ".webm"
+            if "wav" in mime_type:
+                suffix = ".wav"
+            elif "ogg" in mime_type:
+                suffix = ".ogg"
+            elif "mp4" in mime_type or "mpeg" in mime_type:
+                suffix = ".mp4"
+
+            try:
+                text = transcribe_audio_bytes(
+                    audio_bytes,
+                    suffix=suffix,
+                    model_name="tiny",
+                    lang="en",
+                )
+                last_seq = seq
+                await websocket.send_json({
+                    "transcript": text,
+                    "seq": seq,
+                    "final": is_final,
+                    "timestamp": time.time(),
+                })
+            except Exception as e:
+                await websocket.send_json({
+                    "error": f"Streaming transcription failed: {e}",
+                    "seq": seq,
+                    "final": is_final,
+                    "timestamp": time.time(),
+                })
+
+    except WebSocketDisconnect:
+        logging.getLogger("uvicorn.error").info("Audio transcription WebSocket disconnected")
+    except Exception as e:
+        logging.getLogger("uvicorn.error").error(f"Audio transcription WebSocket error: {e}")
+        try:
+            await websocket.close()
+        except Exception:
+            pass
 
 
 @app.post("/api/analyze-posture")

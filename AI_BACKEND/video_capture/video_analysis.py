@@ -335,7 +335,7 @@ def analyze_camera_snapshot_rgb(
     analyzer = BodyLanguageAnalyzer(history=8)
     m = analyzer.analyze_pose_landmarks(lm_list)
 
-    annotated = (
+uv    annotated = (
         _draw_pose_on_rgb(rgb_u8, lm_list) if draw_skeleton else rgb_u8.copy()
     )
 

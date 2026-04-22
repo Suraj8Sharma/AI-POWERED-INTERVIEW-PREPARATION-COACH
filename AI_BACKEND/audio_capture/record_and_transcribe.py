@@ -272,6 +272,31 @@ def transcribe_audio(
     return text
 
 
+def transcribe_audio_bytes(
+    audio_bytes: bytes,
+    suffix: str = ".wav",
+    model_name: str = "tiny",
+    lang: str = "en",
+) -> str:
+    """
+    Transcribe raw uploaded audio bytes by writing them to a temporary file first.
+
+    This supports browser-recorded chunks such as ``audio/webm`` as well as WAV.
+    """
+    import tempfile
+    import uuid
+
+    suffix = suffix if suffix.startswith(".") else f".{suffix}"
+    tmp_dir = Path(tempfile.gettempdir())
+    audio_path = tmp_dir / f"stream_{uuid.uuid4().hex}{suffix}"
+    audio_path.write_bytes(audio_bytes)
+
+    try:
+        return transcribe_audio(audio_path, model_name=model_name, lang=lang)
+    finally:
+        audio_path.unlink(missing_ok=True)
+
+
 # ---------------------------------------------------------------------------
 # Transcript logging
 # ---------------------------------------------------------------------------
