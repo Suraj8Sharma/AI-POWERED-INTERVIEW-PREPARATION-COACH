@@ -292,8 +292,10 @@ startBtn.addEventListener("click", async () => {
         switchView(interviewView);
         setStatus(true);
         await startWebcam();
+        startContinuousAnalysis();  // Auto-enable live video analysis
         enableControls(true);
         speak(currentQuestion.question_text);
+
     } catch (e) {
         alert("Could not start interview: " + e.message);
     } finally {
@@ -886,10 +888,10 @@ function startFrameCapture() {
         
         try {
             const video = videoPreview;
-            snapshotCanvas.width = video.videoWidth || 640;
-            snapshotCanvas.height = video.videoHeight || 480;
+            snapshotCanvas.width = 640;
+            snapshotCanvas.height = 480;
             const ctx = snapshotCanvas.getContext("2d");
-            ctx.drawImage(video, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
+            ctx.drawImage(video, 0, 0);
             
             // Convert to base64 and send
             snapshotCanvas.toBlob((blob) => {
@@ -900,12 +902,13 @@ function startFrameCapture() {
                         continuousAnalysisSocket.send(JSON.stringify({ frame: base64 }));
                     }
                 };
-                reader.readAsDataURL(blob);
-            }, "image/jpeg", 0.8);
+                reader.readAsDataURL(blob, "image/jpeg", 0.7);  // Optimized quality for <50ms latency
+            });
         } catch (e) {
             console.error("Frame capture error:", e);
         }
-    }, 67); // ~15 FPS
+    }, 40); // 25 FPS for smooth 40ms updates
+
 }
 
 // Event listener for continuous analysis toggle

@@ -222,11 +222,24 @@ body {
 
 select.s-input {
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     cursor: pointer;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.7rem center;
     padding-right: 2.1rem;
+}
+
+select.s-input option {
+    background: #0e1018;
+    color: #f0f2f8;
+    padding: 0.5rem;
+}
+
+select.s-input option:hover {
+    background: #6c63ff;
+    color: #fff;
 }
 
 /* Toggle */
