@@ -6,11 +6,485 @@
     <meta name="description" content="PrepLoom — Weave confidence into every interview. AI-powered mock interviews with feedback on technical depth, communication, and presence." />
     <title>PrepLoom — AI interview preparation</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
+    <style>
+        /* ── Hero overhaul ────────────────────────────────────────── */
+        .home-hero {
+            position: relative;
+            text-align: center;
+            padding: 5rem 1rem 4.5rem;
+            overflow: hidden;
+        }
+
+        .home-hero__bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108,99,255,0.28), transparent),
+                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(45,212,191,0.1), transparent),
+                radial-gradient(ellipse 40% 30% at 10% 60%, rgba(108,99,255,0.08), transparent);
+        }
+
+        .home-hero__noise {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        .home-hero__inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-eyebrow-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1.1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(45,212,191,0.3);
+            background: rgba(45,212,191,0.07);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #2dd4bf;
+            margin-bottom: 2rem;
+            animation: fadeSlideDown 0.6s ease both;
+        }
+
+        .hero-eyebrow-pill::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #2dd4bf;
+            box-shadow: 0 0 8px #2dd4bf;
+            animation: pillDot 2s ease-in-out infinite;
+        }
+
+        @keyframes pillDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero-title-line1 {
+            display: block;
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: clamp(2.8rem, 7vw, 5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            color: #fff;
+            animation: fadeSlideDown 0.65s 0.1s ease both;
+        }
+
+        .hero-title-line2 {
+            display: block;
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: clamp(2.8rem, 7vw, 5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 50%, #2dd4bf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            animation: fadeSlideDown 0.65s 0.18s ease both;
+        }
+
+        .hero-lead {
+            font-size: 1.1rem;
+            color: rgba(244,244,247,0.62);
+            max-width: 50ch;
+            margin: 0 auto 2.5rem;
+            line-height: 1.65;
+            animation: fadeSlideDown 0.65s 0.26s ease both;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+            animation: fadeSlideDown 0.65s 0.34s ease both;
+        }
+
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.8rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            background: linear-gradient(135deg, #6c63ff 0%, #8b84ff 100%);
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(108,99,255,0.4);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 44px rgba(108,99,255,0.5);
+        }
+
+        .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.6rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.04);
+            color: #f4f4f7;
+            text-decoration: none;
+            transition: border-color 0.18s, background 0.18s, transform 0.18s;
+        }
+
+        .btn-hero-secondary:hover {
+            border-color: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-1px);
+        }
+
+        /* Trust chips */
+        .hero-trust {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-top: 2.5rem;
+            animation: fadeSlideDown 0.65s 0.42s ease both;
+        }
+
+        .trust-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            font-size: 0.8rem;
+            color: rgba(244,244,247,0.55);
+            backdrop-filter: blur(8px);
+            transition: border-color 0.2s, color 0.2s, transform 0.2s;
+        }
+
+        .trust-chip:hover {
+            border-color: rgba(108,99,255,0.3);
+            color: rgba(244,244,247,0.85);
+            transform: translateY(-1px);
+        }
+
+        .trust-chip__icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        /* ── Animated divider ─────────────────────────────────── */
+        .section-divider {
+            position: relative;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(108,99,255,0.4), rgba(45,212,191,0.3), transparent);
+            margin: 3rem 0;
+            overflow: visible;
+        }
+
+        /* ── Why section ──────────────────────────────────────── */
+        .why-section {
+            padding: 2rem 0 3rem;
+        }
+
+        .section-eyebrow {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #2dd4bf;
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .section-eyebrow.visible { opacity: 1; transform: translateY(0); }
+
+        .section-title-large {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 650;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s 0.08s ease, transform 0.5s 0.08s ease;
+        }
+
+        .section-title-large.visible { opacity: 1; transform: translateY(0); }
+
+        .section-subtitle {
+            color: rgba(244,244,247,0.55);
+            font-size: 1rem;
+            max-width: 50ch;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s 0.14s ease, transform 0.5s 0.14s ease;
+        }
+
+        .section-subtitle.visible { opacity: 1; transform: translateY(0); }
+
+        /* Feature cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 860px) {
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+
+        .feat-card {
+            position: relative;
+            padding: 1.75rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(14,16,24,0.7);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.55s ease, transform 0.55s ease, border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .feat-card.visible { opacity: 1; transform: translateY(0); }
+        .feat-card:nth-child(2) { transition-delay: 0.08s; }
+        .feat-card:nth-child(3) { transition-delay: 0.16s; }
+
+        .feat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(108,99,255,0.06), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .feat-card:hover {
+            border-color: rgba(108,99,255,0.25);
+            box-shadow: 0 8px 40px rgba(108,99,255,0.12);
+            transform: translateY(-3px);
+        }
+
+        .feat-card:hover::before { opacity: 1; }
+
+        .feat-card__glow {
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            opacity: 0.07;
+            filter: blur(40px);
+            pointer-events: none;
+        }
+
+        .feat-card--tech .feat-card__glow  { background: #6c63ff; }
+        .feat-card--comm .feat-card__glow  { background: #2dd4bf; }
+        .feat-card--pres .feat-card__glow  { background: #a78bfa; }
+
+        .feat-card__icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .feat-card--tech .feat-card__icon { background: rgba(108,99,255,0.15); }
+        .feat-card--comm .feat-card__icon { background: rgba(45,212,191,0.12); }
+        .feat-card--pres .feat-card__icon { background: rgba(167,139,250,0.12); }
+
+        .feat-card__title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #f4f4f7;
+            margin-bottom: 0.6rem;
+        }
+
+        .feat-card__body {
+            font-size: 0.88rem;
+            color: rgba(244,244,247,0.55);
+            line-height: 1.6;
+        }
+
+        .feat-card__tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-top: 1.25rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .feat-card--tech .feat-card__tag { background: rgba(108,99,255,0.12); color: #a78bfa; }
+        .feat-card--comm .feat-card__tag { background: rgba(45,212,191,0.1); color: #2dd4bf; }
+        .feat-card--pres .feat-card__tag { background: rgba(167,139,250,0.1); color: #c4b5fd; }
+
+        /* ── Steps / how it works ────────────────────────────── */
+        .steps-section {
+            padding: 3rem 0;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        @media (max-width: 860px) {
+            .steps-grid { grid-template-columns: 1fr; }
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .step-item.visible { opacity: 1; transform: translateY(0); }
+        .step-item:nth-child(2) { transition-delay: 0.1s; }
+        .step-item:nth-child(3) { transition-delay: 0.2s; }
+
+        .step-num-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(108,99,255,0.08));
+            border: 1px solid rgba(108,99,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #a78bfa;
+        }
+
+        .step-item h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #f4f4f7;
+        }
+
+        .step-item p {
+            font-size: 0.88rem;
+            color: rgba(244,244,247,0.55);
+            line-height: 1.6;
+        }
+
+        /* ── CTA band ────────────────────────────────────────── */
+        .cta-band {
+            position: relative;
+            margin: 2rem 0 1rem;
+            padding: 3.5rem 2rem;
+            border-radius: 24px;
+            border: 1px solid rgba(108,99,255,0.2);
+            background: linear-gradient(135deg, rgba(108,99,255,0.1) 0%, rgba(14,16,24,0.8) 60%, rgba(45,212,191,0.06) 100%);
+            text-align: center;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .cta-band.visible { opacity: 1; transform: translateY(0); }
+
+        .cta-band::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 200px;
+            background: radial-gradient(ellipse, rgba(108,99,255,0.2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-band h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 650;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .cta-band p {
+            color: rgba(244,244,247,0.55);
+            font-size: 0.95rem;
+            margin-bottom: 1.75rem;
+            max-width: 44ch;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+
+        /* ── Keyframes ───────────────────────────────────────── */
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile hero */
+        @media (max-width: 640px) {
+            .home-hero { padding: 3.5rem 0.5rem 3rem; }
+        }
+    </style>
 </head>
 <body class="site">
 <div class="site-wrap">
+
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
             <span class="site-nav__mark" aria-hidden="true">PL</span>
@@ -34,46 +508,128 @@
     </header>
 
     <main class="site-main">
-        <section class="hero" aria-labelledby="hero-title">
-            <p class="hero__eyebrow">Interview preparation, reimagined</p>
-            <h1 id="hero-title" class="hero__title">Weave confidence into every interview.</h1>
-            <p class="hero__lead">PrepLoom combines role-aware technical questions, communication analysis, and optional video feedback so you walk in prepared—not rehearsed.</p>
-            <div class="hero__actions">
-                <a class="btn-hero-primary" href="/app">Start practicing</a>
-                <a class="btn-hero-secondary" href="/features">Explore features</a>
+
+        <!-- ═══ HERO ═══ -->
+        <section class="home-hero" aria-labelledby="hero-title">
+            <div class="home-hero__bg" aria-hidden="true"></div>
+            <div class="home-hero__noise" aria-hidden="true"></div>
+            <div class="home-hero__inner">
+                <span class="hero-eyebrow-pill">AI Interview Coach</span>
+                <h1 id="hero-title">
+                    <span class="hero-title-line1">Prepare smarter.</span>
+                    <span class="hero-title-line2">Ace the room.</span>
+                </h1>
+                <p class="hero-lead">Everything you need before your next interview — technical depth, communication signals, and real-time presence feedback, all in one place.</p>
+                <div class="hero-actions">
+                    <a class="btn-hero-primary" href="/app">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Start practicing
+                    </a>
+                    <a class="btn-hero-secondary" href="/features">
+                        Explore features
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+
+                <div class="hero-trust" aria-label="Feature highlights">
+                    <span class="trust-chip">
+                        <span class="trust-chip__icon" style="background:rgba(108,99,255,0.15)">📚</span>
+                        Technical scoring
+                    </span>
+                    <span class="trust-chip">
+                        <span class="trust-chip__icon" style="background:rgba(45,212,191,0.12)">🗣️</span>
+                        Communication analysis
+                    </span>
+                    <span class="trust-chip">
+                        <span class="trust-chip__icon" style="background:rgba(167,139,250,0.12)">📹</span>
+                        Presence &amp; posture
+                    </span>
+                    <span class="trust-chip">
+                        <span class="trust-chip__icon" style="background:rgba(34,197,94,0.1)">⚡</span>
+                        Instant feedback
+                    </span>
+                </div>
             </div>
         </section>
 
-        <div class="section-head">
-            <h2>Why PrepLoom</h2>
-            <p>One focused workspace for the skills interviewers actually score—without the noise of generic question banks.</p>
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- ═══ WHY PREPLOOM ═══ -->
+        <section class="why-section">
+            <p class="section-eyebrow js-reveal">Why PrepLoom</p>
+            <h2 class="section-title-large js-reveal">Built around how interviews are actually scored.</h2>
+            <p class="section-subtitle js-reveal">One focused workspace for the three dimensions that hiring decisions actually hinge on — not a generic question bank.</p>
+
+            <div class="feature-grid">
+                <article class="feat-card feat-card--tech js-reveal-card">
+                    <div class="feat-card__glow" aria-hidden="true"></div>
+                    <div class="feat-card__icon" aria-hidden="true">📚</div>
+                    <h3 class="feat-card__title">Technical depth</h3>
+                    <p class="feat-card__body">Role-aware questions mixed from behavioural and technical prompts. Get scored on reasoning, accuracy, and completeness — not just right/wrong.</p>
+                    <span class="feat-card__tag">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        LLM evaluation
+                    </span>
+                </article>
+                <article class="feat-card feat-card--comm js-reveal-card">
+                    <div class="feat-card__glow" aria-hidden="true"></div>
+                    <div class="feat-card__icon" aria-hidden="true">🗣️</div>
+                    <h3 class="feat-card__title">Communication</h3>
+                    <p class="feat-card__body">Clarity, pacing, and structure matter as much as correctness. PrepLoom surfaces filler words, speaking rate, and answer structure in real time.</p>
+                    <span class="feat-card__tag">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        NLP analysis
+                    </span>
+                </article>
+                <article class="feat-card feat-card--pres js-reveal-card">
+                    <div class="feat-card__glow" aria-hidden="true"></div>
+                    <div class="feat-card__icon" aria-hidden="true">📹</div>
+                    <h3 class="feat-card__title">Presence</h3>
+                    <p class="feat-card__body">Enable camera for live cues on openness, engagement, and posture. Notice habits before a hiring manager does — in a low-stakes practice room.</p>
+                    <span class="feat-card__tag">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        MediaPipe signals
+                    </span>
+                </article>
+            </div>
+        </section>
+
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- ═══ HOW IT WORKS ═══ -->
+        <section class="steps-section">
+            <p class="section-eyebrow js-reveal">How it works</p>
+            <h2 class="section-title-large js-reveal">Three steps to a full mock session.</h2>
+
+            <div class="steps-grid">
+                <div class="step-item js-reveal-card">
+                    <div class="step-num-badge" aria-hidden="true">1</div>
+                    <h3>Choose a role</h3>
+                    <p>Select your target role from the sidebar. PrepLoom tailors the question mix — behavioural and technical — to what that role actually tests.</p>
+                </div>
+                <div class="step-item js-reveal-card">
+                    <div class="step-num-badge" aria-hidden="true">2</div>
+                    <h3>Answer via voice or text</h3>
+                    <p>Speak naturally or type your answer. Whisper transcribes speech, your webcam tracks presence, and the question is read aloud if you want.</p>
+                </div>
+                <div class="step-item js-reveal-card">
+                    <div class="step-num-badge" aria-hidden="true">3</div>
+                    <h3>Get your report</h3>
+                    <p>After the session you get per-question scores across technical, communication, and confidence dimensions — with actionable improvement tips.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ CTA ═══ -->
+        <div class="cta-band js-reveal-card" role="complementary">
+            <h2>Ready when you are.</h2>
+            <p>No subscription required. Open the practice room, pick a role, and run a full mock session right in your browser.</p>
+            <a class="btn-hero-primary" href="/app">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Go to practice room
+            </a>
         </div>
 
-        <div class="grid-3">
-            <article class="card-pl">
-                <div class="card-pl__icon" aria-hidden="true">📚</div>
-                <h3>Technical depth</h3>
-                <p>Practice with questions matched to your target role, with structured feedback on correctness and reasoning.</p>
-            </article>
-            <article class="card-pl">
-                <div class="card-pl__icon" aria-hidden="true">🗣️</div>
-                <h3>Communication</h3>
-                <p>Clarity, pacing, and structure matter. PrepLoom surfaces how you sound—not just what you know.</p>
-            </article>
-            <article class="card-pl">
-                <div class="card-pl__icon" aria-hidden="true">📹</div>
-                <h3>Presence</h3>
-                <p>Optional camera-based cues help you notice posture and engagement before the real room.</p>
-            </article>
-        </div>
-
-        <div class="section-head">
-            <h2>Ready when you are</h2>
-            <p>Open the practice room, pick a role, and run a full mock session in your browser.</p>
-        </div>
-        <div class="hero__actions" style="justify-content: flex-start;">
-            <a class="btn-hero-primary" href="/app">Go to practice room</a>
-        </div>
     </main>
 
     <footer class="site-footer">
@@ -89,6 +645,7 @@
     </footer>
 </div>
 
+<!-- Sign in modal -->
 <div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
     <div class="modal">
         <div class="modal__header">
@@ -112,6 +669,7 @@
     </div>
 </div>
 
+<!-- Sign up modal -->
 <div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
     <div class="modal">
         <div class="modal__header">
@@ -141,5 +699,20 @@
 
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
+<script>
+    // Scroll-reveal observer
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.js-reveal, .js-reveal-card').forEach(el => {
+        revealObserver.observe(el);
+    });
+</script>
 </body>
 </html>

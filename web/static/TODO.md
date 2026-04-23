@@ -1,20 +1,13 @@
-# TODO: Create Revision Page for Interview Preparation
+ # PrepLoom Redesign Task Progress
 
-## Steps (Approved Plan - Proceed)
+## Plan Overview
+- [ ] Update `index.html` with premium hero, stats-strip, enriched 3-card grid (LLM, Communication, Presence/OpenCV), glow-divider, full data-animate
+- [ ] Standardize `features.html` to site.css (remove inline styles, use .page-hero/.card-pl/.grid-3, 4 feature cards, staggered animations)
+- [ ] Verify modals preserved exactly, nav active states correct
+- [ ] Test: Static files ready for browser
 
-1. ✅ **Create `web/static/revision.html`** - New static page with revision content (flashcards, tips, etc.) matching site design.
-2. **Update navigation in existing pages**:
-   - `index.html`: Add Revision link in nav and footer.
-   - `features.html`: Add Revision link in nav and footer.
-   - `about.html`: Add Revision link in nav and footer.
-   - `app.html`: No change (app-specific layout).
-3. **Test**: Run dev server, check `/revision` page and navigation links/highlights.
-4. **Complete**: Use `attempt_completion`.
+## Steps Completed
+- [x] Analyzed site.css, about.html (revision-like patterns), current index/features
+- [x] Plan confirmed with user (base on about/revision premium design)
 
-**Progress**: 
-- Step 1: Created `revision.html`
-- Step 2: Updated nav/footer in `index.html`, `features.html`
-- ✅ Step 2 complete: Updated nav/footer in `index.html`, `features.html`, `about.html`
-- Step 3: Ready for testing.
-
-
+Next: Implement index.html redesign.

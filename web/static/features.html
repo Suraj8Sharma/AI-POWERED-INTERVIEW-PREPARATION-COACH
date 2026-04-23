@@ -6,11 +6,527 @@
     <meta name="description" content="PrepLoom features — Technical practice, communication analysis, and video presence feedback for interview prep." />
     <title>Features — PrepLoom</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
+    <style>
+        /* ── Features hero ────────────────────────────────────── */
+        .feat-hero {
+            position: relative;
+            text-align: center;
+            padding: 5rem 1rem 4rem;
+            overflow: hidden;
+        }
+
+        .feat-hero__bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108,99,255,0.28), transparent),
+                radial-gradient(ellipse 50% 40% at 85% 30%, rgba(45,212,191,0.09), transparent),
+                radial-gradient(ellipse 40% 30% at 5% 50%, rgba(108,99,255,0.07), transparent);
+        }
+
+        .feat-hero__noise {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        .feat-hero__inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-eyebrow-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1.1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(45,212,191,0.3);
+            background: rgba(45,212,191,0.07);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #2dd4bf;
+            margin-bottom: 2rem;
+            animation: fadeSlideDown 0.6s ease both;
+        }
+
+        .hero-eyebrow-pill::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #2dd4bf;
+            box-shadow: 0 0 8px #2dd4bf;
+            animation: pillDot 2s ease-in-out infinite;
+        }
+
+        @keyframes pillDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .feat-hero__line1 {
+            display: block;
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: clamp(2.6rem, 6.5vw, 4.5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.07;
+            color: #fff;
+            animation: fadeSlideDown 0.65s 0.1s ease both;
+        }
+
+        .feat-hero__line2 {
+            display: block;
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: clamp(2.6rem, 6.5vw, 4.5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.07;
+            background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 50%, #2dd4bf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            animation: fadeSlideDown 0.65s 0.18s ease both;
+        }
+
+        .feat-hero__lead {
+            font-size: 1.05rem;
+            color: rgba(244,244,247,0.62);
+            max-width: 52ch;
+            margin: 0 auto 2.5rem;
+            line-height: 1.65;
+            animation: fadeSlideDown 0.65s 0.26s ease both;
+        }
+
+        /* Filter pills (like revision tabs) */
+        .feat-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-bottom: 0;
+            animation: fadeSlideDown 0.65s 0.34s ease both;
+        }
+
+        .feat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 1.25rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(244,244,247,0.6);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+
+        .feat-pill:hover, .feat-pill.active {
+            background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(108,99,255,0.1));
+            border-color: rgba(108,99,255,0.4);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(108,99,255,0.2);
+        }
+
+        /* ── Section divider ──────────────────────────────────── */
+        .section-divider {
+            position: relative;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(108,99,255,0.4), rgba(45,212,191,0.3), transparent);
+            margin: 3rem 0;
+        }
+
+        /* ── Scroll reveal ────────────────────────────────────── */
+        .section-eyebrow {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #2dd4bf;
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .section-eyebrow.visible { opacity: 1; transform: translateY(0); }
+
+        .section-title-large {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 650;
+            letter-spacing: -0.03em;
+            line-height: 1.12;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s 0.08s ease, transform 0.5s 0.08s ease;
+        }
+
+        .section-title-large.visible { opacity: 1; transform: translateY(0); }
+
+        .section-subtitle {
+            color: rgba(244,244,247,0.55);
+            font-size: 0.95rem;
+            max-width: 50ch;
+            margin-bottom: 2.25rem;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s 0.14s ease, transform 0.5s 0.14s ease;
+        }
+
+        .section-subtitle.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── Big feature blocks ───────────────────────────────── */
+        .feature-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .feature-block.visible { opacity: 1; transform: translateY(0); }
+
+        .feature-block--reverse { direction: rtl; }
+        .feature-block--reverse > * { direction: ltr; }
+
+        @media (max-width: 800px) {
+            .feature-block, .feature-block--reverse {
+                grid-template-columns: 1fr;
+                direction: ltr;
+            }
+            .feature-block--reverse > * { direction: ltr; }
+        }
+
+        .feature-block__text {}
+
+        .feature-block__num {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(244,244,247,0.35);
+            margin-bottom: 0.85rem;
+        }
+
+        .feature-block__num span {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            background: rgba(108,99,255,0.15);
+            border: 1px solid rgba(108,99,255,0.2);
+            text-align: center;
+            line-height: 24px;
+            color: #a78bfa;
+            font-size: 0.75rem;
+        }
+
+        .feature-block__title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.4rem, 3vw, 1.85rem);
+            font-weight: 650;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 0.85rem;
+        }
+
+        .feature-block__body {
+            color: rgba(244,244,247,0.6);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-block__bullets {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .feature-block__bullets li {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+            color: rgba(244,244,247,0.65);
+        }
+
+        .feature-block__bullets li::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #6c63ff;
+            flex-shrink: 0;
+        }
+
+        /* Visual panels */
+        .feature-block__visual {
+            position: relative;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(14,16,24,0.75);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-block__visual::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(108,99,255,0.08), transparent 60%);
+        }
+
+        .visual-icon-large {
+            font-size: 4.5rem;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 0 24px rgba(108,99,255,0.3));
+        }
+
+        .visual-badge {
+            position: absolute;
+            bottom: 1.25rem;
+            left: 1.25rem;
+            right: 1.25rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(7,8,12,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+
+        .visual-badge__label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(244,244,247,0.35);
+            margin-bottom: 0.3rem;
+        }
+
+        .visual-badge__bar-wrap {
+            height: 5px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .visual-badge__bar {
+            height: 100%;
+            border-radius: 999px;
+            animation: barGrow 2s 0.8s ease both;
+        }
+
+        @keyframes barGrow {
+            from { width: 0%; }
+        }
+
+        .visual-badge--tech .visual-badge__bar { width: 76%; background: linear-gradient(90deg, #6c63ff, #a78bfa); }
+        .visual-badge--comm .visual-badge__bar { width: 83%; background: linear-gradient(90deg, #2dd4bf, #6ee7b7); }
+        .visual-badge--pres .visual-badge__bar { width: 68%; background: linear-gradient(90deg, #a78bfa, #c4b5fd); }
+        .visual-badge--role .visual-badge__bar { width: 91%; background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+        .visual-badge__val {
+            float: right;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: rgba(244,244,247,0.7);
+            margin-top: -1.1rem;
+        }
+
+        /* ── Comparison table ─────────────────────────────────── */
+        .compare-table-wrap {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .compare-table-wrap.visible { opacity: 1; transform: translateY(0); }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .compare-table th {
+            padding: 0.85rem 1.25rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(244,244,247,0.38);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .compare-table th:not(:first-child) { text-align: center; }
+
+        .compare-table td {
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: rgba(244,244,247,0.7);
+        }
+
+        .compare-table td:not(:first-child) { text-align: center; }
+
+        .compare-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .compare-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .check-yes {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(34,197,94,0.12);
+            color: #22c55e;
+            font-size: 0.75rem;
+        }
+
+        .check-no {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(239,68,68,0.08);
+            color: rgba(239,68,68,0.5);
+            font-size: 0.9rem;
+        }
+
+        .col-preploom {
+            background: rgba(108,99,255,0.06);
+            border-radius: 8px;
+            font-weight: 600;
+            color: #fff !important;
+        }
+
+        /* ── CTA band ────────────────────────────────────────── */
+        .cta-band {
+            position: relative;
+            margin: 2rem 0 1rem;
+            padding: 3.5rem 2rem;
+            border-radius: 24px;
+            border: 1px solid rgba(108,99,255,0.2);
+            background: linear-gradient(135deg, rgba(108,99,255,0.1) 0%, rgba(14,16,24,0.8) 60%, rgba(45,212,191,0.06) 100%);
+            text-align: center;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .cta-band.visible { opacity: 1; transform: translateY(0); }
+
+        .cta-band::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 200px;
+            background: radial-gradient(ellipse, rgba(108,99,255,0.2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-band h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 650;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .cta-band p {
+            color: rgba(244,244,247,0.55);
+            font-size: 0.95rem;
+            margin-bottom: 1.75rem;
+            max-width: 44ch;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.8rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            background: linear-gradient(135deg, #6c63ff 0%, #8b84ff 100%);
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(108,99,255,0.4);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 44px rgba(108,99,255,0.5);
+        }
+
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .feat-hero { padding: 3.5rem 0.5rem 3rem; }
+        }
+    </style>
 </head>
 <body class="site">
 <div class="site-wrap">
+
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
             <span class="site-nav__mark" aria-hidden="true">PL</span>
@@ -34,34 +550,243 @@
     </header>
 
     <main class="site-main">
-        <header class="page-hero">
-            <h1>Features</h1>
-            <p>PrepLoom is built around how real interviews are scored: substance, signal, and presence. Here is what you get in the practice room today.</p>
-        </header>
 
-        <section class="content-block">
-            <h2>Role-aware technical questions</h2>
-            <p>Draw from a structured bank aligned to your target role. Each session mixes behavioural and technical prompts so you rehearse both storytelling and depth.</p>
+        <!-- ═══ HERO ═══ -->
+        <section class="feat-hero" aria-labelledby="feat-title">
+            <div class="feat-hero__bg" aria-hidden="true"></div>
+            <div class="feat-hero__noise" aria-hidden="true"></div>
+            <div class="feat-hero__inner">
+                <span class="hero-eyebrow-pill">What's inside</span>
+                <h1 id="feat-title">
+                    <span class="feat-hero__line1">Every tool you need</span>
+                    <span class="feat-hero__line2">to walk in ready.</span>
+                </h1>
+                <p class="feat-hero__lead">PrepLoom is built around how real interviews are scored — substance, signal, and presence. Here's what you get in the practice room today.</p>
+                <div class="feat-pills" role="navigation" aria-label="Jump to section">
+                    <a class="feat-pill" href="#questions">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Questions
+                    </a>
+                    <a class="feat-pill" href="#evaluation">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        Evaluation
+                    </a>
+                    <a class="feat-pill" href="#communication">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                        Communication
+                    </a>
+                    <a class="feat-pill" href="#presence">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Presence
+                    </a>
+                </div>
+            </div>
         </section>
 
-        <section class="content-block">
-            <h2>Answer evaluation</h2>
-            <p>Submit spoken or typed answers for feedback on reasoning and accuracy. Ideal answers can be revealed when you want to compare against a strong baseline.</p>
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- ═══ FEATURES DETAIL ═══ -->
+        <section id="questions" style="padding: 2rem 0;">
+            <p class="section-eyebrow js-reveal">Role-aware questions</p>
+            <h2 class="section-title-large js-reveal">Questions built around your target role.</h2>
+            <p class="section-subtitle js-reveal">Pull from a structured RAG-powered bank aligned to your target role. Each session mixes behavioural and technical prompts.</p>
+
+            <div class="feature-block js-reveal-block">
+                <div class="feature-block__text">
+                    <div class="feature-block__num"><span>01</span> Question bank</div>
+                    <h3 class="feature-block__title">Structured, role-specific question sets.</h3>
+                    <p class="feature-block__body">PrepLoom pulls from a curated ChromaDB vector store, mixing 6–7 technical questions with 3 behavioural ones every session. No two sessions are identical.</p>
+                    <ul class="feature-block__bullets">
+                        <li>Retrieval-augmented generation (RAG) question fetch</li>
+                        <li>Technical + behavioural balance every session</li>
+                        <li>Difficulty and subtopic shown per question</li>
+                        <li>Ideal answers available on demand</li>
+                    </ul>
+                </div>
+                <div class="feature-block__visual">
+                    <div class="visual-icon-large" aria-hidden="true">📚</div>
+                    <div class="visual-badge visual-badge--role">
+                        <div class="visual-badge__label">Role coverage</div>
+                        <div class="visual-badge__bar-wrap">
+                            <div class="visual-badge__bar"></div>
+                        </div>
+                        <div class="visual-badge__val">91%</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section class="content-block">
-            <h2>Communication signals</h2>
-            <p>Metrics such as clarity and structure help you notice habits—rambling, filler, or pacing—before a hiring manager does.</p>
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <section id="evaluation" style="padding: 2rem 0;">
+            <p class="section-eyebrow js-reveal">Answer evaluation</p>
+            <h2 class="section-title-large js-reveal">LLM scoring that actually explains itself.</h2>
+            <p class="section-subtitle js-reveal">Submit spoken or typed answers for feedback on reasoning and accuracy. Ideal answers reveal a strong baseline to compare against.</p>
+
+            <div class="feature-block feature-block--reverse js-reveal-block">
+                <div class="feature-block__text">
+                    <div class="feature-block__num"><span>02</span> Evaluation</div>
+                    <h3 class="feature-block__title">Strengths, gaps, and what you missed.</h3>
+                    <p class="feature-block__body">Every answer gets a technical score, a list of strengths, areas to improve, and missing points — not just a number. The feedback is actionable on the same day.</p>
+                    <ul class="feature-block__bullets">
+                        <li>0–100 technical score per answer</li>
+                        <li>Streengths and improvement points called out</li>
+                        <li>Missing key concepts surfaced explicitly</li>
+                        <li>Short qualitative feedback paragraph</li>
+                    </ul>
+                </div>
+                <div class="feature-block__visual">
+                    <div class="visual-icon-large" aria-hidden="true">🎯</div>
+                    <div class="visual-badge visual-badge--tech">
+                        <div class="visual-badge__label">Technical score</div>
+                        <div class="visual-badge__bar-wrap">
+                            <div class="visual-badge__bar"></div>
+                        </div>
+                        <div class="visual-badge__val">76 / 100</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section class="content-block">
-            <h2>Video and posture (optional)</h2>
-            <p>Enable your camera for lightweight cues on openness, engagement, and posture. Use it as a nudge, not a verdict—comfort still comes first.</p>
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <section id="communication" style="padding: 2rem 0;">
+            <p class="section-eyebrow js-reveal">Communication signals</p>
+            <h2 class="section-title-large js-reveal">Notice how you sound before the real room does.</h2>
+            <p class="section-subtitle js-reveal">Filler words, pacing, and structure — the signals a hiring manager notices without naming them.</p>
+
+            <div class="feature-block js-reveal-block">
+                <div class="feature-block__text">
+                    <div class="feature-block__num"><span>03</span> Communication</div>
+                    <h3 class="feature-block__title">NLP analysis on every answer.</h3>
+                    <p class="feature-block__body">PrepLoom counts fillers, calculates your words-per-minute, and scores clarity and structure — not just vocabulary. The goal is to make habits visible before they cost you.</p>
+                    <ul class="feature-block__bullets">
+                        <li>Filler word detection (um, uh, like, you know)</li>
+                        <li>Speaking pace in WPM with ideal range</li>
+                        <li>Clarity and structure score</li>
+                        <li>Whisper-powered transcription</li>
+                    </ul>
+                </div>
+                <div class="feature-block__visual">
+                    <div class="visual-icon-large" aria-hidden="true">🗣️</div>
+                    <div class="visual-badge visual-badge--comm">
+                        <div class="visual-badge__label">Communication score</div>
+                        <div class="visual-badge__bar-wrap">
+                            <div class="visual-badge__bar"></div>
+                        </div>
+                        <div class="visual-badge__val">83 / 100</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <div class="hero__actions" style="margin-top: 1rem;">
-            <a class="btn-hero-primary" href="/app">Open practice room</a>
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <section id="presence" style="padding: 2rem 0;">
+            <p class="section-eyebrow js-reveal">Video &amp; posture</p>
+            <h2 class="section-title-large js-reveal">Presence is a skill. Practice it.</h2>
+            <p class="section-subtitle js-reveal">Optional camera-based signals on openness, engagement, and posture — a nudge, not a verdict. Comfort still comes first.</p>
+
+            <div class="feature-block feature-block--reverse js-reveal-block">
+                <div class="feature-block__text">
+                    <div class="feature-block__num"><span>04</span> Presence</div>
+                    <h3 class="feature-block__title">Live body language via MediaPipe.</h3>
+                    <p class="feature-block__body">A WebSocket streams your webcam frames to a pose-estimation backend. You get real-time openness, engagement, posture, and fidgeting signals — updated every frame while you speak.</p>
+                    <ul class="feature-block__bullets">
+                        <li>MediaPipe pose estimation</li>
+                        <li>4 live signals: openness, engagement, posture, fidgeting</li>
+                        <li>WebSocket continuous analysis (~15 FPS)</li>
+                        <li>Confidence score feeds into the final report</li>
+                    </ul>
+                </div>
+                <div class="feature-block__visual">
+                    <div class="visual-icon-large" aria-hidden="true">📹</div>
+                    <div class="visual-badge visual-badge--pres">
+                        <div class="visual-badge__label">Confidence score</div>
+                        <div class="visual-badge__bar-wrap">
+                            <div class="visual-badge__bar"></div>
+                        </div>
+                        <div class="visual-badge__val">68 / 100</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- ═══ COMPARISON TABLE ═══ -->
+        <section style="padding: 2rem 0 3rem;">
+            <p class="section-eyebrow js-reveal">At a glance</p>
+            <h2 class="section-title-large js-reveal">PrepLoom vs the alternatives.</h2>
+
+            <div class="compare-table-wrap js-reveal-block" style="overflow-x:auto; border-radius:16px; border:1px solid rgba(255,255,255,0.06); background: rgba(14,16,24,0.6);">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th class="col-preploom">PrepLoom</th>
+                            <th>Generic Q&amp;A sites</th>
+                            <th>Mock interviews (human)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Role-specific questions</td>
+                            <td class="col-preploom"><span class="check-yes">✓</span></td>
+                            <td><span class="check-yes">✓</span></td>
+                            <td><span class="check-yes">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td>Instant AI feedback</td>
+                            <td class="col-preploom"><span class="check-yes">✓</span></td>
+                            <td><span class="check-no">✗</span></td>
+                            <td><span class="check-no">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td>Communication scoring</td>
+                            <td class="col-preploom"><span class="check-yes">✓</span></td>
+                            <td><span class="check-no">✗</span></td>
+                            <td>Sometimes</td>
+                        </tr>
+                        <tr>
+                            <td>Body language analysis</td>
+                            <td class="col-preploom"><span class="check-yes">✓</span></td>
+                            <td><span class="check-no">✗</span></td>
+                            <td>Sometimes</td>
+                        </tr>
+                        <tr>
+                            <td>Session report &amp; tips</td>
+                            <td class="col-preploom"><span class="check-yes">✓</span></td>
+                            <td><span class="check-no">✗</span></td>
+                            <td>Sometimes</td>
+                        </tr>
+                        <tr>
+                            <td>No scheduling needed</td>
+                            <td class="col-preploom"><span class="check-yes">✓</span></td>
+                            <td><span class="check-yes">✓</span></td>
+                            <td><span class="check-no">✗</span></td>
+                        </tr>
+                        <tr>
+                            <td>Free to use</td>
+                            <td class="col-preploom"><span class="check-yes">✓</span></td>
+                            <td>Mostly</td>
+                            <td><span class="check-no">✗</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ═══ CTA ═══ -->
+        <div class="cta-band js-reveal-card" role="complementary">
+            <h2>Open the practice room.</h2>
+            <p>Select a role, answer questions at your own pace, and walk away with a full report in under 20 minutes.</p>
+            <a class="btn-hero-primary" href="/app">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Start practicing now
+            </a>
         </div>
+
     </main>
 
     <footer class="site-footer">
@@ -77,6 +802,7 @@
     </footer>
 </div>
 
+<!-- Sign in modal -->
 <div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
     <div class="modal">
         <div class="modal__header">
@@ -100,6 +826,7 @@
     </div>
 </div>
 
+<!-- Sign up modal -->
 <div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
     <div class="modal">
         <div class="modal__header">
@@ -129,5 +856,29 @@
 
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
+<script>
+    // Scroll-reveal observer
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.js-reveal, .js-reveal-card, .js-reveal-block').forEach(el => {
+        revealObserver.observe(el);
+    });
+
+    // Smooth-scroll for anchor pills
+    document.querySelectorAll('.feat-pill[href^="#"]').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(link.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+</script>
 </body>
 </html>
