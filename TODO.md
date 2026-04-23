@@ -1,9 +1,11 @@
-# PrepLoom Redesign Task Progress
+# PDF Report Generation TODO
 
-## Plan Breakdown
-- [ ] 1. Create redesigned `web/static/index.html` (modern hero, stats-strip, grid-3 cards, animations, CTA)
-- [ ] 2. Enhance `web/static/features.html` (deeper content, glow-divider, stats-strip)
-- [ ] 3. Verify modals/scripts unchanged
-- [ ] 4. Complete task
+## Plan Steps:
+- [x] Install reportlab: pip install reportlab
+- [x] Backend: Add POST /api/report/{session_id}/pdf in web/api.py using ReportLab to generate PDF from report data
+- [x] Frontend: Update web/static/js/app.js showReport() to fetch/download PDF after rendering
+- [ ] DB: Store PDF path in MongoDB user.reports[] array (for session.user_id)
+- [ ] Test full flow: interview → report → PDF download
+- [ ] Update TODO.md
+- [ ] attempt_completion
 
-**Current Step:** 1/4 - Redesigning index.html

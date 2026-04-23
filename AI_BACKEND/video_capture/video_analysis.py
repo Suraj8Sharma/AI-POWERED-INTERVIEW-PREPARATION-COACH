@@ -84,9 +84,9 @@ def _pose_landmarker_image(model_path: str) -> PoseLandmarker:
         base_options=base_options_lib.BaseOptions(model_asset_path=model_path),
         running_mode=RunningMode.IMAGE,
         num_poses=1,
-        min_pose_detection_confidence=0.5,
-        min_pose_presence_confidence=0.5,
-        min_tracking_confidence=0.5,
+        min_pose_detection_confidence=0.65,
+        min_pose_presence_confidence=0.65,
+        min_tracking_confidence=0.65,
     )
     return PoseLandmarker.create_from_options(opts)
 
@@ -128,7 +128,7 @@ def _body_scale(ls: np.ndarray, rs: np.ndarray) -> float:
 
 @dataclass
 class BodyLanguageAnalyzer:
-    history: int = 30
+    history: int = 24
     _nose_hist: deque = field(init=False)
     _lw_hist: deque = field(init=False)
     _rw_hist: deque = field(init=False)
@@ -158,15 +158,16 @@ class BodyLanguageAnalyzer:
         lh, v_lh = _lm_xyv_list(landmark_list, PL.LEFT_HIP)
         rh, v_rh = _lm_xyv_list(landmark_list, PL.RIGHT_HIP)
 
-        vis = min(v_n, v_ls, v_rs, v_le, v_re, v_lw, v_rw)
-        if vis < 0.35:
+        vis_core = min(v_n, v_ls, v_rs)
+        if vis_core < 0.35:
             return {
-                "visibility": vis,
+                "visibility": float(vis_core),
                 "openness": 0.5,
                 "fidgeting": 0.5,
                 "engagement": 0.5,
                 "posture": 0.5,
             }
+
 
         scale = _body_scale(ls, rs)
         mid_sh = (ls + rs) / 2.0
@@ -175,12 +176,13 @@ class BodyLanguageAnalyzer:
         ang_l = _angle_deg_2d(ls, le, lw)
         ang_r = _angle_deg_2d(rs, re, rw)
         elbow_open = (
-            np.clip((ang_l - 55.0) / 95.0, 0.0, 1.0)
-            + np.clip((ang_r - 55.0) / 95.0, 0.0, 1.0)
+            np.clip((ang_l - 60.0) / 120.0, 0.0, 1.0)
+            + np.clip((ang_r - 60.0) / 120.0, 0.0, 1.0)
         ) / 2.0
 
         wrist_sep = float(np.linalg.norm(lw[:2] - rw[:2])) / scale
-        spread = float(np.clip((wrist_sep - 0.35) / 1.35, 0.0, 1.0))
+        spread = float(np.clip((wrist_sep - 0.3) / 1.2, 0.0, 1.0))
+
 
         cx = 0.5 * (min(ls[0], rs[0]) + max(ls[0], rs[0]))
         wrists_center_x = 0.5 * (lw[0] + rw[0])
@@ -197,22 +199,24 @@ class BodyLanguageAnalyzer:
         self._rw_hist.append(rw.copy())
         self._nose_hist.append(nose.copy())
 
-        fidget = 0.35
+        fidget = 0.0
         if len(self._lw_hist) >= 2:
             d_l = float(np.linalg.norm(self._lw_hist[-1] - self._lw_hist[-2]))
             d_r = float(np.linalg.norm(self._rw_hist[-1] - self._rw_hist[-2]))
             inst = (d_l + d_r) / (2.0 * scale + 1e-6)
-            fidget = float(np.clip((inst - 0.004) / 0.06, 0.0, 1.0))
+            fidget = float(np.clip((inst - 0.025) / 0.20, 0.0, 1.0))
+
 
         if len(self._lw_hist) >= 4:
-            buf_l = list(self._lw_hist)[-8:]
-            buf_r = list(self._rw_hist)[-8:]
+            buf_l = list(self._lw_hist)[-12:]
+            buf_r = list(self._rw_hist)[-12:]
             vars_ = []
             for buf in (buf_l, buf_r):
                 arr = np.stack(buf, axis=0)
                 vars_.append(float(np.var(arr, axis=0).mean()))
             var_m = float(np.mean(vars_)) / (scale**2 + 1e-6)
-            fidget = max(fidget, float(np.clip(1.2 * var_m / 0.015, 0.0, 1.0)))
+            fidget = max(fidget, float(np.clip((var_m-0.005)/ 0.02, 0.0, 1.0)))
+
 
         shoulder_mid_x = mid_sh[0]
         off = abs(nose[0] - shoulder_mid_x) / (scale + 1e-6)
@@ -222,7 +226,7 @@ class BodyLanguageAnalyzer:
         if len(self._nose_hist) >= 3:
             arr = np.stack(list(self._nose_hist)[-10:], axis=0)
             nvar = float(np.var(arr, axis=0).mean()) / (scale**2 + 1e-6)
-            stability = float(np.clip(1.0 - 22.0 * nvar, 0.0, 1.0))
+            stability = float(np.clip(1.0 - 30.0 * nvar, 0.0, 1.0))
 
         lean_fwd = float(
             np.clip((mid_sh[1] - nose[1]) / (scale * 3.0 + 1e-6), -0.3, 0.5)
@@ -248,7 +252,7 @@ class BodyLanguageAnalyzer:
         )
 
         return {
-            "visibility": vis,
+            "visibility": float(vis_core),
             "openness": openness,
             "fidgeting": fidget,
             "engagement": engagement,
@@ -332,7 +336,8 @@ def analyze_camera_snapshot_rgb(
         return out
 
     lm_list = result.pose_landmarks[0]
-    analyzer = BodyLanguageAnalyzer(history=8)
+    analyzer = BodyLanguageAnalyzer(history=20)
+
     m = analyzer.analyze_pose_landmarks(lm_list)
 
     annotated = (
@@ -416,9 +421,9 @@ def analyze_webcam_session(
         base_options=base_options_lib.BaseOptions(model_asset_path=model_path),
         running_mode=RunningMode.VIDEO,
         num_poses=1,
-        min_pose_detection_confidence=0.5,
-        min_pose_presence_confidence=0.5,
-        min_tracking_confidence=0.5,
+        min_pose_detection_confidence=0.65,
+        min_pose_presence_confidence=0.65,
+        min_tracking_confidence=0.65,
     )
     landmarker = PoseLandmarker.create_from_options(opts)
 

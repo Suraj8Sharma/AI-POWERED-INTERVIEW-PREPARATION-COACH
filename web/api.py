@@ -33,7 +33,7 @@ from PIL import Image
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Form, UploadFile, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 
@@ -337,13 +337,32 @@ async def websocket_analyze_posture(websocket: WebSocket):
     error_count = 0
     
     try:
-        from AI_BACKEND.video_capture import analyze_camera_snapshot_rgb
+        from AI_BACKEND.video_capture.video_analysis import (
+            ensure_pose_model_path,
+            BodyLanguageAnalyzer,
+            _np_rgb_to_mp_image
+        )
+        from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions, RunningMode
+        from mediapipe.tasks.python.core import base_options as base_options_lib
     except ImportError as e:
         await websocket.send_json({"error": f"Video module import failed: {e}"})
         await websocket.close()
         return
 
     try:
+        model_path = str(ensure_pose_model_path())
+        opts = PoseLandmarkerOptions(
+            base_options=base_options_lib.BaseOptions(model_asset_path=model_path),
+            running_mode=RunningMode.VIDEO,
+            num_poses=1,
+            min_pose_detection_confidence=0.5,
+            min_pose_presence_confidence=0.5,
+            min_tracking_confidence=0.5,
+        )
+        landmarker = PoseLandmarker.create_from_options(opts)
+        analyzer = BodyLanguageAnalyzer(history=20)
+        frame_timestamp_ms = 0
+
         while True:
             try:
                 # Receive frame data
@@ -370,16 +389,36 @@ async def websocket_analyze_posture(websocket: WebSocket):
                 
                 # Analyze pose
                 try:
-                    raw = analyze_camera_snapshot_rgb(rgb, draw_skeleton=False)
-                    result = {k: v for k, v in raw.items() if k not in ("annotated_rgb",)}
+                    mp_img = _np_rgb_to_mp_image(rgb)
+                    frame_timestamp_ms += 67  # Approx 15 FPS timing
+                    result = landmarker.detect_for_video(mp_img, frame_timestamp_ms)
                     
+                    if not result.pose_landmarks:
+                        res = {
+                            "openness": 0.5, "fidgeting": 0.5, "engagement": 0.5, "posture": 0.5,
+                            "pose_visible_fraction": 0.0,
+                            "summary": "No pose detected. Please ensure your upper body is visible.",
+                        }
+                    else:
+                        lm_list = result.pose_landmarks[0]
+                        res = analyzer.analyze_pose_landmarks(lm_list)
+                        vis_ok = res.get("visibility", 0) >= 0.35
+                        res["pose_visible_fraction"] = 1.0 if vis_ok else 0.0
+                        
+                        o = round(float(res.get("openness", 0.5)), 3)
+                        f = round(float(res.get("fidgeting", 0.5)), 3)
+                        e = round(float(res.get("engagement", 0.5)), 3)
+                        p_ = round(float(res.get("posture", 0.5)), 3)
+                        res["probabilities"] = {"openness": o, "fidgeting": f, "engagement": e, "posture": p_}
+                        res["summary"] = f"Live: Openness {o:.0%}, Fidgeting {f:.0%}, Engagement {e:.0%}, Posture {p_:.0%}"
+                        
                     # Add frame counter
                     frame_count += 1
-                    result["frame_count"] = frame_count
-                    result["timestamp"] = time.time()
+                    res["frame_count"] = frame_count
+                    res["timestamp"] = time.time()
                     
                     # Send metrics back
-                    await websocket.send_json(result)
+                    await websocket.send_json(res)
                     error_count = 0  # Reset error count on success
                     
                 except Exception as e:
@@ -431,7 +470,7 @@ async def get_report(session_id: str):
     if avg_tech < 60:
         tips.append("📚 Technical knowledge: Review core concepts, practice explaining them out loud.")
     if avg_comm < 60:
-        tips.append("🗣️ Communication: Reduce filler words, aim for 130-160 WPM, use structured answers (STAR method).")
+        tips.append("🗣️ Communication: Reduce filler words, aim for 130-160 WPM, use structured answers (STAR method).") 
     if avg_conf < 60:
         tips.append("📹 Body language: Maintain eye contact, sit upright, keep hands visible and relaxed.")
     if not tips:
@@ -449,6 +488,137 @@ async def get_report(session_id: str):
         "evaluations": evals,
         "tips": tips,
     }
+
+
+@app.post("/api/report/{session_id}/pdf")
+async def generate_report_pdf(session_id: str):
+    """Generate PDF report for the session and return as download."""
+    try:
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.lib import colors
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        from io import BytesIO
+        import datetime
+    except ImportError:
+        raise HTTPException(500, "PDF library not available")
+
+    # Fetch report
+    report = await get_report(session_id)
+    if "error" in report:
+        raise HTTPException(400, report["error"])
+
+    # Create PDF buffer
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    story = []
+
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#6C63FF'),
+    )
+    heading_style = ParagraphStyle(
+        'CustomHeading2',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor=colors.black,
+    )
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=8,
+        textColor=colors.black,
+    )
+
+    # Title page
+    story.append(Paragraph("PrepLoom Interview Report", title_style))
+    story.append(Spacer(1, 20))
+    story.append(Paragraph(f"Role: {report['role']}<br/><br/>Candidate: {report['name'] or 'Anonymous'}<br/><br/>Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}", normal_style))
+    story.append(Spacer(1, 40))
+    story.append(Paragraph(f"Overall Score: {report['overall']}/100", ParagraphStyle(
+        'Score',
+        parent=styles['Heading1'],
+        fontSize=48,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#22c55e' if report['overall'] >= 70 else '#f59e0b' if report['overall'] >= 45 else '#ef4444'),
+        spaceAfter=30
+    )))
+    story.append(Spacer(1, 20))
+
+    # Scores table
+    scores_data = [
+        ['Metric', 'Score', '/100'],
+        ['Technical', f"{report['avg_technical']}", '100'],
+        ['Communication', f"{report['avg_communication']}", '100'],
+        ['Confidence', f"{report['avg_confidence']}", '100'],
+    ]
+    scores_table = Table(scores_data)
+    scores_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.grey),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 14),
+        ('BOTTOMPADDING', (0,0), (-1,0), 12),
+        ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ('FONTSIZE', (0,1), (-1,-1), 12),
+    ]))
+    story.append(scores_table)
+    story.append(Spacer(1, 30))
+
+    # Tips
+    story.append(Paragraph("Improvement Tips", heading_style))
+    for tip in report['tips']:
+        story.append(Paragraph(f"• {tip}", normal_style))
+    story.append(Spacer(1, 20))
+
+    # Per-question breakdown
+    story.append(Paragraph("Question-by-Question", heading_style))
+    for i, eval in enumerate(report['evaluations'], 1):
+        story.append(Spacer(1, 12))
+        story.append(Paragraph(f"Q{i}: {eval['question_text'][:80]}...", ParagraphStyle(
+            'QTitle',
+            parent=normal_style,
+            fontSize=11,
+            spaceAfter=8,
+            fontName='Helvetica-Bold',
+        )))
+        
+        # Mini scores
+        q_scores = [
+            [f"Tech: {eval.get('technical_score', '?')}", f"Comm: {eval.get('communication_score', '?')}"],
+            [f"Conf: {eval.get('confidence_score', '?')}", '']
+        ]
+        q_table = Table(q_scores, colWidths=[2.2*inch, 2.2*inch])
+        q_table.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica-Bold'),
+        ]))
+        story.append(q_table)
+        
+        if eval.get('short_feedback'):
+            story.append(Paragraph(eval['short_feedback'], normal_style))
+
+    doc.build(story)
+
+    filename = f"PrepLoom_Report_{report['role'].replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+    return Response(
+        content=buffer.getvalue(),
+        media_type='application/pdf',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+    )
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
