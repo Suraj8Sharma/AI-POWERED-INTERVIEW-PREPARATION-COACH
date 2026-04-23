@@ -1,12 +1,11 @@
-# Video Analysis Precision Improvement TODO
+# PDF Report Generation TODO
 
 ## Plan Steps:
-- [x] Tune MediaPipe confidence thresholds to 0.65
-- [x] Update visibility threshold to 0.5
-- [x] Adjust fidgeting: inst threshold=0.008/div=0.12, var=0.02*1.0, add EMA smoothing (alpha=0.3)
-- [x] Tighten posture/engagement params (shoulder_tilt=15.0, nvar=30.0, upright=0.02/0.15)
-- [x] Reduce history to 24 frames
-- [x] Edit video_analysis.py with changes
-- [x] Test: python AI_BACKEND/video_capture/video_analysis.py → fidgeting <0.2 for still pose
-- [x] Update TODO on completion
-- [x] attempt_completion
+- [x] Install reportlab: pip install reportlab
+- [x] Backend: Add POST /api/report/{session_id}/pdf in web/api.py using ReportLab to generate PDF from report data
+- [x] Frontend: Update web/static/js/app.js showReport() to fetch/download PDF after rendering
+- [ ] DB: Store PDF path in MongoDB user.reports[] array (for session.user_id)
+- [ ] Test full flow: interview → report → PDF download
+- [ ] Update TODO.md
+- [ ] attempt_completion
+

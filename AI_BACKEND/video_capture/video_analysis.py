@@ -158,10 +158,10 @@ class BodyLanguageAnalyzer:
         lh, v_lh = _lm_xyv_list(landmark_list, PL.LEFT_HIP)
         rh, v_rh = _lm_xyv_list(landmark_list, PL.RIGHT_HIP)
 
-        vis = min(v_n, v_ls, v_rs, v_le, v_re, v_lw, v_rw)
-        if vis < 0.5:
+        vis_core = min(v_n, v_ls, v_rs)
+        if vis_core < 0.35:
             return {
-                "visibility": float(vis),
+                "visibility": float(vis_core),
                 "openness": 0.5,
                 "fidgeting": 0.5,
                 "engagement": 0.5,
@@ -199,23 +199,23 @@ class BodyLanguageAnalyzer:
         self._rw_hist.append(rw.copy())
         self._nose_hist.append(nose.copy())
 
-        fidget = 0.35
+        fidget = 0.0
         if len(self._lw_hist) >= 2:
             d_l = float(np.linalg.norm(self._lw_hist[-1] - self._lw_hist[-2]))
             d_r = float(np.linalg.norm(self._rw_hist[-1] - self._rw_hist[-2]))
             inst = (d_l + d_r) / (2.0 * scale + 1e-6)
-            fidget = float(np.clip((inst - 0.008) / 0.12, 0.0, 1.0))
+            fidget = float(np.clip((inst - 0.025) / 0.20, 0.0, 1.0))
 
 
         if len(self._lw_hist) >= 4:
-            buf_l = list(self._lw_hist)[-8:]
-            buf_r = list(self._rw_hist)[-8:]
+            buf_l = list(self._lw_hist)[-12:]
+            buf_r = list(self._rw_hist)[-12:]
             vars_ = []
             for buf in (buf_l, buf_r):
                 arr = np.stack(buf, axis=0)
                 vars_.append(float(np.var(arr, axis=0).mean()))
             var_m = float(np.mean(vars_)) / (scale**2 + 1e-6)
-            fidget = max(fidget, float(np.clip(1.0 * var_m / 0.02, 0.0, 1.0)))
+            fidget = max(fidget, float(np.clip((var_m-0.005)/ 0.02, 0.0, 1.0)))
 
 
         shoulder_mid_x = mid_sh[0]
@@ -252,7 +252,7 @@ class BodyLanguageAnalyzer:
         )
 
         return {
-            "visibility": vis,
+            "visibility": float(vis_core),
             "openness": openness,
             "fidgeting": fidget,
             "engagement": engagement,

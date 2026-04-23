@@ -738,13 +738,17 @@ if (postureBtn) postureBtn.addEventListener("click", async () => {
     postureBtn.disabled = true;
     postureBtn.innerHTML = '<span class="spinner"></span> Analyzing…';
 
-    try {
+        try {
         // Capture frame from video
         const video = videoPreview;
-        snapshotCanvas.width = video.videoWidth || 640;
-        snapshotCanvas.height = video.videoHeight || 480;
+        const targetWidth = 640;
+        const targetHeight = video.videoWidth ? Math.floor(video.videoHeight * (targetWidth / video.videoWidth)) : 480;
+        snapshotCanvas.width = targetWidth;
+        snapshotCanvas.height = targetHeight;
         const ctx = snapshotCanvas.getContext("2d");
         ctx.drawImage(video, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
+
+
 
         const blob = await new Promise(resolve => snapshotCanvas.toBlob(resolve, "image/jpeg", 0.9));
         const formData = new FormData();
@@ -785,6 +789,7 @@ if (postureBtn) postureBtn.addEventListener("click", async () => {
 let continuousAnalysisSocket = null;
 let isAnalyzingContinuous = false;
 let frameIntervalId = null;
+let isProcessingFrame = false;
 
 async function startContinuousAnalysis() {
     if (isAnalyzingContinuous || !mediaStream) return;
@@ -805,10 +810,12 @@ async function startContinuousAnalysis() {
             blSummary.textContent = "✅ Live analysis active";
             show(bodyMetrics);
             show(blSummary);
+            isProcessingFrame = false;
             startFrameCapture();
         };
         
         continuousAnalysisSocket.onmessage = (event) => {
+            isProcessingFrame = false;
             try {
                 const data = JSON.parse(event.data);
                 
@@ -845,6 +852,7 @@ async function startContinuousAnalysis() {
         };
         
         continuousAnalysisSocket.onerror = (error) => {
+            isProcessingFrame = false;
             blSummary.textContent = "❌ Connection error";
             console.error("WebSocket error:", error);
         };
@@ -863,6 +871,7 @@ async function startContinuousAnalysis() {
 
 function stopContinuousAnalysis() {
     isAnalyzingContinuous = false;
+    isProcessingFrame = false;
     
     if (frameIntervalId) {
         clearInterval(frameIntervalId);
@@ -886,12 +895,19 @@ function startFrameCapture() {
             return;
         }
         
+        if (isProcessingFrame) return;
+        isProcessingFrame = true;
+        
         try {
             const video = videoPreview;
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                isProcessingFrame = false;
+                return;
+            }
             snapshotCanvas.width = 640;
             snapshotCanvas.height = 480;
             const ctx = snapshotCanvas.getContext("2d");
-            ctx.drawImage(video, 0, 0);
+            ctx.drawImage(video, 0, 0, 640, 480);
             
             // Convert to base64 and send
             snapshotCanvas.toBlob((blob) => {
@@ -902,12 +918,14 @@ function startFrameCapture() {
                         continuousAnalysisSocket.send(JSON.stringify({ frame: base64 }));
                     }
                 };
-                reader.readAsDataURL(blob, "image/jpeg", 0.7);  // Optimized quality for <50ms latency
-            });
+                reader.onerror = () => { isProcessingFrame = false; };
+                reader.readAsDataURL(blob);
+            }, "image/jpeg", 0.6);  // Optimized quality for latency
         } catch (e) {
             console.error("Frame capture error:", e);
+            isProcessingFrame = false;
         }
-    }, 40); // 25 FPS for smooth 40ms updates
+    }, 67); // 15 FPS for smooth updates without overloading
 
 }
 
@@ -1043,6 +1061,28 @@ async function showReport() {
         const data = await api(`/api/report/${sessionId}`);
         renderReport(data);
         switchView(reportView);
+        // Download PDF
+        try {
+            const pdfRes = await fetch(`/api/report/${sessionId}/pdf`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getPreploomToken() || ''
+                }
+            });
+            if (pdfRes.ok) {
+                const blob = await pdfRes.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `PrepLoom_Report_${data.role.replace(/ /g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        } catch (pdfErr) {
+            console.warn('PDF download failed:', pdfErr);
+        }
     } catch (e) {
         alert("Could not load report: " + e.message);
     }
