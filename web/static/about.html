@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="About PrepLoom — Our mission is to make rigorous, calm interview practice accessible before the high-stakes moment." />
     <title>About — PrepLoom</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" href="/static/logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <style>
@@ -16,12 +16,28 @@
             padding: 3.5rem 0 3rem;
             overflow: hidden;
         }
-        .about-hero::before {
-            content: '';
+        .about-hero__bg {
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(108,99,255,0.18), transparent);
             pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108,99,255,0.28), transparent),
+                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(45,212,191,0.1), transparent),
+                radial-gradient(ellipse 40% 30% at 10% 60%, rgba(108,99,255,0.08), transparent);
+        }
+        .about-hero__noise {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+        .about-hero__inner {
+            position: relative;
+            z-index: 1;
         }
         .about-hero__eyebrow {
             display: inline-flex;
@@ -281,7 +297,7 @@
 <div class="site-wrap">
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
-            <span class="site-nav__mark" aria-hidden="true">PL</span>
+            <img src="/static/logo.png" alt="PrepLoom Logo" style="height: 32px; width: auto; border-radius: 6px;" />
             PrepLoom
         </a>
         <nav class="site-nav__links" aria-label="Main">
@@ -303,12 +319,16 @@
 
     <main class="site-main">
         <div class="about-hero">
+            <div class="about-hero__bg" aria-hidden="true"></div>
+            <div class="about-hero__noise" aria-hidden="true"></div>
+            <div class="about-hero__inner">
             <div class="about-hero__eyebrow">
                 <span class="dot"></span>
                 Meet the builders
             </div>
             <h1>About PrepLoom</h1>
             <p>We believe preparation should feel focused and repeatable—not frantic. PrepLoom is a capstone-grade workspace for mock interviews: technical depth, how you sound, and how you show up.</p>
+            </div>
         </div>
 
         <section class="about-section" data-animate>
