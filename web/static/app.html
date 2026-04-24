@@ -1112,6 +1112,53 @@ select.s-input option {
     color: var(--muted);
 }
 
+/* ── CODE EDITOR ───────────────────────────────────────────── */
+.code-editor-wrap {
+    height: 350px;
+    border: 1px solid var(--border);
+    border-radius: 0 0 var(--r-sm) var(--r-sm);
+    overflow: hidden;
+    position: relative;
+}
+#codeEditor {
+    width: 100%;
+    height: 100%;
+}
+.code-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    background: rgba(14,16,24,0.9);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--r-sm) var(--r-sm) 0 0;
+}
+.code-lang-select {
+    /* 1. Background and Border */
+    background: rgba(108, 99, 255, 0.08);
+    border: 1px solid rgba(108, 99, 255, 0.3); /* Slightly increased opacity for better visibility */
+    border-radius: 4px;
+    
+    /* 2. Fix the text color so it pops on the dark background */
+    color: #ffffff; 
+    
+    /* 3. Sizing and Spacing */
+    padding: 0.35rem 0.6rem; /* Slightly larger padding for a better click target */
+    font-size: 0.85rem; 
+    
+    /* 4. Usability */
+    outline: none;
+    cursor: pointer;
+}
+
+/* 5. Style the actual dropdown list items */
+.code-lang-select option {
+    background: #1a1a2e; /* Matches your dark navy/black background */
+    color: #ffffff;      /* White text for the list items */
+    padding: 10px;       
+}
+
 /* ── FEEDBACK PANEL ────────────────────────────────────────── */
 .fb-empty {
     padding: 0.75rem 0;
@@ -1614,6 +1661,10 @@ select.s-input option {
                             <input type="checkbox" id="showIdealCheck" />
                             Show ideal
                         </label>
+                        <label class="check-label">
+                            <input type="checkbox" id="showEditorCheck" />
+                            Code Editor
+                        </label>
                     </div>
                     <div id="recordingIndicator" class="rec-indicator hidden">
                         <span class="rec-dot"></span>
@@ -1631,6 +1682,21 @@ select.s-input option {
                         Ideal Answer
                     </div>
                     <p id="idealText"></p>
+                </div>
+
+                <div id="codingWorkspace" class="hidden" style="margin-top: 1rem; margin-bottom: 1rem; animation: fadeIn 0.3s ease;">
+                    <div class="code-toolbar">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--teal); letter-spacing: 0.05em; text-transform: uppercase;">Technical Workspace</div>
+                        <select id="codeLangSelect" class="code-lang-select">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div class="code-editor-wrap">
+                        <div id="codeEditor"></div>
+                    </div>
                 </div>
 
                 <div class="type-row">
@@ -1802,5 +1868,33 @@ select.s-input option {
 </script>
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/app.js"></script>
+
+<!-- Monaco Editor Loader -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+<script>
+    let preploomCodeEditor = null;
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+    require(['vs/editor/editor.main'], function() {
+        preploomCodeEditor = monaco.editor.create(document.getElementById('codeEditor'), {
+            value: '# Write your optimal solution here...\n',
+            language: 'python',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            minimap: { enabled: false },
+            fontSize: 14,
+            fontFamily: "'JetBrains Mono', monospace",
+            padding: { top: 16, bottom: 16 },
+            scrollBeyondLastLine: false
+        });
+        
+        document.getElementById('codeLangSelect').addEventListener('change', function(e) {
+            monaco.editor.setModelLanguage(preploomCodeEditor.getModel(), e.target.value);
+        });
+    });
+
+    document.getElementById('showEditorCheck').addEventListener('change', function(e) {
+        document.getElementById('codingWorkspace').classList.toggle('hidden', !e.target.checked);
+    });
+</script>
 </body>
 </html>

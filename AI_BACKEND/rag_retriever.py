@@ -156,6 +156,11 @@ def _is_behavioural(difficulty_level: Any) -> bool:
     # Dataset uses "Behavioural" (sometimes with trailing space)
     return "behavioural" in text or "behavioral" in text
 
+def _is_coding(q: RetrievedQuestion) -> bool:
+    """Identify coding questions based on common LeetCode phrasing."""
+    text = (q.question_text or "").lower()
+    return "write a function" in text or "given an array" in text or "singly linked list" in text
+
 
 def fetch_questions_for_role_random_mix(
     vectordb: Chroma,
@@ -203,16 +208,51 @@ def fetch_questions_for_role_random_mix(
         all_qs = all_qs[:limit]
 
     behavioural = [q for q in all_qs if _is_behavioural(q.difficulty_level)]
-    technical = [q for q in all_qs if not _is_behavioural(q.difficulty_level)]
+    tech_all = [q for q in all_qs if not _is_behavioural(q.difficulty_level)]
+    
+    # Separate coding from standard conceptual tech questions
+    coding = [q for q in tech_all if _is_coding(q)]
+    standard_tech = [q for q in tech_all if not _is_coding(q)]
+    
+    print(f"\n[DEBUG] Found {len(coding)} coding questions for role: {role_tag}")
 
-    n_technical = rng.randint(technical_min, technical_max)
-    n_technical = min(n_technical, len(technical))
     n_behavioural = min(behavioural_count, len(behavioural))
+    n_coding = 2 # Force exactly 2 coding questions
+    
+    # Fill the rest of the quota with standard technical questions
+    n_standard_tech = rng.randint(technical_min, technical_max) - n_coding
+    n_standard_tech = max(0, min(n_standard_tech, len(standard_tech)))
 
-    chosen_technical = rng.sample(technical, n_technical) if n_technical > 0 else []
     chosen_behavioural = rng.sample(behavioural, n_behavioural) if n_behavioural > 0 else []
+    chosen_standard_tech = rng.sample(standard_tech, n_standard_tech) if n_standard_tech > 0 else []
+    
+    if len(coding) >= n_coding:
+        chosen_coding = rng.sample(coding, n_coding)
+    elif len(coding) > 0:
+        chosen_coding = coding
+    else:
+        print("[DEBUG] No coding questions found in DB. Injecting fallback coding questions.")
+        chosen_coding = [
+            RetrievedQuestion(
+                question_text="Write a function to solve the 'Two Sum' problem. Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+                question_id="fallback_code_1",
+                role_tag=role_tag,
+                difficulty_level="Medium",
+                subtopic="Arrays & Hashing",
+                ideal_answer="The optimal solution uses a Hash Map (dictionary) to store the complement of each number as we iterate through the array. This gives O(n) Time Complexity and O(n) Space Complexity. A brute force nested loop would be O(n^2) which is suboptimal.",
+                metadata={}
+            ),
+            RetrievedQuestion(
+                question_text="Write a function to check if a given string is a valid palindrome. It should ignore non-alphanumeric characters and be case-insensitive.",
+                question_id="fallback_code_2",
+                role_tag=role_tag,
+                difficulty_level="Easy",
+                subtopic="Two Pointers",
+                ideal_answer="The optimal solution uses the Two Pointer technique. One pointer starts at the beginning, one at the end, moving inward and skipping non-alphanumeric characters. This gives O(n) Time Complexity and O(1) Space Complexity.",
+                metadata={}
+            )
+        ]
 
-    mixed = chosen_technical + chosen_behavioural
-    rng.shuffle(mixed)
-    return mixed
-
+    # Return the questions in the exact requested order: 
+    # Standard Technical -> Coding -> Behavioural
+    return chosen_standard_tech + chosen_coding + chosen_behavioural

@@ -128,6 +128,7 @@ def evaluate_technical_answer(
     question_text: str,
     ideal_answer: str,
     user_answer: str,
+    code_submission: str | None = None,
     role_tag: str | None = None,
     difficulty_level: str | None = None,
 ) -> dict[str, Any]:
@@ -144,6 +145,7 @@ def evaluate_technical_answer(
     """
     user_answer = user_answer or ""
     ideal_answer = ideal_answer or ""
+    code_submission = code_submission or ""
 
     # LLM scoring (best effort)
     try:
@@ -152,20 +154,39 @@ def evaluate_technical_answer(
         role_hint = f"Role: {role_tag}.\n" if role_tag else ""
         diff_hint = f"Difficulty: {difficulty_level}.\n" if difficulty_level else ""
 
-        prompt = (
-            "You are an expert technical interviewer.\n"
-            f"{role_hint}{diff_hint}"
-            "Compare the user's answer with the ideal answer and score technical proficiency.\n\n"
-            f"Question:\n{question_text}\n\n"
-            f"Ideal answer:\n{ideal_answer}\n\n"
-            f"User answer:\n{user_answer}\n\n"
-            "Return ONLY valid JSON with the following keys:\n"
-            "- technical_score: integer 0-100\n"
-            "- strengths: array of up to 3 short strings\n"
-            "- improvements: array of up to 3 short strings\n"
-            "- missing_points: array of short strings (can be empty)\n"
-            "- short_feedback: one short sentence\n"
-        )
+        is_coding = bool(code_submission.strip() and not code_submission.strip().startswith("# Write your optimal"))
+
+        if is_coding:
+            prompt = (
+                "You are an expert technical interviewer evaluating a coding challenge.\n"
+                f"{role_hint}{diff_hint}"
+                f"Question:\n{question_text}\n\n"
+                f"Ideal Reference:\n{ideal_answer}\n\n"
+                f"Candidate's spoken explanation:\n{user_answer}\n\n"
+                f"Candidate's submitted code:\n{code_submission}\n\n"
+                "Evaluate BOTH the candidate's explanation and their code. Check for Big-O complexity (Time & Space), edge cases, and code cleanliness.\n"
+                "Return ONLY valid JSON with the following keys:\n"
+                "- technical_score: integer 0-100\n"
+                "- strengths: array of up to 3 short strings (e.g. 'Optimal O(n) time', 'Good variable naming')\n"
+                "- improvements: array of up to 3 short strings (e.g. 'Missed empty array edge case')\n"
+                "- missing_points: array of short strings (can be empty)\n"
+                "- short_feedback: one short paragraph summarizing their code quality and explanation.\n"
+            )
+        else:
+            prompt = (
+                "You are an expert technical interviewer.\n"
+                f"{role_hint}{diff_hint}"
+                "Compare the user's answer with the ideal answer and score technical proficiency.\n\n"
+                f"Question:\n{question_text}\n\n"
+                f"Ideal answer:\n{ideal_answer}\n\n"
+                f"User answer:\n{user_answer}\n\n"
+                "Return ONLY valid JSON with the following keys:\n"
+                "- technical_score: integer 0-100\n"
+                "- strengths: array of up to 3 short strings\n"
+                "- improvements: array of up to 3 short strings\n"
+                "- missing_points: array of short strings (can be empty)\n"
+                "- short_feedback: one short sentence\n"
+            )
 
         resp = llm.invoke(prompt)
         data = _safe_json_loads(getattr(resp, "content", "") or str(resp))
@@ -185,5 +206,7 @@ def evaluate_technical_answer(
         # Fall back if HF endpoint / dependencies fail.
         pass
 
-    return _heuristic_score(user_answer=user_answer, ideal_answer=ideal_answer)
-
+    combined_answer = user_answer
+    if code_submission:
+        combined_answer += "\n\nCode:\n" + code_submission
+    return _heuristic_score(user_answer=combined_answer, ideal_answer=ideal_answer)

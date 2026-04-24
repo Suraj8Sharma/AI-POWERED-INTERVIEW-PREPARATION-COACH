@@ -377,7 +377,12 @@ function enableControls(on) {
 }
 
 function updateSubmitState() {
-    submitBtn.disabled = isRecording || !lastAnswer.trim();
+    let codeSubmission = "";
+    const codingWorkspace = document.getElementById('codingWorkspace');
+    if (codingWorkspace && !codingWorkspace.classList.contains('hidden') && typeof preploomCodeEditor !== 'undefined') {
+        codeSubmission = preploomCodeEditor.getValue();
+    }
+    submitBtn.disabled = isRecording || (!lastAnswer.trim() && !codeSubmission.trim());
 }
 
 function startLiveTranscript() {
@@ -944,7 +949,13 @@ continuousAnalysisBtn.addEventListener("click", () => {
 //  SUBMIT ANSWER
 // ═══════════════════════════════════════════════════════════════════════════
 submitBtn.addEventListener("click", async () => {
-    if (!lastAnswer.trim() || !sessionId) return;
+    let codeSubmission = "";
+    const codingWorkspace = document.getElementById('codingWorkspace');
+    if (codingWorkspace && !codingWorkspace.classList.contains('hidden') && typeof preploomCodeEditor !== 'undefined') {
+        codeSubmission = preploomCodeEditor.getValue();
+    }
+
+    if ((!lastAnswer.trim() && !codeSubmission.trim()) || !sessionId) return;
 
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="spinner"></span> Evaluating…';
@@ -958,6 +969,7 @@ submitBtn.addEventListener("click", async () => {
                 answer: lastAnswer,
                 duration: answerDuration,
                 body_language: bodyLanguageData,
+                code_submission: codeSubmission,
             }),
         });
 

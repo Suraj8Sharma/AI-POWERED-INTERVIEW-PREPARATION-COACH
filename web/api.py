@@ -205,6 +205,7 @@ async def submit_answer(payload: dict):
     answer = payload.get("answer", "").strip()
     duration = float(payload.get("duration", 7.0))
     bl_data = payload.get("body_language")
+    code_submission = payload.get("code_submission", "")
 
     idx = session["question_idx"]
     questions = session["questions"]
@@ -218,6 +219,7 @@ async def submit_answer(payload: dict):
         question_text=q.question_text,
         ideal_answer=q.ideal_answer or "",
         user_answer=answer,
+        code_submission=code_submission,
         role_tag=q.role_tag,
         difficulty_level=q.difficulty_level,
     )
