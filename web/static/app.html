@@ -1782,7 +1782,7 @@ select.s-input option {
             <h2 id="signin-title" style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;">Sign in</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close" style="width:36px;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,0.06);color:rgba(240,242,248,0.62);font-size:1.25rem;cursor:pointer;">×</button>
         </div>
-        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">MongoDB stores your account; you receive a JWT stored in this browser.</p>
+        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Sign in with Supabase to save your account and continue your interview progress across sessions.</p>
         <p id="signinError" class="modal-error" hidden style="font-size:0.82rem;color:#f87171;margin-bottom:0.75rem;"></p>
         <form id="formSignin">
             <div style="margin-bottom:1rem;">
@@ -1795,6 +1795,7 @@ select.s-input option {
             </div>
             <button type="submit" style="width:100%;padding:0.75rem;margin-top:0.35rem;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Sign in</button>
         </form>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;">Continue with Google</button>
         <p style="text-align:center;margin-top:1rem;font-size:0.82rem;color:rgba(240,242,248,0.38);">No account? <button type="button" data-open-modal="modal-signup" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-family:inherit;font-size:inherit;">Sign up</button></p>
     </div>
 </div>
@@ -1805,7 +1806,7 @@ select.s-input option {
             <h2 id="signup-title" style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;">Create account</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close" style="width:36px;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,0.06);color:rgba(240,242,248,0.62);font-size:1.25rem;cursor:pointer;">×</button>
         </div>
-        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Password must be at least 8 characters. You can use Practice without an account.</p>
+        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Create an account to save your progress. Password must be at least 8 characters.</p>
         <p id="signupError" class="modal-error" hidden style="font-size:0.82rem;color:#f87171;margin-bottom:0.75rem;"></p>
         <form id="formSignup">
             <div style="margin-bottom:1rem;">
@@ -1822,6 +1823,7 @@ select.s-input option {
             </div>
             <button type="submit" style="width:100%;padding:0.75rem;margin-top:0.35rem;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Create account</button>
         </form>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;">Continue with Google</button>
         <p style="text-align:center;margin-top:1rem;font-size:0.82rem;color:rgba(240,242,248,0.38);">Already have an account? <button type="button" data-open-modal="modal-signin" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-family:inherit;font-size:inherit;">Sign in</button></p>
     </div>
 </div>
@@ -1866,6 +1868,9 @@ select.s-input option {
     });
 })();
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/app.js"></script>
 

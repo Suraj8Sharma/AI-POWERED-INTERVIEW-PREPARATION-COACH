@@ -1,8 +1,12 @@
-"""JWT + bcrypt auth API backed by MongoDB."""
+"""JWT + bcrypt auth API backed by MongoDB, with Supabase token support."""
 
 from __future__ import annotations
 
+import asyncio
+import json
 import os
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any
 
@@ -60,6 +64,57 @@ def user_doc_to_public(doc: dict) -> dict[str, Any]:
         "email": doc["email"],
         "name": doc.get("name") or "",
     }
+
+
+def get_supabase_settings() -> tuple[str, str]:
+    url = (
+        os.getenv("SUPABASE_URL")
+        or os.getenv("SUPABASE_PROJECT_URL")
+        or os.getenv("supabase_url")
+        or ""
+    ).strip()
+    anon_key = (
+        os.getenv("SUPABASE_ANON_KEY")
+        or os.getenv("SUPABASE_PUBLISHABLE_KEY")
+        or os.getenv("supabase_anon_key")
+        or ""
+    ).strip()
+    return url.rstrip("/"), anon_key
+
+
+def _fetch_supabase_user(token: str) -> dict[str, Any] | None:
+    base_url, anon_key = get_supabase_settings()
+    if not base_url or not anon_key:
+        return None
+
+    req = Request(
+        f"{base_url}/auth/v1/user",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "apikey": anon_key,
+        },
+    )
+
+    try:
+        with urlopen(req, timeout=8) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
+        return None
+
+    if not payload or not payload.get("id") or not payload.get("email"):
+        return None
+
+    meta = payload.get("user_metadata") or {}
+    return {
+        "id": payload["id"],
+        "email": payload["email"],
+        "name": meta.get("name") or meta.get("full_name") or "",
+        "auth_provider": "supabase",
+    }
+
+
+async def get_supabase_user_from_token(token: str) -> dict[str, Any] | None:
+    return await asyncio.to_thread(_fetch_supabase_user, token)
 
 
 async def get_user_by_id(user_id: str) -> dict | None:
@@ -134,6 +189,9 @@ async def me(creds: Annotated[HTTPAuthorizationCredentials | None, Depends(secur
         if not uid:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     except JWTError:
+        user = await get_supabase_user_from_token(creds.credentials)
+        if user:
+            return user
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
@@ -155,5 +213,5 @@ async def get_optional_user(
         if not uid:
             return None
     except JWTError:
-        return None
+        return await get_supabase_user_from_token(creds.credentials)
     return await get_user_by_id(uid)

@@ -652,7 +652,7 @@
             <h2 id="signin-title">Sign in</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
         </div>
-        <p class="modal__note">MongoDB stores your account; you receive a JWT stored in this browser.</p>
+        <p class="modal__note">Sign in with Supabase to save your account and continue your interview progress across sessions.</p>
         <p id="signinError" class="modal-error" hidden></p>
         <form id="formSignin">
             <div class="modal__field">
@@ -665,6 +665,7 @@
             </div>
             <button type="submit" class="btn-modal-primary">Sign in</button>
         </form>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
         <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
     </div>
 </div>
@@ -676,7 +677,7 @@
             <h2 id="signup-title">Create account</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
         </div>
-        <p class="modal__note">Password must be at least 8 characters. You can use Practice without an account.</p>
+        <p class="modal__note">Create an account to save your progress. Password must be at least 8 characters.</p>
         <p id="signupError" class="modal-error" hidden></p>
         <form id="formSignup">
             <div class="modal__field">
@@ -693,10 +694,14 @@
             </div>
             <button type="submit" class="btn-modal-primary">Create account</button>
         </form>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
         <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
     </div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
 <script>
