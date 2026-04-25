@@ -36,6 +36,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
+# ...existing code...
+import os
+from fastapi.responses import JSONResponse
+
+# ...existing code (app = FastAPI() etc.) ...
+
+
 
 # ── Path setup (same as frontend.py) ──────────────────────────────────────
 APP_ROOT = Path(__file__).resolve().parents[1]
@@ -126,6 +133,24 @@ async def serve_app():
 
 # Mount static files AFTER the root route so /api/* takes precedence
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+@app.get("/api/public-config")
+async def get_public_config():
+    return {
+        "supabase_url": (
+            os.getenv("SUPABASE_URL")
+            or os.getenv("SUPABASE_PROJECT_URL")
+            or os.getenv("supabase_url")
+            or ""
+        ).strip(),
+        "supabase_anon_key": (
+            os.getenv("SUPABASE_ANON_KEY")
+            or os.getenv("SUPABASE_PUBLISHABLE_KEY")
+            or os.getenv("supabase_anon_key")
+            or ""
+        ).strip(),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════

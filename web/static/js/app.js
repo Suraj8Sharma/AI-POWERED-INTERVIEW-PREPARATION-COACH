@@ -108,6 +108,9 @@ const PREPLOOM_TOKEN_KEY = "preploom_token";
 
 function getPreploomToken() {
     try {
+        if (window.SB && typeof window.SB.getToken === "function") {
+            return window.SB.getToken();
+        }
         return localStorage.getItem(PREPLOOM_TOKEN_KEY);
     } catch (e) {
         return null;
@@ -1075,11 +1078,10 @@ async function showReport() {
         switchView(reportView);
         // Download PDF
         try {
+            const token = getPreploomToken();
             const pdfRes = await fetch(`/api/report/${sessionId}/pdf`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + getPreploomToken() || ''
-                }
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
             });
             if (pdfRes.ok) {
                 const blob = await pdfRes.blob();
