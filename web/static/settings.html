@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Settings — PrepLoom. Customize your AI interview coaching experience." />
+    <title>Settings — PrepLoom</title>
+    <link rel="icon" href="/static/logo.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/site.css" />
+    <style>
+/* ================================================================
+   PREPLOOM SETTINGS — PREMIUM DARK/LIGHT THEME
+   ================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── Theme tokens ────────────────────────────────────────── */
+:root {
+    --transition-theme: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+    --bg:            #07080c;
+    --bg-elevated:   #0e1018;
+    --bg-surface:    rgba(14,16,30,0.78);
+    --bg-input:      rgba(255,255,255,0.04);
+    --bg-input-hover:rgba(255,255,255,0.07);
+    --bg-hover:      rgba(255,255,255,0.04);
+    --border:        rgba(255,255,255,0.07);
+    --border-md:     rgba(255,255,255,0.11);
+    --border-hi:     rgba(255,255,255,0.18);
+    --text:          #f0f2f8;
+    --text-2:        rgba(240,242,248,0.6);
+    --text-3:        rgba(240,242,248,0.35);
+    --accent:        #6c63ff;
+    --accent-2:      #8b84ff;
+    --accent-glow:   rgba(108,99,255,0.25);
+    --accent-soft:   rgba(108,99,255,0.12);
+    --accent-text:   #a78bfa;
+    --teal:          #2dd4bf;
+    --teal-soft:     rgba(45,212,191,0.1);
+    --green:         #22c55e;
+    --green-soft:    rgba(34,197,94,0.1);
+    --amber:         #f59e0b;
+    --amber-soft:    rgba(245,158,11,0.1);
+    --red:           #ef4444;
+    --red-soft:      rgba(239,68,68,0.1);
+    --nav-bg:        rgba(7,8,12,0.88);
+    --card-shine:    rgba(255,255,255,0.03);
+    --shadow:        0 8px 40px rgba(0,0,0,0.35);
+    --orb-1:         rgba(108,99,255,0.22);
+    --orb-2:         rgba(45,212,191,0.13);
+    --orb-3:         rgba(167,139,250,0.11);
+    --save-bg:       linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+[data-theme="light"] {
+    --bg:            #f5f5f8;
+    --bg-elevated:   #ffffff;
+    --bg-surface:    rgba(255,255,255,0.92);
+    --bg-input:      rgba(0,0,0,0.04);
+    --bg-input-hover:rgba(0,0,0,0.07);
+    --bg-hover:      rgba(0,0,0,0.04);
+    --border:        rgba(0,0,0,0.08);
+    --border-md:     rgba(0,0,0,0.12);
+    --border-hi:     rgba(0,0,0,0.2);
+    --text:          #0f0f14;
+    --text-2:        rgba(15,15,20,0.6);
+    --text-3:        rgba(15,15,20,0.38);
+    --accent:        #5b52f5;
+    --accent-2:      #7c74ff;
+    --accent-glow:   rgba(91,82,245,0.2);
+    --accent-soft:   rgba(91,82,245,0.08);
+    --accent-text:   #6c63ff;
+    --teal:          #0ea5a0;
+    --teal-soft:     rgba(14,165,160,0.1);
+    --green:         #16a34a;
+    --green-soft:    rgba(22,163,74,0.1);
+    --amber:         #d97706;
+    --amber-soft:    rgba(217,119,6,0.1);
+    --red:           #dc2626;
+    --red-soft:      rgba(220,38,38,0.1);
+    --nav-bg:        rgba(245,245,248,0.92);
+    --card-shine:    rgba(255,255,255,0.8);
+    --shadow:        0 4px 24px rgba(0,0,0,0.08);
+    --orb-1:         rgba(108,99,255,0.08);
+    --orb-2:         rgba(45,212,191,0.06);
+    --orb-3:         rgba(167,139,250,0.06);
+    --save-bg:       linear-gradient(135deg,#16a34a,#15803d);
+}
+
+html { height: 100%; scroll-behavior: smooth; }
+
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    transition: background var(--transition-theme), color var(--transition-theme);
+    overflow-x: hidden;
+}
+
+/* ── Ambient orbs ──────────────────────────────────────── */
+.ambient {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    transition: opacity var(--transition-theme);
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(110px);
+    animation: orbFloat 24s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--orb-1), transparent 70%);
+    top: -15%; left: -12%;
+}
+.orb-2 {
+    width: 450px; height: 450px;
+    background: radial-gradient(circle, var(--orb-2), transparent 70%);
+    top: 40%; right: -10%;
+    animation-delay: -8s; animation-duration: 30s;
+}
+.orb-3 {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, var(--orb-3), transparent 70%);
+    bottom: -8%; left: 30%;
+    animation-delay: -16s; animation-duration: 36s;
+}
+
+@keyframes orbFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33%      { transform: translate(24px,-32px) scale(1.03); }
+    66%      { transform: translate(-16px,20px) scale(0.97); }
+}
+
+/* ── Nav ──────────────────────────────────────────────── */
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition-theme), border-color var(--transition-theme);
+}
+
+.nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.04em;
+    transition: opacity 0.2s;
+}
+.nav__brand:hover { opacity: 0.85; }
+
+.nav__mark {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), #8b84ff 55%, var(--teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px var(--accent-glow);
+    overflow: hidden;
+}
+.nav__mark img { width: 100%; height: 100%; object-fit: cover; }
+
+.nav__right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.nav__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-md);
+    background: transparent;
+    color: var(--text-2);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.18s;
+}
+.nav__back:hover { background: var(--bg-hover); color: var(--text); border-color: var(--border-hi); }
+
+/* ── Page shell ───────────────────────────────────────── */
+.page {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+}
+
+/* ── Page header ──────────────────────────────────────── */
+.page-header {
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.55s ease both;
+}
+
+.page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--teal-soft);
+    background: var(--teal-soft);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 1rem;
+    transition: background var(--transition-theme), border-color var(--transition-theme);
+}
+
+.page-eyebrow::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 6px var(--teal);
+    animation: dotBlink 2s ease-in-out infinite;
+}
+
+@keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.page-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--text) 0%, var(--text-2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: none;
+}
+
+.page-sub {
+    font-size: 0.93rem;
+    color: var(--text-2);
+    line-height: 1.6;
+    transition: color var(--transition-theme);
+}
+
+/* ── Settings layout: sidebar + content ────────────────── */
+.settings-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 1.75rem;
+    align-items: start;
+}
+
+@media (max-width: 720px) {
+    .settings-layout { grid-template-columns: 1fr; }
+    .settings-nav { flex-direction: row; flex-wrap: wrap; }
+}
+
+/* ── Side nav ────────────────────────────────────────── */
+.settings-nav {
+    position: sticky;
+    top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    backdrop-filter: blur(12px);
+    animation: fadeUp 0.55s 0.05s ease both;
+    transition: background var(--transition-theme), border-color var(--transition-theme);
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.18s;
+    border: none;
+    background: none;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+}
+
+.nav-item:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.nav-item.active {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+}
+
+.nav-item svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.nav-item.active svg { opacity: 1; }
+
+.nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.25rem 0;
+}
+
+/* ── Settings panels ─────────────────────────────────── */
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.settings-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.55s ease both;
+    transition: background var(--transition-theme), border-color var(--transition-theme), box-shadow var(--transition-theme);
+}
+
+.settings-panel:nth-child(2) { animation-delay: 0.05s; }
+.settings-panel:nth-child(3) { animation-delay: 0.10s; }
+.settings-panel:nth-child(4) { animation-delay: 0.15s; }
+.settings-panel:nth-child(5) { animation-delay: 0.20s; }
+
+.panel-header {
+    padding: 1.25rem 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+}
+
+.panel-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.panel-icon--accent  { background: var(--accent-soft); color: var(--accent-text); }
+.panel-icon--teal    { background: var(--teal-soft); color: var(--teal); }
+.panel-icon--amber   { background: var(--amber-soft); color: var(--amber); }
+.panel-icon--green   { background: var(--green-soft); color: var(--green); }
+.panel-icon--red     { background: var(--red-soft); color: var(--red); }
+
+.panel-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    transition: color var(--transition-theme);
+}
+
+.panel-subtitle {
+    font-size: 0.76rem;
+    color: var(--text-3);
+    margin-top: 0.1rem;
+    transition: color var(--transition-theme);
+}
+
+.panel-body {
+    padding: 0 1.5rem 1.5rem;
+}
+
+/* ── Setting rows ────────────────────────────────────── */
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+    gap: 1.5rem;
+    transition: border-color var(--transition-theme);
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.setting-row:hover .setting-label { color: var(--text); }
+
+.setting-info { flex: 1; min-width: 0; }
+
+.setting-label {
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.18rem;
+    transition: color var(--transition-theme);
+}
+
+.setting-desc {
+    font-size: 0.76rem;
+    color: var(--text-3);
+    line-height: 1.45;
+    transition: color var(--transition-theme);
+}
+
+.setting-control { flex-shrink: 0; }
+
+/* ── Toggle ──────────────────────────────────────────── */
+.toggle {
+    position: relative;
+    width: 42px; height: 23px;
+    flex-shrink: 0;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+.toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--border-md);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.22s, box-shadow 0.22s;
+}
+
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 17px; height: 17px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.toggle input:checked ~ .toggle-track {
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+}
+
+.toggle input:checked ~ .toggle-track::after {
+    transform: translateX(19px);
+}
+
+/* ── Input, Select ───────────────────────────────────── */
+.s-input, .s-select {
+    padding: 0.55rem 0.85rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border-md);
+    border-radius: 9px;
+    color: var(--text);
+    font-size: 0.84rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, color var(--transition-theme);
+    min-width: 160px;
+}
+
+.s-input:focus, .s-select:focus {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.s-input::placeholder { color: var(--text-3); }
+
+.s-select {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(150,150,170,0.8)' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.25rem;
+}
+
+.s-select option { background: var(--bg-elevated); color: var(--text); }
+
+/* ── Theme switcher ──────────────────────────────────── */
+.theme-switcher {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border-md);
+    border-radius: 10px;
+    transition: background var(--transition-theme), border-color var(--transition-theme);
+}
+
+.theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.48rem 0.85rem;
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-2);
+    transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap;
+}
+
+.theme-btn:hover { color: var(--text); background: var(--bg-hover); }
+
+.theme-btn.active {
+    background: var(--bg-elevated);
+    border-color: var(--border-md);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* ── Accent color picker ─────────────────────────────── */
+.accent-picker {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.accent-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.accent-dot:hover { transform: scale(1.15); }
+
+.accent-dot.active {
+    border-color: var(--text);
+    box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px currentColor;
+    transform: scale(1.12);
+}
+
+.accent-dot::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0;
+    transition: opacity 0.18s;
+}
+
+.accent-dot.active::after { opacity: 0.35; }
+
+/* ── Avatar upload ───────────────────────────────────── */
+.avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: border-color var(--transition-theme);
+}
+
+.avatar-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #8b84ff 55%, var(--teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px var(--accent-glow);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 24px var(--accent-glow);
+}
+
+.avatar-circle .avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.18s;
+    border-radius: 50%;
+}
+
+.avatar-circle:hover .avatar-overlay { opacity: 1; }
+
+.avatar-info { flex: 1; }
+.avatar-name { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+.avatar-hint { font-size: 0.74rem; color: var(--text-3); margin-top: 0.15rem; }
+
+.avatar-btn {
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border-md);
+    background: var(--bg-input);
+    color: var(--text-2);
+    transition: all 0.18s;
+}
+.avatar-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--border-hi); }
+
+/* ── Danger zone ─────────────────────────────────────── */
+.danger-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+    gap: 1.5rem;
+    transition: border-color var(--transition-theme);
+}
+.danger-row:last-child { border-bottom: none; }
+
+.btn-danger {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid rgba(239,68,68,0.3);
+    background: var(--red-soft);
+    color: var(--red);
+    transition: all 0.18s;
+    white-space: nowrap;
+}
+.btn-danger:hover {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.5);
+    box-shadow: 0 4px 14px rgba(239,68,68,0.15);
+}
+
+/* ── Stats strip ─────────────────────────────────────── */
+.stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    animation: fadeUp 0.55s 0.03s ease both;
+}
+
+@media (max-width: 720px) {
+    .stats-strip { grid-template-columns: repeat(2,1fr); }
+}
+
+.stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.1rem 1rem;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    transition: all 0.2s, background var(--transition-theme), border-color var(--transition-theme);
+    cursor: default;
+}
+
+.stat-card:hover {
+    border-color: var(--accent-soft);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+}
+
+.stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.7rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(135deg, var(--accent-text), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-lbl {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    transition: color var(--transition-theme);
+}
+
+/* ── Save bar ─────────────────────────────────────────── */
+.save-bar {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-md);
+    border-radius: 999px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.3), 0 0 0 1px var(--accent-soft);
+    backdrop-filter: blur(16px);
+    z-index: 200;
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background var(--transition-theme);
+    white-space: nowrap;
+}
+
+.save-bar.visible {
+    transform: translateX(-50%) translateY(0);
+}
+
+.save-bar-text {
+    font-size: 0.83rem;
+    color: var(--text-2);
+    font-weight: 500;
+}
+
+.save-bar-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 8px rgba(245,158,11,0.6);
+    animation: pulseDot 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.3); }
+}
+
+.btn-save {
+    padding: 0.55rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: var(--save-bg);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(34,197,94,0.45); }
+
+.btn-discard {
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border-md);
+    background: transparent;
+    color: var(--text-2);
+    transition: all 0.15s;
+}
+.btn-discard:hover { background: var(--bg-hover); color: var(--text); }
+
+/* ── Toast ────────────────────────────────────────────── */
+.toast {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--green-soft);
+    border-radius: 12px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--green);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+}
+
+.toast.show { opacity: 1; transform: translateX(0); }
+
+/* ── Badge tags ───────────────────────────────────────── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.badge--new { background: var(--teal-soft); color: var(--teal); border: 1px solid rgba(45,212,191,0.2); }
+.badge--pro { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+.badge--beta { background: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent-soft); }
+
+/* ── Progress ring ────────────────────────────────────── */
+.progress-ring-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ring-svg { transform: rotate(-90deg); }
+
+.ring-bg { fill: none; stroke: var(--border-md); stroke-width: 3; }
+.ring-fill { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 88; transition: stroke-dashoffset 0.8s ease; }
+
+/* ── Animations ───────────────────────────────────────── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Keyboard shortcut chips ─────────────────────────── */
+.kbd {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: var(--bg-input);
+    border: 1px solid var(--border-md);
+    color: var(--text-3);
+    gap: 0.2rem;
+}
+
+/* ── Range slider ────────────────────────────────────── */
+.range-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 200px;
+}
+
+.s-range {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 4px;
+    border-radius: 99px;
+    background: var(--border-md);
+    outline: none;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.s-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 2px 8px var(--accent-glow);
+    cursor: grab;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.s-range::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.2);
+    box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.range-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-text);
+    min-width: 32px;
+    text-align: right;
+}
+
+/* ── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ── Section hidden state ────────────────────────────── */
+.settings-section { display: none; }
+.settings-section.active { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    </style>
+</head>
+<body>
+
+<!-- Ambient -->
+<div class="ambient" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<!-- Nav -->
+<nav class="nav">
+    <a class="nav__brand" href="/">
+        <div class="nav__mark">
+            <img src="/static/logo.png" alt="PrepLoom" onerror="this.style.display='none';this.parentElement.textContent='PL'" />
+        </div>
+        PrepLoom
+    </a>
+    <div class="nav__right">
+        <a class="nav__back" href="/">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+        </a>
+    </div>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    Settings saved
+</div>
+
+<!-- Save bar -->
+<div class="save-bar" id="saveBar">
+    <span class="save-bar-dot"></span>
+    <span class="save-bar-text">Unsaved changes</span>
+    <button class="btn-discard" id="discardBtn">Discard</button>
+    <button class="btn-save" id="saveBtn">Save changes</button>
+</div>
+
+<!-- Page -->
+<div class="page">
+
+    <div class="page-header">
+        <div class="page-eyebrow">Your account</div>
+        <h1 class="page-title">Settings</h1>
+        <p class="page-sub">Customize your PrepLoom experience — appearance, notifications, privacy, and more.</p>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-sessions">-</div>
+            <div class="stat-lbl">Sessions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-score">-</div>
+            <div class="stat-lbl">Avg. score</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-time">-</div>
+            <div class="stat-lbl">Practice time</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-roles">-</div>
+            <div class="stat-lbl">Roles practiced</div>
+        </div>
+    </div>
+
+    <div class="settings-layout">
+
+        <!-- Side nav -->
+        <nav class="settings-nav" aria-label="Settings sections">
+            <button class="nav-item active" data-section="profile">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Profile
+            </button>
+            <button class="nav-item" data-section="appearance">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                Appearance
+            </button>
+            <button class="nav-item" data-section="interview">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Interview
+            </button>
+            <button class="nav-item" data-section="audio">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                Audio &amp; Video
+            </button>
+            <button class="nav-item" data-section="notifications">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Notifications
+            </button>
+            <div class="nav-divider"></div>
+            <button class="nav-item" data-section="privacy">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Privacy
+            </button>
+            <button class="nav-item" data-section="danger">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Danger zone
+            </button>
+        </nav>
+
+        <!-- Content area -->
+        <div class="settings-content" id="settingsContent">
+
+            <!-- ── PROFILE ── -->
+            <div class="settings-section active" id="section-profile">
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--accent">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Personal information</div>
+                            <div class="panel-subtitle">Name, email and avatar</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="avatar-row">
+                            <div class="avatar-circle" id="avatarCircle" title="Change avatar">
+                                <span id="avatarInitials">JS</span>
+                                <div class="avatar-overlay">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                </div>
+                            </div>
+                            <div class="avatar-info">
+                                <div class="avatar-name" id="avatarDisplayName">Jordan Sharma</div>
+                                <div class="avatar-hint">Click the avatar to upload a photo</div>
+                            </div>
+                            <button class="avatar-btn" onclick="triggerFileUpload()">Change photo</button>
+                            <input type="file" id="avatarInput" accept="image/*" style="display:none" />
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Full name</div>
+                                <div class="setting-desc">Shown on your interview reports</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="text" class="s-input track-change" value="Jordan Sharma" id="inputName" placeholder="Your name" />
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Email address</div>
+                                <div class="setting-desc">Used for sign-in and report delivery</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="email" id="inputEmail" class="s-input" placeholder="you@example.com" disabled title="Email is managed via authentication provider" style="opacity:0.6; cursor:not-allowed;" />
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Target role</div>
+                                <div class="setting-desc">Pre-selected each time you start</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change" id="defaultRole">
+                                    <option>Data Scientist</option>
+                                    <option selected>AI ML Engineer</option>
+                                    <option>Backend Engineer</option>
+                                    <option>Frontend Engineer</option>
+                                    <option>Product Manager</option>
+                                    <option>DevOps Engineer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--teal">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Password &amp; security</div>
+                            <div class="panel-subtitle">Change your password anytime</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Current password</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="password" class="s-input track-change" placeholder="••••••••" />
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">New password</div>
+                                <div class="setting-desc">At least 8 characters</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="password" class="s-input track-change" placeholder="••••••••" />
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Two-factor authentication</div>
+                                <div class="setting-desc">Add an extra layer of account security</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── APPEARANCE ── -->
+            <div class="settings-section" id="section-appearance">
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--accent">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Theme</div>
+                            <div class="panel-subtitle">Choose your colour mode</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Colour mode</div>
+                                <div class="setting-desc">Switch between dark, light, or system default</div>
+                            </div>
+                            <div class="setting-control">
+                                <div class="theme-switcher">
+                                    <button class="theme-btn active" data-theme="dark" id="themeBtnDark">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                                        Dark
+                                    </button>
+                                    <button class="theme-btn" data-theme="light" id="themeBtnLight">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                                        Light
+                                    </button>
+                                    <button class="theme-btn" data-theme="system" id="themeBtnSystem">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                        System
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Accent colour</div>
+                                <div class="setting-desc">Personalise the highlight colour throughout the app</div>
+                            </div>
+                            <div class="setting-control">
+                                <div class="accent-picker" id="accentPicker">
+                                    <div class="accent-dot active" data-color="#6c63ff" style="background:#6c63ff;" title="Violet"></div>
+                                    <div class="accent-dot" data-color="#2dd4bf" style="background:#2dd4bf;" title="Teal"></div>
+                                    <div class="accent-dot" data-color="#f59e0b" style="background:#f59e0b;" title="Amber"></div>
+                                    <div class="accent-dot" data-color="#ef4444" style="background:#ef4444;" title="Red"></div>
+                                    <div class="accent-dot" data-color="#ec4899" style="background:#ec4899;" title="Pink"></div>
+                                    <div class="accent-dot" data-color="#22c55e" style="background:#22c55e;" title="Green"></div>
+                                    <div class="accent-dot" data-color="#0ea5e9" style="background:#0ea5e9;" title="Sky"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Reduce motion</div>
+                                <div class="setting-desc">Turn off most animations and transitions</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" id="reduceMotion" />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Ambient orb effects</div>
+                                <div class="setting-desc">Background glow blobs on practice pages</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Font size</div>
+                                <div class="setting-desc">Adjust base text size across the app</div>
+                            </div>
+                            <div class="setting-control">
+                                <div class="range-wrap">
+                                    <input type="range" class="s-range track-change" min="12" max="20" value="15" id="fontSizeRange" step="1" />
+                                    <span class="range-val" id="fontSizeVal">15px</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── INTERVIEW ── -->
+            <div class="settings-section" id="section-interview">
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--accent">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Session defaults</div>
+                            <div class="panel-subtitle">How your interview is configured at start</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Questions per session</div>
+                                <div class="setting-desc">Total questions asked per practice round</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option>5 questions</option>
+                                    <option selected>7 questions</option>
+                                    <option>10 questions</option>
+                                    <option>15 questions</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Difficulty level</div>
+                                <div class="setting-desc">Default difficulty for new sessions</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option>Beginner</option>
+                                    <option selected>Intermediate</option>
+                                    <option>Advanced</option>
+                                    <option>Mixed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Show ideal answers</div>
+                                <div class="setting-desc">Toggle ideal answer option on by default</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Code editor by default</div>
+                                <div class="setting-desc">Show the Monaco code editor when session starts</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Auto-download PDF report</div>
+                                <div class="setting-desc">Automatically save a PDF when the session ends</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Behavioural question mix</div>
+                                <div class="setting-desc">Ratio of behavioural to technical questions</div>
+                            </div>
+                            <div class="setting-control">
+                                <div class="range-wrap">
+                                    <input type="range" class="s-range track-change" min="0" max="5" value="3" id="behavRange" step="1" />
+                                    <span class="range-val" id="behavVal">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--teal">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Feedback &amp; scoring</div>
+                            <div class="panel-subtitle">Customise how you receive feedback</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Confidence score <span class="badge badge--new">New</span></div>
+                                <div class="setting-desc">Include body-language confidence in your overall score</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">WPM analysis</div>
+                                <div class="setting-desc">Show speaking pace feedback after each answer</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Filler word detection</div>
+                                <div class="setting-desc">Track um, uh, like, you know, etc.</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Improvement tips depth</div>
+                                <div class="setting-desc">How many improvement tips appear per session</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option>3 tips</option>
+                                    <option selected>5 tips</option>
+                                    <option>8 tips</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── AUDIO & VIDEO ── -->
+            <div class="settings-section" id="section-audio">
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--amber">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Audio</div>
+                            <div class="panel-subtitle">Microphone, TTS, and transcription</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Read questions aloud (TTS)</div>
+                                <div class="setting-desc">AI interviewer voice for each question</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">TTS speaking rate</div>
+                                <div class="setting-desc">Speed of the question read-aloud</div>
+                            </div>
+                            <div class="setting-control">
+                                <div class="range-wrap">
+                                    <input type="range" class="s-range track-change" min="0.5" max="2" value="0.95" step="0.05" id="ttsRateRange" />
+                                    <span class="range-val" id="ttsRateVal">0.95×</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Voice preference</div>
+                                <div class="setting-desc">TTS voice gender preference</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option selected>Female (Samantha)</option>
+                                    <option>Male (Daniel)</option>
+                                    <option>Neutral (auto)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Transcription engine</div>
+                                <div class="setting-desc">Speech-to-text backend for your answers</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option selected>Whisper (high accuracy)</option>
+                                    <option>Browser SpeechRecognition</option>
+                                    <option>Whisper + Browser fallback</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Live transcript preview</div>
+                                <div class="setting-desc">Show real-time text while you speak</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--accent">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Video &amp; posture <span class="badge badge--beta">Beta</span></div>
+                            <div class="panel-subtitle">Camera and live analysis settings</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Auto-enable live posture</div>
+                                <div class="setting-desc">Start continuous posture analysis automatically</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Analysis frame rate</div>
+                                <div class="setting-desc">Frames per second sent to the posture backend</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option>5 FPS (battery-saver)</option>
+                                    <option selected>15 FPS (balanced)</option>
+                                    <option>30 FPS (high detail)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Camera resolution</div>
+                                <div class="setting-desc">Higher resolution = sharper analysis</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option>480p</option>
+                                    <option selected>720p</option>
+                                    <option>1080p</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Show body language summary</div>
+                                <div class="setting-desc">Display posture caption in the video panel</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── NOTIFICATIONS ── -->
+            <div class="settings-section" id="section-notifications">
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--teal">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Notifications</div>
+                            <div class="panel-subtitle">Control what PrepLoom notifies you about</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Session reminders</div>
+                                <div class="setting-desc">Daily reminder to keep your practice streak</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Weekly progress digest</div>
+                                <div class="setting-desc">Summary of your scores and improvement areas</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">New feature announcements</div>
+                                <div class="setting-desc">First to know about new PrepLoom features</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Marketing emails</div>
+                                <div class="setting-desc">Tips, offers, and occasional newsletters</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Reminder time</div>
+                                <div class="setting-desc">When to send your daily practice nudge</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="s-select track-change">
+                                    <option>7:00 AM</option>
+                                    <option selected>9:00 AM</option>
+                                    <option>12:00 PM</option>
+                                    <option>6:00 PM</option>
+                                    <option>8:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── PRIVACY ── -->
+            <div class="settings-section" id="section-privacy">
+
+                <div class="settings-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--green">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title">Privacy &amp; data</div>
+                            <div class="panel-subtitle">Control how PrepLoom handles your data</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Save session history</div>
+                                <div class="setting-desc">Store past interview sessions and reports</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Store audio recordings</div>
+                                <div class="setting-desc">Keep your recorded answer audio for review</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Share usage analytics</div>
+                                <div class="setting-desc">Help improve PrepLoom with anonymous usage data</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" checked />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Use answers to improve AI</div>
+                                <div class="setting-desc">Your anonymised answers may improve future scoring</div>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" class="track-change" />
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── DANGER ZONE ── -->
+            <div class="settings-section" id="section-danger">
+
+                <div class="settings-panel" style="border-color: rgba(239,68,68,0.18);">
+                    <div class="panel-header">
+                        <div class="panel-icon panel-icon--red">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div>
+                            <div class="panel-title" style="color: var(--red);">Danger zone</div>
+                            <div class="panel-subtitle">Irreversible actions — proceed with caution</div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="danger-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Clear session history</div>
+                                <div class="setting-desc">Permanently delete all past interview sessions and reports</div>
+                            </div>
+                            <button class="btn-danger" onclick="confirmDanger('Are you sure you want to delete ALL session history? This cannot be undone.')">Clear history</button>
+                        </div>
+                        <div class="danger-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Reset preferences</div>
+                                <div class="setting-desc">Restore all settings to factory defaults</div>
+                            </div>
+                            <button class="btn-danger" onclick="confirmDanger('Reset all settings to defaults?')">Reset all</button>
+                        </div>
+                        <div class="danger-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Sign out all devices</div>
+                                <div class="setting-desc">Log out of every active PrepLoom session</div>
+                            </div>
+                            <button class="btn-danger" onclick="if(confirm('Sign out?')) { if(window.SB) window.SB.client.auth.signOut().then(()=>window.location.href='/'); }">Sign out</button>
+                        </div>
+                        <div class="danger-row">
+                            <div class="setting-info">
+                                <div class="setting-label">Delete account</div>
+                                <div class="setting-desc">Permanently erase your account, all data, and sessions</div>
+                            </div>
+                            <button class="btn-danger" style="border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.15);" onclick="confirmDanger('PERMANENTLY DELETE your account? This CANNOT be undone.')">Delete account</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── Modals ── -->
+<div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signin-title">Sign in</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+        </div>
+        <p class="modal__note">Sign in with Supabase to manage your settings and preferences.</p>
+        <p id="signinError" class="modal-error" hidden></p>
+        <form id="formSignin">
+            <div class="modal__field">
+                <label for="signin-email">Email</label>
+                <input id="signin-email" name="email" type="email" autocomplete="username" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signin-password">Password</label>
+                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Sign in</button>
+        </form>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
+    </div>
+</div>
+
+<div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signup-title">Create account</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+        </div>
+        <p class="modal__note">Create an account to save your progress and settings.</p>
+        <p id="signupError" class="modal-error" hidden></p>
+        <form id="formSignup">
+            <div class="modal__field">
+                <label for="signup-name">Name <span class="modal-optional">(optional)</span></label>
+                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Your name" maxlength="120" />
+            </div>
+            <div class="modal__field">
+                <label for="signup-email">Email</label>
+                <input id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signup-password">Password</label>
+                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Create account</button>
+        </form>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/static/js/supabaseClient.js"></script>
+<script src="/static/js/site.js"></script>
+<script src="/static/js/auth.js"></script>
+<script>
+/* ── Section switching ──────────────────────────────────── */
+const navItems = document.querySelectorAll('.nav-item[data-section]');
+const sections = document.querySelectorAll('.settings-section');
+
+navItems.forEach(item => {
+    item.addEventListener('click', () => {
+        navItems.forEach(n => n.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        item.classList.add('active');
+        const sec = document.getElementById('section-' + item.dataset.section);
+        if (sec) {
+            sec.classList.add('active');
+            sec.querySelectorAll('.settings-panel').forEach((p, i) => {
+                p.style.animation = 'none';
+                p.offsetHeight;
+                p.style.animation = `fadeUp 0.45s ${i * 0.06}s ease both`;
+            });
+        }
+    });
+});
+
+/* ── Theme switching ────────────────────────────────────── */
+const themeButtons = document.querySelectorAll('.theme-btn');
+let currentTheme = 'dark';
+
+themeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        themeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const theme = btn.dataset.theme;
+        currentTheme = theme;
+        const applied = theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+        document.documentElement.setAttribute('data-theme', applied);
+        try { localStorage.setItem('preploom_theme', theme); } catch(e) {}
+        markChanged();
+    });
+});
+
+/* ── Accent picker ──────────────────────────────────────── */
+document.querySelectorAll('.accent-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+        document.querySelectorAll('.accent-dot').forEach(d => d.classList.remove('active'));
+        dot.classList.add('active');
+        const color = dot.dataset.color;
+        document.documentElement.style.setProperty('--accent', color);
+        document.documentElement.style.setProperty('--accent-2', lightenHex(color, 20));
+        document.documentElement.style.setProperty('--accent-glow', hexToRgba(color, 0.25));
+        document.documentElement.style.setProperty('--accent-soft', hexToRgba(color, 0.12));
+        document.documentElement.style.setProperty('--accent-text', lightenHex(color, 30));
+        markChanged();
+    });
+});
+
+function lightenHex(hex, pct) {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    const li = v => Math.min(255, Math.floor(v + (255 - v) * pct/100));
+    return '#' + [li(r),li(g),li(b)].map(v => v.toString(16).padStart(2,'0')).join('');
+}
+
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/* ── Range sliders ──────────────────────────────────────── */
+const fontRange = document.getElementById('fontSizeRange');
+const fontVal   = document.getElementById('fontSizeVal');
+if (fontRange) {
+    fontRange.addEventListener('input', () => {
+        fontVal.textContent = fontRange.value + 'px';
+        markChanged();
+    });
+}
+
+const ttsRange = document.getElementById('ttsRateRange');
+const ttsVal   = document.getElementById('ttsRateVal');
+if (ttsRange) {
+    ttsRange.addEventListener('input', () => {
+        ttsVal.textContent = parseFloat(ttsRange.value).toFixed(2) + '×';
+        markChanged();
+    });
+}
+
+const behavRange = document.getElementById('behavRange');
+const behavVal   = document.getElementById('behavVal');
+if (behavRange) {
+    behavRange.addEventListener('input', () => {
+        behavVal.textContent = behavRange.value;
+        markChanged();
+    });
+}
+
+/* ── Name → avatar initials ─────────────────────────────── */
+const inputName = document.getElementById('inputName');
+const avatarInitials = document.getElementById('avatarInitials');
+const avatarDisplayName = document.getElementById('avatarDisplayName');
+
+if (inputName) {
+    inputName.addEventListener('input', () => {
+        const parts = inputName.value.trim().split(/\s+/).filter(Boolean);
+        if (parts.length >= 2) {
+            avatarInitials.textContent = (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+        } else if (parts.length === 1) {
+            avatarInitials.textContent = parts[0].slice(0,2).toUpperCase();
+        }
+        avatarDisplayName.textContent = inputName.value.trim() || 'Your name';
+        markChanged();
+    });
+}
+
+/* ── Avatar upload ───────────────────────────────────────── */
+function triggerFileUpload() {
+    document.getElementById('avatarInput').click();
+}
+
+document.getElementById('avatarCircle').addEventListener('click', triggerFileUpload);
+document.getElementById('avatarInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const circle = document.getElementById('avatarCircle');
+        circle.style.backgroundImage = `url(${ev.target.result})`;
+        circle.style.backgroundSize = 'cover';
+        document.getElementById('avatarInitials').style.display = 'none';
+        markChanged();
+    };
+    reader.readAsDataURL(file);
+});
+
+/* ── Change tracking + save bar ─────────────────────────── */
+let hasChanges = false;
+const saveBar  = document.getElementById('saveBar');
+const saveBtn  = document.getElementById('saveBtn');
+const discardBtn = document.getElementById('discardBtn');
+
+function markChanged() {
+    if (!hasChanges) {
+        hasChanges = true;
+        saveBar.classList.add('visible');
+    }
+}
+
+document.querySelectorAll('.track-change').forEach(el => {
+    el.addEventListener('change', markChanged);
+    el.addEventListener('input', markChanged);
+});
+
+saveBtn.addEventListener('click', () => {
+    if (window.SB && window.SB.client) {
+        const newName = document.getElementById('inputName').value.trim();
+        window.SB.client.auth.updateUser({
+            data: { name: newName }
+        }).then(({ data, error }) => {
+            if (!error && data && data.user) {
+                window.SB.syncProfile(data.user);
+                hasChanges = false;
+                saveBar.classList.remove('visible');
+                showToast();
+            }
+        });
+    } else {
+        hasChanges = false;
+        saveBar.classList.remove('visible');
+        showToast();
+    }
+});
+
+discardBtn.addEventListener('click', () => {
+    hasChanges = false;
+    saveBar.classList.remove('visible');
+});
+
+/* ── Toast ────────────────────────────────────────────────── */
+function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── Danger confirmations ───────────────────────────────── */
+function confirmDanger(msg) {
+    if (confirm(msg)) {
+        showToast();
+        document.getElementById('toast').style.borderColor = 'var(--red-soft)';
+        document.getElementById('toast').style.color = 'var(--red)';
+        document.getElementById('toast').querySelector('svg').style.stroke = 'var(--red)';
+        document.querySelector('.toast span:last-child') && (document.querySelector('.toast').childNodes[document.querySelector('.toast').childNodes.length-1].textContent = ' Action completed');
+        setTimeout(() => {
+            document.getElementById('toast').style.borderColor = '';
+            document.getElementById('toast').style.color = '';
+        }, 3000);
+    }
+}
+
+/* ── Restore saved theme ─────────────────────────────────── */
+try {
+    const saved = localStorage.getItem('preploom_theme');
+    if (saved) {
+        const btn = document.querySelector(`.theme-btn[data-theme="${saved}"]`);
+        if (btn) {
+            themeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const applied = saved === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : saved;
+            document.documentElement.setAttribute('data-theme', applied);
+        }
+    }
+} catch(e) {}
+
+/* ── Reduce motion ───────────────────────────────────────── */
+document.getElementById('reduceMotion').addEventListener('change', function() {
+    if (this.checked) {
+        document.documentElement.style.setProperty('--transition-theme', '0s');
+        const style = document.createElement('style');
+        style.id = 'reduce-motion-style';
+        style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }';
+        document.head.appendChild(style);
+    } else {
+        document.documentElement.style.setProperty('--transition-theme', '0.35s cubic-bezier(0.4, 0, 0.2, 1)');
+        const existing = document.getElementById('reduce-motion-style');
+        if (existing) existing.remove();
+    }
+    markChanged();
+});
+
+/* ── Restore User Settings from Supabase ────────────────── */
+window.addEventListener('supabase:ready', async () => {
+    const session = await window.SB.getSession();
+    if (!session) {
+        const signinModal = document.getElementById('modal-signin');
+        if (signinModal) {
+            signinModal.classList.add('is-open');
+            signinModal.setAttribute('aria-hidden', 'false');
+        }
+        return;
+    }
+    const user = session.user;
+    const name = user.user_metadata?.name || user.user_metadata?.full_name || '';
+    document.getElementById('inputName').value = name;
+    document.getElementById('inputEmail').value = user.email || '';
+    document.getElementById('avatarDisplayName').textContent = name || user.email || 'User';
+    const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+    
+    if (avatarUrl) {
+        const circle = document.getElementById('avatarCircle');
+        circle.style.backgroundImage = `url(${avatarUrl})`;
+        circle.style.backgroundSize = 'cover';
+        document.getElementById('avatarInitials').style.display = 'none';
+    } else if (name) {
+        document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
+    }
+
+    // Fetch user statistics
+    try {
+        const token = session.access_token;
+        const res = await fetch('/api/user/stats', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const stats = await res.json();
+            document.getElementById('stat-sessions').textContent = stats.sessions;
+            document.getElementById('stat-score').textContent = stats.avg_score;
+            document.getElementById('stat-time').textContent = stats.practice_time;
+            document.getElementById('stat-roles').textContent = stats.roles;
+        }
+    } catch (err) {
+        console.error("Failed to load user stats", err);
+    }
+});
+</script>
+</body>
+</html>

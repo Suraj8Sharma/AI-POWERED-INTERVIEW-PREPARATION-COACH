@@ -107,7 +107,6 @@ body {
     display: flex;
     flex: 1;
     min-height: 100vh;
-    transition: gap 0.28s var(--ease);
 }
 
 /* ── SIDEBAR ───────────────────────────────────────────────── */
@@ -127,73 +126,6 @@ body {
     -webkit-backdrop-filter: blur(24px) saturate(1.4);
     border-right: 1px solid var(--border);
     z-index: 20;
-    transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), border-color 0.28s var(--ease);
-}
-
-.shell--focused .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: clamp(280px, 22vw, 320px);
-    max-width: calc(100vw - 32px);
-    min-width: 280px;
-    min-height: 100vh;
-    max-height: 100vh;
-    padding: 1.35rem 1.1rem;
-    border-right-color: rgba(255,255,255,0.08);
-    box-shadow: 0 28px 80px rgba(0,0,0,0.48);
-    transform: translateX(calc(-100% + 18px));
-    overflow-y: auto;
-    overflow-x: visible;
-}
-
-.shell--focused.sidebar-open .sidebar {
-    transform: translateX(0);
-}
-
-.sidebar__drawer-handle {
-    position: absolute;
-    top: 50%;
-    right: -18px;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 148px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-left: none;
-    border-radius: 0 14px 14px 0;
-    background: linear-gradient(180deg, rgba(18, 20, 37, 0.96), rgba(10, 12, 20, 0.96));
-    color: rgba(240,242,248,0.74);
-    cursor: pointer;
-    box-shadow: 10px 0 30px rgba(0,0,0,0.22);
-    transition: color 0.18s var(--ease), background 0.18s var(--ease), transform 0.18s var(--ease);
-    z-index: 2;
-}
-
-.sidebar__drawer-handle span {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    font-size: 0.58rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-}
-
-.shell--focused .sidebar__drawer-handle {
-    display: inline-flex;
-}
-
-.sidebar__drawer-handle:hover {
-    color: var(--text);
-    background: linear-gradient(180deg, rgba(24, 27, 49, 0.98), rgba(13, 15, 26, 0.98));
-}
-
-.sidebar__drawer-handle:focus-visible {
-    outline: 2px solid rgba(108,99,255,0.55);
-    outline-offset: 2px;
 }
 
 /* Scrollbar */
@@ -451,140 +383,36 @@ select.s-input option {
 
 /* ── App Top Nav ───────────────────────────────────────────── */
 .app-top-nav {
-    position: sticky;
-    top: 1rem;
     display: flex;
     justify-content: center;
-    margin-bottom: 1.15rem;
-    padding: 0 0.35rem;
-    z-index: 30;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 10;
 }
 
 .app-top-nav__inner {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    width: min(100%, 1380px);
-    padding: 0.8rem 1rem 0.8rem 1.15rem;
-    background: linear-gradient(135deg, rgba(18, 20, 37, 0.88), rgba(10, 12, 20, 0.82));
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 24px;
-    backdrop-filter: blur(18px) saturate(1.2);
-    -webkit-backdrop-filter: blur(18px) saturate(1.2);
-    box-shadow: 0 14px 42px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.06);
-}
-
-.app-top-nav__inner::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, rgba(108,99,255,0.28), rgba(45,212,191,0.12), rgba(255,255,255,0.02));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-}
-
-.app-top-nav__brand {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
-}
-
-.app-top-nav__label {
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--teal);
-}
-
-.app-top-nav__hint {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    color: #fff;
-}
-
-.app-top-nav__links {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-}
-
-.app-top-nav__links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 700;
-    padding: 0.6rem 0.9rem;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    transition: color 0.18s var(--ease), background 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.18s var(--ease);
-}
-
-.app-top-nav__links a:hover {
-    color: var(--text);
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.08);
-    transform: translateY(-1px);
-}
-
-.app-top-nav__badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.55rem 0.85rem;
+    gap: 1.5rem;
+    padding: 0.6rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 999px;
-    background: rgba(45,212,191,0.08);
-    border: 1px solid rgba(45,212,191,0.2);
-    color: var(--text);
-    font-size: 0.75rem;
-    font-weight: 700;
-    white-space: nowrap;
+    backdrop-filter: blur(12px);
 }
 
-.app-top-nav__badge::before {
-    content: '';
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--teal);
-    box-shadow: 0 0 12px rgba(45,212,191,0.5);
-}
-
-.app-top-nav__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
+.app-top-nav__inner a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color 0.18s var(--ease); }
+.app-top-nav__inner a:hover { color: var(--text); }
 
 /* ── MAIN ──────────────────────────────────────────────────── */
 .main {
     flex: 1;
-    min-width: 0;
-    padding: 1.2rem 1.4rem 2.2rem;
-    max-width: none;
+    padding: 1.75rem 2rem 3rem;
+    max-width: 1320px;
     width: 100%;
     position: relative;
     z-index: 1;
     animation: fadeIn 0.4s var(--ease);
-    transition: padding 0.28s var(--ease);
-}
-
-.shell--focused .main {
-    padding-left: 1rem;
-    padding-right: 1rem;
 }
 
 @keyframes fadeIn {
@@ -784,7 +612,7 @@ select.s-input option {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 0.95rem;
+    margin-bottom: 1.25rem;
     gap: 1rem;
     flex-wrap: wrap;
 }
@@ -853,38 +681,27 @@ select.s-input option {
 
 .panel__body { padding: 0 1.25rem 1.25rem; }
 
-/* Interview workspace */
-.iv-workspace {
+/* Interview grid */
+.iv-grid-top {
+    margin-bottom: 1rem;
+}
+
+.iv-grid-lower {
     display: grid;
-    grid-template-columns: minmax(460px, 1.08fr) minmax(560px, 1.18fr);
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
     margin-bottom: 1rem;
-    align-items: start;
-}
-
-.iv-media-stack {
-    display: grid;
-    gap: 1rem;
-    align-content: start;
-}
-
-.iv-interview-stack {
-    display: grid;
-    gap: 1rem;
-    align-content: start;
-    min-width: 0;
 }
 
 /* ── VIDEO PANEL ───────────────────────────────────────────── */
 #videoPanel .panel__body {
-    padding-top: 0;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 1rem;
+    align-items: start;
 }
 
-.video-col {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-}
+.video-col {}
 
 .video-wrap {
     position: relative;
@@ -892,7 +709,6 @@ select.s-input option {
     overflow: hidden;
     background: #000;
     aspect-ratio: 16/10;
-    min-height: 360px;
     border: 1px solid var(--border);
     box-shadow: 0 4px 28px rgba(0,0,0,0.45);
 }
@@ -1006,12 +822,6 @@ select.s-input option {
 }
 
 /* ── QUESTION PANEL ────────────────────────────────────────── */
-#interviewPanel .panel__body {
-    display: flex;
-    flex-direction: column;
-    min-height: clamp(390px, 54vh, 520px);
-}
-
 .q-bubble {
     display: flex;
     gap: 0.8rem;
@@ -1241,8 +1051,7 @@ select.s-input option {
 .action-row {
     display: flex;
     gap: 0.5rem;
-    margin-top: auto;
-    padding-top: 0.85rem;
+    margin-top: 0.75rem;
 }
 
 .act-btn {
@@ -1305,8 +1114,7 @@ select.s-input option {
 
 /* ── CODE EDITOR ───────────────────────────────────────────── */
 .code-editor-wrap {
-    height: clamp(220px, 32vh, 320px);
-    min-height: 220px;
+    height: 350px;
     border: 1px solid var(--border);
     border-radius: 0 0 var(--r-sm) var(--r-sm);
     overflow: hidden;
@@ -1357,12 +1165,6 @@ select.s-input option {
     font-size: 0.82rem;
     color: var(--faint);
     line-height: 1.55;
-}
-
-#feedbackPanel .panel__body {
-    padding-top: 0;
-    max-height: 180px;
-    overflow: auto;
 }
 
 .score-row {
@@ -1599,36 +1401,15 @@ select.s-input option {
     }
     .s-status, .s-back { display: none; }
     .main { padding: 1rem; }
-    .iv-workspace { grid-template-columns: 1fr; }
-    .sidebar__drawer-handle { display: none !important; }
+    .iv-grid-lower { grid-template-columns: 1fr; }
+    #videoPanel .panel__body { grid-template-columns: 1fr; }
     .score-cards { grid-template-columns: repeat(2, 1fr); }
     .fb-details { grid-template-columns: 1fr; }
     .metrics-grid { grid-template-columns: repeat(4, 1fr); }
     .welcome-steps { flex-direction: column; align-items: center; gap: 0.75rem; }
     .w-connector { width: 1px; height: 30px; background: linear-gradient(180deg, rgba(108,99,255,0.4), transparent); margin: 0; }
-    .app-top-nav { justify-content: center; margin-bottom: 1rem; top: 0.65rem; }
-    .app-top-nav__inner { width: 100%; flex-wrap: wrap; padding: 0.9rem; }
-    .app-top-nav__brand, .app-top-nav__badge { width: 100%; }
-    .app-top-nav__links { width: 100%; justify-content: flex-start; }
-    .app-top-nav__actions { width: 100%; justify-content: flex-start; }
-    #interviewPanel .panel__body { min-height: auto; }
-}
-
-@media (max-width: 1200px) {
-    .iv-workspace {
-        grid-template-columns: minmax(340px, 0.98fr) minmax(460px, 1.08fr);
-    }
-
-    .metrics-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 640px) {
-    .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .action-row { flex-wrap: wrap; }
-    .act-btn { min-width: 140px; }
-    .code-editor-wrap { min-height: 260px; }
+    .app-top-nav { justify-content: center; margin-bottom: 1rem; }
+    .app-top-nav__inner { width: 100%; justify-content: center; gap: 1rem; flex-wrap: wrap; }
 }
     </style>
 </head>
@@ -1702,6 +1483,11 @@ select.s-input option {
         </button>
     </div>
 
+    <a href="/settings" class="s-btn s-btn--end" style="width: 100%; margin-top: 0.5rem; text-decoration: none; justify-content: center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+    </a>
+
     <div class="s-status">
         <span class="status-dot" id="statusDot"></span>
         <span id="statusLabel">Idle</span>
@@ -1714,10 +1500,6 @@ select.s-input option {
         </a>
     </p>
 
-    <button id="sidebarDrawerHandle" class="sidebar__drawer-handle" type="button" aria-label="Open interview controls" aria-controls="sidebar" aria-expanded="false">
-        <span>Controls</span>
-    </button>
-
 </aside>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1728,19 +1510,10 @@ select.s-input option {
 <!-- ─── APP TOP NAV ──────────────────────────────────────── -->
 <nav class="app-top-nav">
     <div class="app-top-nav__inner">
-        <div class="app-top-nav__brand">
-            <span class="app-top-nav__label">Practice Room</span>
-            <span class="app-top-nav__hint">Interview workspace</span>
-        </div>
-        <div class="app-top-nav__links">
-            <a href="/">Home</a>
-            <a href="/features">Features</a>
-            <a href="/revision">Revision</a>
-            <a href="/about">About</a>
-        </div>
-        <div class="app-top-nav__actions">
-            <div class="app-top-nav__badge">Live AI coach</div>
-        </div>
+        <a href="/">Home</a>
+        <a href="/features">Features</a>
+        <a href="/revision">Revision</a>
+        <a href="/about">About</a>
     </div>
 </nav>
 
@@ -1816,14 +1589,15 @@ select.s-input option {
         </div>
     </div>
 
-    <div class="iv-workspace">
-        <div class="iv-media-stack">
+    <!-- Video + Live metrics row -->
+    <div class="iv-grid-top">
         <div class="panel" id="videoPanel">
             <div class="panel__header">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 Video Coach
             </div>
             <div class="panel__body">
+                <!-- Video -->
                 <div class="video-col">
                     <div class="video-wrap">
                         <video id="videoPreview" autoplay playsinline muted></video>
@@ -1832,15 +1606,7 @@ select.s-input option {
                     </div>
                 </div>
 
-            </div>
-        </div>
-
-        <div class="panel" id="presencePanel">
-            <div class="panel__header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c2.7 0 4.89-2.24 4.89-5S14.7 2 12 2 7.11 4.24 7.11 7s2.19 5 4.89 5Z"/><path d="M4 22c0-3.31 3.58-6 8-6s8 2.69 8 6"/></svg>
-                Presence &amp; posture
-            </div>
-            <div class="panel__body">
+                <!-- Controls + metrics -->
                 <div class="video-controls-col">
                     <button id="continuousAnalysisBtn" class="live-btn" disabled>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="12" r="8"/><path d="M12 3v6m0 6v6"/></svg>
@@ -1872,15 +1638,17 @@ select.s-input option {
         </div>
     </div>
 
-        <div class="iv-interview-stack">
+    <!-- Question + Feedback row -->
+    <div class="iv-grid-lower">
 
         <!-- Question / Answer panel -->
         <div class="panel" id="interviewPanel">
             <div class="panel__header">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                Interview workspace
+                Interview
             </div>
             <div class="panel__body">
+
                 <div class="q-bubble" id="questionBubble">
                     <div class="q-avatar">AI</div>
                     <div class="q-text">Loading question…</div>
@@ -1961,7 +1729,8 @@ select.s-input option {
             </div>
         </div>
 
-            <div class="panel" id="feedbackPanel">
+        <!-- Feedback panel -->
+        <div class="panel" id="feedbackPanel">
             <div class="panel__header">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 Feedback
@@ -1976,7 +1745,7 @@ select.s-input option {
                 </div>
             </div>
         </div>
-        </div>
+
     </div>
 </section>
 
@@ -2018,7 +1787,7 @@ select.s-input option {
             <h2 id="signin-title" style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;">Sign in</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close" style="width:36px;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,0.06);color:rgba(240,242,248,0.62);font-size:1.25rem;cursor:pointer;">×</button>
         </div>
-        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Sign in with Supabase to save your account and continue your interview progress across sessions.</p>
+        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Sign in with Supabase to save your interview sessions securely.</p>
         <p id="signinError" class="modal-error" hidden style="font-size:0.82rem;color:#f87171;margin-bottom:0.75rem;"></p>
         <form id="formSignin">
             <div style="margin-bottom:1rem;">
@@ -2031,7 +1800,7 @@ select.s-input option {
             </div>
             <button type="submit" style="width:100%;padding:0.75rem;margin-top:0.35rem;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Sign in</button>
         </form>
-        <button type="button" data-auth-provider="google" data-error-target="signinError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;">Continue with Google</button>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Continue with Google</button>
         <p style="text-align:center;margin-top:1rem;font-size:0.82rem;color:rgba(240,242,248,0.38);">No account? <button type="button" data-open-modal="modal-signup" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-family:inherit;font-size:inherit;">Sign up</button></p>
     </div>
 </div>
@@ -2042,7 +1811,7 @@ select.s-input option {
             <h2 id="signup-title" style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;">Create account</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close" style="width:36px;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,0.06);color:rgba(240,242,248,0.62);font-size:1.25rem;cursor:pointer;">×</button>
         </div>
-        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Create an account to save your progress. Password must be at least 8 characters.</p>
+        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Create an account to save your progress and access full reports.</p>
         <p id="signupError" class="modal-error" hidden style="font-size:0.82rem;color:#f87171;margin-bottom:0.75rem;"></p>
         <form id="formSignup">
             <div style="margin-bottom:1rem;">
@@ -2059,7 +1828,7 @@ select.s-input option {
             </div>
             <button type="submit" style="width:100%;padding:0.75rem;margin-top:0.35rem;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Create account</button>
         </form>
-        <button type="button" data-auth-provider="google" data-error-target="signupError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;">Continue with Google</button>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Continue with Google</button>
         <p style="text-align:center;margin-top:1rem;font-size:0.82rem;color:rgba(240,242,248,0.38);">Already have an account? <button type="button" data-open-modal="modal-signin" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-family:inherit;font-size:inherit;">Sign in</button></p>
     </div>
 </div>
@@ -2104,7 +1873,6 @@ select.s-input option {
     });
 })();
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/auth.js"></script>

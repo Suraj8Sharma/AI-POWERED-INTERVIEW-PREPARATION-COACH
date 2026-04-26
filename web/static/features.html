@@ -540,7 +540,7 @@
             <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
-            <span id="navUserEmail" class="nav-user-email hidden" aria-live="polite"></span>
+            <a href="/settings" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Settings" style="text-decoration:none; color:inherit; display:flex; align-items:center; cursor:pointer; font-weight:600; transition: color 0.15s ease;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'"></a>
             <button type="button" id="navLogout" class="btn-nav-outline hidden">Log out</button>
             <div id="navAuthButtons">
                 <button type="button" class="btn-nav-outline" data-open-modal="modal-signin">Sign in</button>
@@ -809,7 +809,7 @@
             <h2 id="signin-title">Sign in</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
         </div>
-        <p class="modal__note">Sign in with Supabase to save your account and continue your interview progress across sessions.</p>
+        <p class="modal__note">Sign in with Supabase to manage your settings and preferences.</p>
         <p id="signinError" class="modal-error" hidden></p>
         <form id="formSignin">
             <div class="modal__field">
@@ -834,7 +834,7 @@
             <h2 id="signup-title">Create account</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
         </div>
-        <p class="modal__note">Create an account to save your progress. Password must be at least 8 characters.</p>
+        <p class="modal__note">Create an account to save your progress and settings.</p>
         <p id="signupError" class="modal-error" hidden></p>
         <form id="formSignup">
             <div class="modal__field">

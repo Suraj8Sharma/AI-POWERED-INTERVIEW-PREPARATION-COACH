@@ -45,7 +45,7 @@
   // Use Google photo if available, otherwise generate letter avatar
   const avatarUrl = metadata.avatar_url
     || metadata.picture
-    || https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6c63ff&color=fff&bold=true&size=128;
+    || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6c63ff&color=fff&bold=true&size=128`;
 
   return {
     id: user.id,
@@ -202,7 +202,6 @@ window.supabaseClient.auth.onAuthStateChange(async function(event, session) {
     }
 });
 
-window.dispatchEvent(new Event('supabase:ready'));
     console.log('SB Step 7: window.SB is set ✓');
     window.dispatchEvent(new Event('supabase:ready'));
 
