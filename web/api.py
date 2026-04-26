@@ -5,7 +5,7 @@ Wraps AI_BACKEND modules as REST endpoints:
   /api/roles, /api/start, /api/submit, /api/next,
   /api/transcribe, /api/analyze-posture, /api/report/{id}
 
-Auth (MongoDB + JWT):
+Auth (Supabase):
   POST /api/auth/register, POST /api/auth/login, GET /api/auth/me
 
 Run:
@@ -15,36 +15,27 @@ Run:
 
 from __future__ import annotations
 
+import base64
 import io
+import json
 import logging
+import os
 import sys
-import uuid
 import time
-import asyncio
-from contextlib import asynccontextmanager
+import uuid
 from pathlib import Path
 from typing import Any
-
-import base64
-import json
 
 import numpy as np
 from PIL import Image
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Form, UploadFile, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
-# ...existing code...
-import os
-from fastapi.responses import JSONResponse
 
-# ...existing code (app = FastAPI() etc.) ...
-
-
-
-# ── Path setup (same as frontend.py) ──────────────────────────────────────
+# ── Path setup ─────────────────────────────────────────────────────────────
 APP_ROOT = Path(__file__).resolve().parents[1]
 if str(APP_ROOT) not in sys.path:
     sys.path.insert(0, str(APP_ROOT))
@@ -52,20 +43,8 @@ if str(APP_ROOT) not in sys.path:
 load_dotenv(APP_ROOT / ".ENV")
 load_dotenv(APP_ROOT / ".env")
 
+# ── Local imports (after path + env setup) ────────────────────────────────
 from web.auth_routes import get_optional_user, router as auth_router
-from web.mongo_db import get_db
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    try:
-        db = get_db()
-        await asyncio.wait_for(db.users.create_index("email", unique=True), timeout=3)
-    except Exception as e:
-        logging.getLogger("uvicorn.error").warning("MongoDB users index: %s", e)
-    yield
-
-
 
 from AI_BACKEND.rag_retriever import (
     fetch_questions_for_role_random_mix,
@@ -94,7 +73,7 @@ def _get_vectordb():
 
 
 # ── FastAPI app ────────────────────────────────────────────────────────────
-app = FastAPI(title="PrepLoom API", lifespan=lifespan)
+app = FastAPI(title="PrepLoom API")
 app.include_router(auth_router)
 
 app.add_middleware(
@@ -105,7 +84,7 @@ app.add_middleware(
 )
 
 
-# ── HTML pages (marketing + interview app) ────────────────────────────────
+# ── HTML pages ────────────────────────────────────────────────────────────
 @app.get("/")
 async def serve_index():
     return FileResponse(STATIC_DIR / "index.html")
@@ -129,10 +108,6 @@ async def serve_revision():
 @app.get("/app")
 async def serve_app():
     return FileResponse(STATIC_DIR / "app.html")
-
-
-# Mount static files AFTER the root route so /api/* takes precedence
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 @app.get("/api/public-config")
@@ -163,7 +138,7 @@ async def get_roles():
     """Return available interview roles."""
     try:
         roles = list_roles(_get_vectordb())
-    except Exception as e:
+    except Exception:
         roles = ["Data Scientist", "AI ML Engineer"]
     return {"roles": roles}
 
@@ -173,11 +148,7 @@ async def start_interview(
     payload: dict,
     user: dict | None = Depends(get_optional_user),
 ):
-    """Start a new interview session for the given role.
-
-    If the client sends ``Authorization: Bearer <JWT>`` (signed-in user),
-    the session is associated with that account for future persistence.
-    """
+    """Start a new interview session for the given role."""
     role = payload.get("role", "")
     name = payload.get("name", "")
     if not role:
@@ -203,8 +174,8 @@ async def start_interview(
     _sessions[session_id] = {
         "name": name,
         "role": role,
-        "user_id": user["id"] if user else None,
-        "user_email": user["email"] if user else None,
+        "user_id": user.get("id") if user else None,
+        "user_email": user.get("email") if user else None,
         "questions": questions,
         "question_idx": 0,
         "evaluations": [],
@@ -239,7 +210,6 @@ async def submit_answer(payload: dict):
 
     q = questions[idx]
 
-    # 1. Technical score (LLM / heuristic)
     tech_eval = evaluate_technical_answer(
         question_text=q.question_text,
         ideal_answer=q.ideal_answer or "",
@@ -249,10 +219,8 @@ async def submit_answer(payload: dict):
         difficulty_level=q.difficulty_level,
     )
 
-    # 2. Communication score (NLP)
     comm_eval = analyze_communication(answer, duration)
 
-    # 3. Confidence score (body language)
     confidence_score = None
     bl_summary = "No body language data captured for this question."
     if bl_data and not bl_data.get("error") and bl_data.get("pose_visible_fraction", 0) > 0:
@@ -343,34 +311,29 @@ async def analyze_posture(image: UploadFile = File(...)):
         raise HTTPException(400, f"Could not decode image: {e}")
 
     raw = analyze_camera_snapshot_rgb(rgb, draw_skeleton=False)
-    # Remove non-serializable fields
     result = {k: v for k, v in raw.items() if k not in ("annotated_rgb",)}
     return result
 
 
 @app.websocket("/ws/analyze-posture")
 async def websocket_analyze_posture(websocket: WebSocket):
-    """
-    WebSocket endpoint for continuous frame-by-frame posture analysis.
-    
-    Client sends messages with base64-encoded JPEG frames.
-    Server responds with real-time metrics.
-    
-    Message format: {"frame": "base64_jpeg_data"}
-    Response format: {"metrics": {...}, "summary": "...", "timestamp": ...}
-    """
+    """WebSocket endpoint for continuous frame-by-frame posture analysis."""
     await websocket.accept()
     frame_count = 0
     error_count = 0
-    
+
     try:
         from AI_BACKEND.video_capture.video_analysis import (
-            ensure_pose_model_path,
             BodyLanguageAnalyzer,
-            _np_rgb_to_mp_image
+            _np_rgb_to_mp_image,
+            ensure_pose_model_path,
         )
-        from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions, RunningMode
         from mediapipe.tasks.python.core import base_options as base_options_lib
+        from mediapipe.tasks.python.vision import (
+            PoseLandmarker,
+            PoseLandmarkerOptions,
+            RunningMode,
+        )
     except ImportError as e:
         await websocket.send_json({"error": f"Video module import failed: {e}"})
         await websocket.close()
@@ -392,16 +355,14 @@ async def websocket_analyze_posture(websocket: WebSocket):
 
         while True:
             try:
-                # Receive frame data
                 data = await websocket.receive_text()
                 msg = json.loads(data)
                 frame_data = msg.get("frame", "")
-                
+
                 if not frame_data:
                     await websocket.send_json({"error": "No frame data provided"})
                     continue
-                
-                # Decode base64 JPEG
+
                 try:
                     image_bytes = base64.b64decode(frame_data)
                     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
@@ -413,16 +374,18 @@ async def websocket_analyze_posture(websocket: WebSocket):
                         await websocket.close()
                         break
                     continue
-                
-                # Analyze pose
+
                 try:
                     mp_img = _np_rgb_to_mp_image(rgb)
-                    frame_timestamp_ms += 67  # Approx 15 FPS timing
+                    frame_timestamp_ms += 67
                     result = landmarker.detect_for_video(mp_img, frame_timestamp_ms)
-                    
+
                     if not result.pose_landmarks:
-                        res = {
-                            "openness": 0.5, "fidgeting": 0.5, "engagement": 0.5, "posture": 0.5,
+                        res: dict[str, Any] = {
+                            "openness": 0.5,
+                            "fidgeting": 0.5,
+                            "engagement": 0.5,
+                            "posture": 0.5,
                             "pose_visible_fraction": 0.0,
                             "summary": "No pose detected. Please ensure your upper body is visible.",
                         }
@@ -431,45 +394,46 @@ async def websocket_analyze_posture(websocket: WebSocket):
                         res = analyzer.analyze_pose_landmarks(lm_list)
                         vis_ok = res.get("visibility", 0) >= 0.35
                         res["pose_visible_fraction"] = 1.0 if vis_ok else 0.0
-                        
                         o = round(float(res.get("openness", 0.5)), 3)
                         f = round(float(res.get("fidgeting", 0.5)), 3)
                         e = round(float(res.get("engagement", 0.5)), 3)
                         p_ = round(float(res.get("posture", 0.5)), 3)
                         res["probabilities"] = {"openness": o, "fidgeting": f, "engagement": e, "posture": p_}
-                        res["summary"] = f"Live: Openness {o:.0%}, Fidgeting {f:.0%}, Engagement {e:.0%}, Posture {p_:.0%}"
-                        
-                    # Add frame counter
+                        res["summary"] = (
+                            f"Live: Openness {o:.0%}, Fidgeting {f:.0%}, "
+                            f"Engagement {e:.0%}, Posture {p_:.0%}"
+                        )
+
                     frame_count += 1
                     res["frame_count"] = frame_count
                     res["timestamp"] = time.time()
-                    
-                    # Send metrics back
                     await websocket.send_json(res)
-                    error_count = 0  # Reset error count on success
-                    
+                    error_count = 0
+
                 except Exception as e:
                     error_count += 1
                     await websocket.send_json({
                         "error": f"Analysis failed: {str(e)}",
                         "frame_count": frame_count,
-                        "timestamp": time.time()
+                        "timestamp": time.time(),
                     })
                     if error_count > 10:
                         await websocket.close()
                         break
-                
+
             except json.JSONDecodeError:
                 await websocket.send_json({"error": "Invalid JSON format"})
                 continue
-                
+
     except WebSocketDisconnect:
-        logging.getLogger("uvicorn.error").info(f"WebSocket disconnected after {frame_count} frames")
+        logging.getLogger("uvicorn.error").info(
+            f"WebSocket disconnected after {frame_count} frames"
+        )
     except Exception as e:
         logging.getLogger("uvicorn.error").error(f"WebSocket error: {e}")
         try:
             await websocket.close()
-        except:
+        except Exception:
             pass
 
 
@@ -497,7 +461,7 @@ async def get_report(session_id: str):
     if avg_tech < 60:
         tips.append("📚 Technical knowledge: Review core concepts, practice explaining them out loud.")
     if avg_comm < 60:
-        tips.append("🗣️ Communication: Reduce filler words, aim for 130-160 WPM, use structured answers (STAR method).") 
+        tips.append("🗣️ Communication: Reduce filler words, aim for 130-160 WPM, use structured answers (STAR method).")
     if avg_conf < 60:
         tips.append("📹 Body language: Maintain eye contact, sit upright, keep hands visible and relaxed.")
     if not tips:
@@ -521,135 +485,133 @@ async def get_report(session_id: str):
 async def generate_report_pdf(session_id: str):
     """Generate PDF report for the session and return as download."""
     try:
-        from reportlab.lib.pagesizes import letter, A4
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.lib.units import inch
-        from reportlab.lib import colors
-        from reportlab.lib.enums import TA_CENTER, TA_LEFT
-        from io import BytesIO
         import datetime
-    except ImportError:
-        raise HTTPException(500, "PDF library not available")
+        from io import BytesIO
 
-    # Fetch report
+        from reportlab.lib import colors
+        from reportlab.lib.enums import TA_CENTER
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import inch
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    except ImportError:
+        raise HTTPException(500, "reportlab is not installed. Run: pip install reportlab")
+
     report = await get_report(session_id)
     if "error" in report:
         raise HTTPException(400, report["error"])
 
-    # Create PDF buffer
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18
+    )
     story = []
-
-    # Styles
     styles = getSampleStyleSheet()
+
     title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        spaceAfter=30,
-        alignment=TA_CENTER,
-        textColor=colors.HexColor('#6C63FF'),
+        "CustomTitle", parent=styles["Heading1"], fontSize=24, spaceAfter=30,
+        alignment=TA_CENTER, textColor=colors.HexColor("#6C63FF"),
     )
     heading_style = ParagraphStyle(
-        'CustomHeading2',
-        parent=styles['Heading2'],
-        fontSize=16,
-        spaceAfter=12,
+        "CustomHeading2", parent=styles["Heading2"], fontSize=16, spaceAfter=12,
         textColor=colors.black,
     )
     normal_style = ParagraphStyle(
-        'CustomNormal',
-        parent=styles['Normal'],
-        fontSize=10,
-        spaceAfter=8,
+        "CustomNormal", parent=styles["Normal"], fontSize=10, spaceAfter=8,
         textColor=colors.black,
     )
 
-    # Title page
     story.append(Paragraph("PrepLoom Interview Report", title_style))
     story.append(Spacer(1, 20))
-    story.append(Paragraph(f"Role: {report['role']}<br/><br/>Candidate: {report['name'] or 'Anonymous'}<br/><br/>Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}", normal_style))
+    story.append(Paragraph(
+        f"Role: {report['role']}<br/><br/>"
+        f"Candidate: {report['name'] or 'Anonymous'}<br/><br/>"
+        f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        normal_style,
+    ))
     story.append(Spacer(1, 40))
-    story.append(Paragraph(f"Overall Score: {report['overall']}/100", ParagraphStyle(
-        'Score',
-        parent=styles['Heading1'],
-        fontSize=48,
-        alignment=TA_CENTER,
-        textColor=colors.HexColor('#22c55e' if report['overall'] >= 70 else '#f59e0b' if report['overall'] >= 45 else '#ef4444'),
-        spaceAfter=30
-    )))
+    story.append(Paragraph(
+        f"Overall Score: {report['overall']}/100",
+        ParagraphStyle(
+            "Score", parent=styles["Heading1"], fontSize=48, alignment=TA_CENTER,
+            textColor=colors.HexColor(
+                "#22c55e" if report["overall"] >= 70
+                else "#f59e0b" if report["overall"] >= 45
+                else "#ef4444"
+            ),
+            spaceAfter=30,
+        ),
+    ))
     story.append(Spacer(1, 20))
 
-    # Scores table
     scores_data = [
-        ['Metric', 'Score', '/100'],
-        ['Technical', f"{report['avg_technical']}", '100'],
-        ['Communication', f"{report['avg_communication']}", '100'],
-        ['Confidence', f"{report['avg_confidence']}", '100'],
+        ["Metric", "Score", "/100"],
+        ["Technical", f"{report['avg_technical']}", "100"],
+        ["Communication", f"{report['avg_communication']}", "100"],
+        ["Confidence", f"{report['avg_confidence']}", "100"],
     ]
     scores_table = Table(scores_data)
     scores_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.grey),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,0), 14),
-        ('BOTTOMPADDING', (0,0), (-1,0), 12),
-        ('BACKGROUND', (0,1), (-1,-1), colors.beige),
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('FONTSIZE', (0,1), (-1,-1), 12),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, 0), 14),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+        ("FONTSIZE", (0, 1), (-1, -1), 12),
     ]))
     story.append(scores_table)
     story.append(Spacer(1, 30))
 
-    # Tips
     story.append(Paragraph("Improvement Tips", heading_style))
-    for tip in report['tips']:
+    for tip in report["tips"]:
         story.append(Paragraph(f"• {tip}", normal_style))
     story.append(Spacer(1, 20))
 
-    # Per-question breakdown
     story.append(Paragraph("Question-by-Question", heading_style))
-    for i, eval in enumerate(report['evaluations'], 1):
+    for i, ev in enumerate(report["evaluations"], 1):
         story.append(Spacer(1, 12))
-        story.append(Paragraph(f"Q{i}: {eval['question_text'][:80]}...", ParagraphStyle(
-            'QTitle',
-            parent=normal_style,
-            fontSize=11,
-            spaceAfter=8,
-            fontName='Helvetica-Bold',
-        )))
-        
-        # Mini scores
-        q_scores = [
-            [f"Tech: {eval.get('technical_score', '?')}", f"Comm: {eval.get('communication_score', '?')}"],
-            [f"Conf: {eval.get('confidence_score', '?')}", '']
-        ]
-        q_table = Table(q_scores, colWidths=[2.2*inch, 2.2*inch])
+        story.append(Paragraph(
+            f"Q{i}: {ev['question_text'][:80]}...",
+            ParagraphStyle("QTitle", parent=normal_style, fontSize=11,
+                           spaceAfter=8, fontName="Helvetica-Bold"),
+        ))
+        q_table = Table(
+            [
+                [f"Tech: {ev.get('technical_score', '?')}", f"Comm: {ev.get('communication_score', '?')}"],
+                [f"Conf: {ev.get('confidence_score', '?')}", ""],
+            ],
+            colWidths=[2.2 * inch, 2.2 * inch],
+        )
         q_table.setStyle(TableStyle([
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('FONTSIZE', (0,0), (-1,-1), 10),
-            ('FONTNAME', (0,0), (-1,-1), 'Helvetica-Bold'),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
         ]))
         story.append(q_table)
-        
-        if eval.get('short_feedback'):
-            story.append(Paragraph(eval['short_feedback'], normal_style))
+        if ev.get("short_feedback"):
+            story.append(Paragraph(ev["short_feedback"], normal_style))
 
     doc.build(story)
 
-    filename = f"PrepLoom_Report_{report['role'].replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+    filename = (
+        f"PrepLoom_Report_{report['role'].replace(' ', '_')}_"
+        f"{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+    )
     return Response(
         content=buffer.getvalue(),
-        media_type='application/pdf',
-        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────
+# ── Static files (mounted LAST so /api/* routes always take precedence) ────
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+
+# ── Helpers ────────────────────────────────────────────────────────────────
 def _question_to_dict(q, idx: int) -> dict:
     return {
         "index": idx,

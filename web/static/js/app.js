@@ -17,6 +17,9 @@ const startBtn        = $("startBtn");
 const endBtn          = $("endBtn");
 const statusDot       = $("statusDot");
 const statusLabel     = $("statusLabel");
+const sidebar         = $("sidebar");
+const sidebarDrawerHandle = $("sidebarDrawerHandle");
+const shell           = document.querySelector(".shell");
 
 const welcomeView     = $("welcomeView");
 const interviewView   = $("interviewView");
@@ -89,6 +92,9 @@ let recordingTimerInterval = null;
 let liveRecognition = null;
 let recognitionRestartRequested = false;
 let liveTranscriptFinal = "";
+let activeView = welcomeView;
+let interviewDrawerOpen = false;
+let interviewDrawerPinned = false;
 
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -141,10 +147,106 @@ function setStatus(live) {
     statusLabel.textContent = live ? "🟢 Live" : "⚪ Idle";
 }
 
+function isDesktopPracticeLayout() {
+    return window.innerWidth > 960;
+}
+
+function canUseInterviewDrawer() {
+    return activeView === interviewView && isDesktopPracticeLayout();
+}
+
+function syncInterviewLayout() {
+    if (shell) {
+        shell.classList.toggle("shell--focused", canUseInterviewDrawer());
+        shell.classList.toggle("sidebar-open", canUseInterviewDrawer() && interviewDrawerOpen);
+    }
+    if (sidebarDrawerHandle) {
+        const handleLabel = interviewDrawerPinned ? "Close" : "Controls";
+        sidebarDrawerHandle.hidden = !canUseInterviewDrawer();
+        sidebarDrawerHandle.setAttribute("aria-hidden", String(!canUseInterviewDrawer()));
+        sidebarDrawerHandle.setAttribute("aria-expanded", String(canUseInterviewDrawer() && interviewDrawerOpen));
+        sidebarDrawerHandle.setAttribute("aria-label", interviewDrawerPinned ? "Close interview controls" : "Open interview controls");
+        const labelEl = sidebarDrawerHandle.querySelector("span");
+        if (labelEl) labelEl.textContent = handleLabel;
+    }
+    if (sidebar) {
+        sidebar.setAttribute("aria-hidden", String(canUseInterviewDrawer() && !interviewDrawerOpen));
+    }
+}
+
+function openInterviewDrawer(pinned = false) {
+    if (!canUseInterviewDrawer()) return;
+    interviewDrawerOpen = true;
+    if (pinned) interviewDrawerPinned = true;
+    syncInterviewLayout();
+}
+
+function closeInterviewDrawer(force = false) {
+    if (!canUseInterviewDrawer()) return;
+    if (interviewDrawerPinned && !force) return;
+    interviewDrawerPinned = false;
+    interviewDrawerOpen = false;
+    syncInterviewLayout();
+}
+
+function toggleInterviewDrawerPin() {
+    if (!canUseInterviewDrawer()) return;
+    if (interviewDrawerPinned) {
+        closeInterviewDrawer(true);
+        return;
+    }
+    interviewDrawerPinned = true;
+    interviewDrawerOpen = true;
+    syncInterviewLayout();
+}
+
 function switchView(view) {
     [welcomeView, interviewView, reportView].forEach(v => hide(v));
     show(view);
+    activeView = view;
+    interviewDrawerOpen = false;
+    interviewDrawerPinned = false;
+    syncInterviewLayout();
 }
+
+if (sidebarDrawerHandle) {
+    sidebarDrawerHandle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleInterviewDrawerPin();
+    });
+}
+
+if (sidebar) {
+    sidebar.addEventListener("mouseenter", () => {
+        openInterviewDrawer();
+    });
+
+    sidebar.addEventListener("mouseleave", () => {
+        if (!canUseInterviewDrawer() || interviewDrawerPinned) return;
+        closeInterviewDrawer();
+    });
+}
+
+document.addEventListener("click", (event) => {
+    if (!canUseInterviewDrawer() || !interviewDrawerPinned || !sidebar) return;
+    if (sidebar.contains(event.target)) return;
+    closeInterviewDrawer(true);
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && canUseInterviewDrawer() && interviewDrawerOpen) {
+        closeInterviewDrawer(true);
+    }
+});
+
+window.addEventListener("resize", () => {
+    if (!isDesktopPracticeLayout()) {
+        interviewDrawerOpen = false;
+        interviewDrawerPinned = false;
+    }
+    syncInterviewLayout();
+});
+syncInterviewLayout();
 
 function setSpeakButtonState(recording = false, elapsedSeconds = 0) {
     speakBtn.classList.toggle("recording", recording);
@@ -329,7 +431,7 @@ endBtn.addEventListener("click", async () => {
 //  Render question
 // ═══════════════════════════════════════════════════════════════════════════
 function renderQuestion(q) {
-    const bubbleText = questionBubble.querySelector(".q-bubble-text");
+    const bubbleText = questionBubble.querySelector(".q-text");
     if (bubbleText) {
         bubbleText.textContent = q.question_text;
     } else {
