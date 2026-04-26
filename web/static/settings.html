@@ -281,9 +281,41 @@ body {
     align-items: start;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
     .settings-layout { grid-template-columns: 1fr; }
-    .settings-nav { flex-direction: row; flex-wrap: wrap; }
+    
+        flex-direction: row; 
+        flex-wrap: nowrap; 
+        overflow-x: auto; 
+        padding: 0.5rem; 
+        gap: 0.5rem; 
+        -webkit-overflow-scrolling: touch; 
+        scrollbar-width: none; 
+    }
+    .settings-nav::-webkit-scrollbar { display: none; }
+    .nav-item { width: auto; flex: 0 0 auto; white-space: nowrap; }
+    .nav-divider { width: 1px; height: auto; margin: 0 0.2rem; }
+    
+    .page { padding: 1.5rem 1rem 6rem; }
+    
+    .setting-row, .danger-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+    
+    .avatar-row { flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
+    
+    .setting-info { width: 100%; }
+    .setting-control { width: 100%; display: flex; justify-content: flex-start; }
+    .s-input, .s-select, .range-wrap { width: 100%; min-width: 0; }
+    .theme-switcher { flex-wrap: wrap; width: 100%; }
+    .theme-btn { flex: 1; justify-content: center; }
+    .btn-danger, .avatar-btn { width: 100%; }
+    
+    .save-bar { width: calc(100% - 2rem); justify-content: space-between; padding: 0.75rem 1rem; }
+    .save-bar-text { display: none; }
+    .save-bar-dot { margin-right: auto; }
 }
 
 /* ── Side nav ────────────────────────────────────────── */
@@ -1280,7 +1312,7 @@ body {
                                 <div class="setting-desc">Total questions asked per practice round</div>
                             </div>
                             <div class="setting-control">
-                                <select class="s-select track-change">
+                                <select class="s-select track-change" id="prefQuestions">
                                     <option>5 questions</option>
                                     <option selected>7 questions</option>
                                     <option>10 questions</option>
@@ -1294,7 +1326,7 @@ body {
                                 <div class="setting-desc">Default difficulty for new sessions</div>
                             </div>
                             <div class="setting-control">
-                                <select class="s-select track-change">
+                                <select class="s-select track-change" id="prefDifficulty">
                                     <option>Beginner</option>
                                     <option selected>Intermediate</option>
                                     <option>Advanced</option>
@@ -1309,7 +1341,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefIdeal" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1321,7 +1353,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" />
+                                    <input type="checkbox" class="track-change" id="prefCode" />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1333,7 +1365,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefPdf" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1371,7 +1403,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefConfidence" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1383,7 +1415,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefWpm" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1395,7 +1427,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefFiller" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1406,7 +1438,7 @@ body {
                                 <div class="setting-desc">How many improvement tips appear per session</div>
                             </div>
                             <div class="setting-control">
-                                <select class="s-select track-change">
+                                <select class="s-select track-change" id="prefTips">
                                     <option>3 tips</option>
                                     <option selected>5 tips</option>
                                     <option>8 tips</option>
@@ -1439,7 +1471,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefTts" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1462,7 +1494,7 @@ body {
                                 <div class="setting-desc">TTS voice gender preference</div>
                             </div>
                             <div class="setting-control">
-                                <select class="s-select track-change">
+                                <select class="s-select track-change" id="prefTtsVoice">
                                     <option selected>Female (Samantha)</option>
                                     <option>Male (Daniel)</option>
                                     <option>Neutral (auto)</option>
@@ -1475,7 +1507,7 @@ body {
                                 <div class="setting-desc">Speech-to-text backend for your answers</div>
                             </div>
                             <div class="setting-control">
-                                <select class="s-select track-change">
+                                <select class="s-select track-change" id="prefSttEngine">
                                     <option selected>Whisper (high accuracy)</option>
                                     <option>Browser SpeechRecognition</option>
                                     <option>Whisper + Browser fallback</option>
@@ -1489,7 +1521,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefLiveTranscript" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1515,7 +1547,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefAutoPosture" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1526,7 +1558,7 @@ body {
                                 <div class="setting-desc">Frames per second sent to the posture backend</div>
                             </div>
                             <div class="setting-control">
-                                <select class="s-select track-change">
+                                <select class="s-select track-change" id="prefFps">
                                     <option>5 FPS (battery-saver)</option>
                                     <option selected>15 FPS (balanced)</option>
                                     <option>30 FPS (high detail)</option>
@@ -1539,7 +1571,7 @@ body {
                                 <div class="setting-desc">Higher resolution = sharper analysis</div>
                             </div>
                             <div class="setting-control">
-                                <select class="s-select track-change">
+                                <select class="s-select track-change" id="prefRes">
                                     <option>480p</option>
                                     <option selected>720p</option>
                                     <option>1080p</option>
@@ -1553,7 +1585,7 @@ body {
                             </div>
                             <div class="setting-control">
                                 <label class="toggle">
-                                    <input type="checkbox" class="track-change" checked />
+                                    <input type="checkbox" class="track-change" id="prefSummary" checked />
                                     <span class="toggle-track"></span>
                                 </label>
                             </div>
@@ -1970,10 +2002,22 @@ document.querySelectorAll('.track-change').forEach(el => {
 });
 
 saveBtn.addEventListener('click', () => {
+    const prefs = {};
+    document.querySelectorAll('.track-change').forEach(el => {
+        if (el.id && el.id !== 'inputName' && el.type !== 'password') {
+            prefs[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+        }
+    });
+    prefs.theme = currentTheme;
+    const activeAccent = document.querySelector('.accent-dot.active');
+    if (activeAccent) prefs.accent = activeAccent.dataset.color;
+    
+    localStorage.setItem('preploom_prefs', JSON.stringify(prefs));
+
     if (window.SB && window.SB.client) {
         const newName = document.getElementById('inputName').value.trim();
         window.SB.client.auth.updateUser({
-            data: { name: newName }
+            data: { name: newName, preferences: prefs }
         }).then(({ data, error }) => {
             if (!error && data && data.user) {
                 window.SB.syncProfile(data.user);
@@ -1992,7 +2036,50 @@ saveBtn.addEventListener('click', () => {
 discardBtn.addEventListener('click', () => {
     hasChanges = false;
     saveBar.classList.remove('visible');
+    try {
+        const p = JSON.parse(localStorage.getItem('preploom_prefs'));
+        if (p) applyPreferences(p);
+    } catch(e) {}
 });
+
+/* ── Apply Preferences ────────────────────────────────────── */
+function applyPreferences(prefs) {
+    if (!prefs) return;
+    document.querySelectorAll('.track-change').forEach(el => {
+        if (el.id && prefs[el.id] !== undefined && el.type !== 'password') {
+            if (el.type === 'checkbox') el.checked = prefs[el.id];
+            else el.value = prefs[el.id];
+            
+            if (el.id === 'fontSizeRange' && document.getElementById('fontSizeVal')) document.getElementById('fontSizeVal').textContent = el.value + 'px';
+            if (el.id === 'ttsRateRange' && document.getElementById('ttsRateVal')) document.getElementById('ttsRateVal').textContent = parseFloat(el.value).toFixed(2) + '×';
+            if (el.id === 'behavRange' && document.getElementById('behavVal')) document.getElementById('behavVal').textContent = el.value;
+        }
+    });
+    if (prefs.accent) {
+        const dot = document.querySelector(`.accent-dot[data-color="${prefs.accent}"]`);
+        if (dot) {
+            document.querySelectorAll('.accent-dot').forEach(d => d.classList.remove('active'));
+            dot.classList.add('active');
+        }
+    }
+    if (prefs.theme) {
+        const btn = document.querySelector(`.theme-btn[data-theme="${prefs.theme}"]`);
+        if (btn) {
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTheme = prefs.theme;
+        }
+    }
+    setTimeout(() => {
+        hasChanges = false;
+        saveBar.classList.remove('visible');
+    }, 50);
+}
+
+try {
+    const p = JSON.parse(localStorage.getItem('preploom_prefs'));
+    if (p) applyPreferences(p);
+} catch(e) {}
 
 /* ── Toast ────────────────────────────────────────────────── */
 function showToast() {
@@ -2071,6 +2158,13 @@ window.addEventListener('supabase:ready', async () => {
         document.getElementById('avatarInitials').style.display = 'none';
     } else if (name) {
         document.getElementById('avatarInitials').textContent = name.charAt(0).toUpperCase();
+    }
+
+    // Restore preferences from Supabase
+    if (user.user_metadata?.preferences) {
+        const p = user.user_metadata.preferences;
+        localStorage.setItem('preploom_prefs', JSON.stringify(p));
+        applyPreferences(p);
     }
 
     // Fetch user statistics

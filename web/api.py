@@ -82,6 +82,16 @@ def _get_vectordb():
     return _vectordb
 
 
+def _question_to_dict(q, index: int) -> dict:
+    return {
+        "index": index,
+        "question_text": q.question_text,
+        "role_tag": q.role_tag,
+        "difficulty_level": q.difficulty_level,
+        "subtopic": q.subtopic,
+        "ideal_answer": q.ideal_answer,
+    }
+
 # ── FastAPI app ────────────────────────────────────────────────────────────
 app = FastAPI(title="PrepLoom API")
 app.include_router(auth_router)
@@ -197,8 +207,8 @@ async def start_interview(
     _sessions[session_id] = {
         "name": name,
         "role": role,
-        "user_id": user["id"] if user else None,
-        "user_email": user["email"] if user else None,
+        "user_id": user.get("sub") or user.get("id") if user else None,
+        "user_email": user.get("email") if user else None,
         "questions": questions,
         "question_idx": 0,
         "evaluations": [],
@@ -473,7 +483,7 @@ async def get_user_stats(user: dict | None = Depends(get_optional_user)):
     if not user:
         return {"sessions": 0, "avg_score": 0, "practice_time": "0.0h", "roles": 0}
 
-    user_id = user.get("id")
+    user_id = user.get("sub") or user.get("id")
     user_email = user.get("email")
 
     user_sessions = []
@@ -555,136 +565,3 @@ async def get_report(session_id: str):
         "evaluations": evals,
         "tips": tips,
     }
-
-
-@app.post("/api/report/{session_id}/pdf")
-async def generate_report_pdf(session_id: str):
-    """Generate PDF report for the session and return as download."""
-    try:
-        from reportlab.lib.pagesizes import letter, A4
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.lib.units import inch
-        from reportlab.lib import colors
-        from reportlab.lib.enums import TA_CENTER, TA_LEFT
-        from io import BytesIO
-        import datetime
-    except ImportError:
-        raise HTTPException(500, "PDF library not available")
-
-    # Fetch report
-    report = await get_report(session_id)
-    if "error" in report:
-        raise HTTPException(400, report["error"])
-
-    # Create PDF buffer
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
-    story = []
-
-    # Styles
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        spaceAfter=30,
-        alignment=TA_CENTER,
-        textColor=colors.HexColor('#6C63FF'),
-    )
-    heading_style = ParagraphStyle(
-        'CustomHeading2',
-        parent=styles['Heading2'],
-        fontSize=16,
-        spaceAfter=12,
-        textColor=colors.black,
-    )
-    normal_style = ParagraphStyle(
-        'CustomNormal',
-        parent=styles['Normal'],
-        fontSize=10,
-        spaceAfter=8,
-        textColor=colors.black,
-    )
-
-    # Title page
-    story.append(Paragraph("PrepLoom Interview Report", title_style))
-    story.append(Spacer(1, 20))
-    story.append(Paragraph(f"Role: {report['role']}<br/><br/>Candidate: {report['name'] or 'Anonymous'}<br/><br/>Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}", normal_style))
-    story.append(Spacer(1, 40))
-    story.append(Paragraph(f"Overall Score: {report['overall']}/100", ParagraphStyle(
-        'Score',
-        parent=styles['Heading1'],
-        fontSize=48,
-        alignment=TA_CENTER,
-        textColor=colors.HexColor('#22c55e' if report['overall'] >= 70 else '#f59e0b' if report['overall'] >= 45 else '#ef4444'),
-        spaceAfter=30
-    )))
-    story.append(Spacer(1, 20))
-
-    # Scores table
-    scores_data = [
-        ['Metric', 'Score', '/100'],
-        ['Technical', f"{report['avg_technical']}", '100'],
-        ['Communication', f"{report['avg_communication']}", '100'],
-        ['Confidence', f"{report['avg_confidence']}", '100'],
-    ]
-    scores_table = Table(scores_data)
-    scores_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.grey),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0,0), (-1,0), 14),
-        ('BOTTOMPADDING', (0,0), (-1,0), 12),
-        ('BACKGROUND', (0,1), (-1,-1), colors.beige),
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('FONTSIZE', (0,1), (-1,-1), 12),
-    ]))
-    story.append(scores_table)
-    story.append(Spacer(1, 30))
-
-    # Tips
-    story.append(Paragraph("Improvement Tips", heading_style))
-    for tip in report['tips']:
-        story.append(Paragraph(f"• {tip}", normal_style))
-    story.append(Spacer(1, 20))
-
-    # Per-question breakdown
-    story.append(Paragraph("Question-by-Question", heading_style))
-    for i, eval in enumerate(report['evaluations'], 1):
-        story.append(Spacer(1, 12))
-        story.append(Paragraph(f"Q{i}: {eval['question_text'][:80]}...", ParagraphStyle(
-            'QTitle',
-            parent=normal_style,
-            fontSize=11,
-            spaceAfter=8,
-            fontName='Helvetica-Bold',
-        )))
-        
-        # Mini scores
-        q_scores = [
-            [f"Tech: {eval.get('technical_score', '?')}", f"Comm: {eval.get('communication_score', '?')}"],
-            [f"Conf: {eval.get('confidence_score', '?')}", '']
-        ]
-        q_table = Table(q_scores, colWidths=[2.2*inch, 2.2*inch])
-        q_table.setStyle(TableStyle([
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('FONTSIZE', (0,0), (-1,-1), 10),
-            ('FONTNAME', (0,0), (-1,-1), 'Helvetica-Bold'),
-        ]))
-        story.append(q_table)
-        
-        if eval.get('short_feedback'):
-            story.append(Paragraph(eval['short_feedback'], normal_style))
-
-    doc.build(story)
-
-    filename = f"PrepLoom_Report_{report['role'].replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
-    return Response(
-        content=buffer.getvalue(),
-        media_type='application/pdf',
-        headers={
-            'Content-Disposition': f'attachment; filename="{filename}"'
-        }
-    )
