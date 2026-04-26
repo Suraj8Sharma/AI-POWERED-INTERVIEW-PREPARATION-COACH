@@ -157,9 +157,19 @@ def _is_behavioural(difficulty_level: Any) -> bool:
     return "behavioural" in text or "behavioral" in text
 
 def _is_coding(q: RetrievedQuestion) -> bool:
-    """Identify coding questions based on common LeetCode phrasing."""
+    """Identify coding questions based on common LeetCode phrasing or subtopic."""
     text = (q.question_text or "").lower()
-    return "write a function" in text or "given an array" in text or "singly linked list" in text
+    topic = (q.subtopic or "").lower()
+    
+    coding_topics = [
+        "arrays & hashing", "two pointers", "linked lists", "stacks", 
+        "dynamic programming", "binary search", "trees"
+    ]
+    if any(ct in topic for ct in coding_topics):
+        return True
+        
+    phrases = ["write a function", "given an array", "singly linked list", "given the root", "linked list", "integer array", "return an array"]
+    return any(p in text for p in phrases)
 
 
 def fetch_questions_for_role_random_mix(
@@ -180,9 +190,13 @@ def fetch_questions_for_role_random_mix(
 
     where = {"role_tag": role_tag}
     try:
-        data = vectordb.get(where=where, include=["documents", "metadatas"])
+        # Explicitly pass limit to prevent ChromaDB from returning only default subset
+        data = vectordb.get(where=where, include=["documents", "metadatas"], limit=limit)
     except TypeError:
-        data = vectordb._collection.get(where=where, include=["documents", "metadatas"])  # type: ignore[attr-defined]
+        try:
+            data = vectordb._collection.get(where=where, include=["documents", "metadatas"], limit=limit)  # type: ignore[attr-defined]
+        except Exception:
+            data = vectordb._collection.get(where=where, include=["documents", "metadatas"])
     except Exception:
         data = vectordb._collection.get(where=where, include=["documents", "metadatas"])  # type: ignore[attr-defined]
 
@@ -226,32 +240,66 @@ def fetch_questions_for_role_random_mix(
     chosen_behavioural = rng.sample(behavioural, n_behavioural) if n_behavioural > 0 else []
     chosen_standard_tech = rng.sample(standard_tech, n_standard_tech) if n_standard_tech > 0 else []
     
+    # If vectordb.get() truncated the results and missed the newly added coding 
+    # questions at the end of the DB, we explicitly search for them.
+    if len(coding) < n_coding:
+        print(f"[DEBUG] Found only {len(coding)} coding questions from get(). Forcing semantic search...")
+        try:
+            extra_docs = vectordb.similarity_search(
+                "Write a function to solve given an array string integer leetcode",
+                k=20,
+                filter={"role_tag": role_tag}
+            )
+            for d in extra_docs:
+                md = dict(d.metadata or {})
+                q_ext = RetrievedQuestion(
+                    question_text=_clean_question_text(d.page_content),
+                    question_id=md.get("question_id"),
+                    role_tag=md.get("role_tag"),
+                    difficulty_level=md.get("difficulty_level"),
+                    subtopic=md.get("subtopic"),
+                    ideal_answer=md.get("ideal_answer"),
+                    metadata=md,
+                )
+                if _is_coding(q_ext) and not any(c.question_text == q_ext.question_text for c in coding):
+                    coding.append(q_ext)
+        except Exception as e:
+            print(f"[DEBUG] Semantic search fallback failed: {e}")
+
     if len(coding) >= n_coding:
         chosen_coding = rng.sample(coding, n_coding)
-    elif len(coding) > 0:
-        chosen_coding = coding
     else:
-        print("[DEBUG] No coding questions found in DB. Injecting fallback coding questions.")
-        chosen_coding = [
-            RetrievedQuestion(
-                question_text="Write a function to solve the 'Two Sum' problem. Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-                question_id="fallback_code_1",
-                role_tag=role_tag,
-                difficulty_level="Medium",
-                subtopic="Arrays & Hashing",
-                ideal_answer="The optimal solution uses a Hash Map (dictionary) to store the complement of each number as we iterate through the array. This gives O(n) Time Complexity and O(n) Space Complexity. A brute force nested loop would be O(n^2) which is suboptimal.",
-                metadata={}
-            ),
-            RetrievedQuestion(
-                question_text="Write a function to check if a given string is a valid palindrome. It should ignore non-alphanumeric characters and be case-insensitive.",
-                question_id="fallback_code_2",
-                role_tag=role_tag,
-                difficulty_level="Easy",
-                subtopic="Two Pointers",
-                ideal_answer="The optimal solution uses the Two Pointer technique. One pointer starts at the beginning, one at the end, moving inward and skipping non-alphanumeric characters. This gives O(n) Time Complexity and O(1) Space Complexity.",
-                metadata={}
-            )
-        ]
+        chosen_coding = list(coding)
+        needed = n_coding - len(chosen_coding)
+        if needed > 0:
+            print(f"[DEBUG] Found only {len(coding)} coding questions in DB. Injecting {needed} fallback(s).")
+            fallbacks = [
+                RetrievedQuestion(
+                    question_text="Write a function to solve the 'Two Sum' problem. Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+                    question_id="fallback_code_1",
+                    role_tag=role_tag,
+                    difficulty_level="Medium",
+                    subtopic="Arrays & Hashing",
+                    ideal_answer="The optimal solution uses a Hash Map (dictionary) to store the complement of each number as we iterate through the array. This gives O(n) Time Complexity and O(n) Space Complexity. A brute force nested loop would be O(n^2) which is suboptimal.",
+                    metadata={}
+                ),
+                RetrievedQuestion(
+                    question_text="Write a function to check if a given string is a valid palindrome. It should ignore non-alphanumeric characters and be case-insensitive.",
+                    question_id="fallback_code_2",
+                    role_tag=role_tag,
+                    difficulty_level="Easy",
+                    subtopic="Two Pointers",
+                    ideal_answer="The optimal solution uses the Two Pointer technique. One pointer starts at the beginning, one at the end, moving inward and skipping non-alphanumeric characters. This gives O(n) Time Complexity and O(1) Space Complexity.",
+                    metadata={}
+                )
+            ]
+            # Prevent duplicate injection if db already matched one of these
+            existing_texts = {c.question_text.lower() for c in chosen_coding if c.question_text}
+            for fb in fallbacks:
+                if fb.question_text.lower() not in existing_texts:
+                    chosen_coding.append(fb)
+                if len(chosen_coding) == n_coding:
+                    break
 
     # Return the questions in the exact requested order: 
     # Standard Technical -> Coding -> Behavioural
