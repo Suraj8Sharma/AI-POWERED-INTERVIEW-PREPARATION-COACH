@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Settings — PrepLoom" />
+    <title>Settings — PrepLoom</title>
+    <link rel="icon" href="/static/logo.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/site.css" />
+    <style>
+        /* ── Settings page overrides ────────────────────────────────── */
+        .settings-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            min-height: 100vh;
+        }
+
+        .settings-header {
+            margin-bottom: 3rem;
+            animation: fadeSlideDown 0.5s ease;
+        }
+
+        .settings-header h1 {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 50%, #2dd4bf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .settings-header p {
+            color: var(--pl-muted);
+            font-size: 1rem;
+        }
+
+        /* ── Settings sections ─────────────────────────────────────── */
+        .settings-section {
+            background: var(--pl-surface);
+            border: 1px solid var(--pl-border);
+            border-radius: var(--pl-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            animation: fadeSlideUp 0.5s ease;
+            animation-fill-mode: both;
+        }
+
+        .settings-section:nth-child(2) { animation-delay: 0.1s; }
+        .settings-section:nth-child(3) { animation-delay: 0.2s; }
+        .settings-section:nth-child(4) { animation-delay: 0.3s; }
+
+        .settings-section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--pl-text);
+        }
+
+        .settings-section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, #6c63ff, #2dd4bf);
+            border-radius: 99px;
+        }
+
+        /* ── Form group ────────────────────────────────────────────── */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--pl-text);
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: #ef4444;
+        }
+
+        .form-input,
+        .form-input-display {
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: var(--pl-radius-sm);
+            border: 1px solid var(--pl-border-strong);
+            background: rgba(14, 16, 32, 0.5);
+            color: var(--pl-text);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-input:hover {
+            border-color: var(--pl-border-strong);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6c63ff;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+
+        .form-input-display {
+            background: rgba(14, 16, 32, 0.8);
+            color: var(--pl-muted);
+            border: 1px solid var(--pl-border);
+            cursor: default;
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: var(--pl-faint);
+            margin-top: 0.4rem;
+        }
+
+        /* ── Theme toggle ──────────────────────────────────────────── */
+        .theme-selector {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .theme-option {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px solid var(--pl-border-strong);
+            border-radius: var(--pl-radius-sm);
+            background: rgba(14, 16, 32, 0.5);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-option:hover {
+            border-color: #6c63ff;
+        }
+
+        .theme-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #6c63ff;
+        }
+
+        .theme-option label {
+            cursor: pointer;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .theme-option.active {
+            border-color: #6c63ff;
+            background: rgba(108, 99, 255, 0.1);
+        }
+
+        /* ── Buttons ────────────────────────────────────────────────── */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary,
+        .btn-danger,
+        .btn-secondary {
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: var(--pl-radius-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(14, 16, 32, 0.5);
+            color: var(--pl-text);
+            border: 1px solid var(--pl-border-strong);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(14, 16, 32, 0.8);
+            border-color: var(--pl-border-strong);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        /* ── Status messages ────────────────────────────────────────– */
+        .status-message {
+            padding: 1rem;
+            border-radius: var(--pl-radius-sm);
+            margin-bottom: 1rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        /* ── Delete account modal ───────────────────────────────────– */
+        .settings-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .settings-modal.show {
+            display: flex;
+        }
+
+        .settings-modal-content {
+            background: var(--pl-bg-elevated);
+            border: 1px solid var(--pl-border-strong);
+            border-radius: var(--pl-radius);
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+        }
+
+        .settings-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--pl-text);
+        }
+
+        .settings-modal-description {
+            color: var(--pl-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .settings-modal-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .settings-modal-actions .btn-primary,
+        .settings-modal-actions .btn-secondary {
+            flex: 1;
+        }
+
+        /* ── Animations ────────────────────────────────────────────– */
+        @keyframes fadeSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ── Dark theme (default) ────────────────────────────────────– */
+        :root.theme-dark {
+            --pl-bg: #07080c;
+            --pl-bg-elevated: #0e1018;
+            --pl-surface: rgba(18, 20, 30, 0.72);
+            --pl-text: #f4f4f7;
+            --pl-muted: rgba(244, 244, 247, 0.62);
+        }
+
+        /* ── Light theme ────────────────────────────────────────────– */
+        :root.theme-light {
+            --pl-bg: #ffffff;
+            --pl-bg-elevated: #f9fafb;
+            --pl-surface: rgba(249, 250, 251, 0.9);
+            --pl-border: rgba(0, 0, 0, 0.08);
+            --pl-border-strong: rgba(0, 0, 0, 0.14);
+            --pl-text: #1f2937;
+            --pl-muted: rgba(31, 41, 55, 0.62);
+            --pl-faint: rgba(31, 41, 55, 0.38);
+        }
+
+        body.site.theme-light {
+            background: var(--pl-bg);
+            color: var(--pl-text);
+        }
+
+        .theme-light .form-input,
+        .theme-light .form-input-display {
+            background: rgba(249, 250, 251, 0.8);
+            color: var(--pl-text);
+            border-color: var(--pl-border-strong);
+        }
+
+        .theme-light .form-input:focus {
+            border-color: #6c63ff;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+
+        .theme-light .theme-option {
+            background: rgba(249, 250, 251, 0.8);
+        }
+
+        .theme-light .btn-secondary {
+            background: rgba(249, 250, 251, 0.8);
+            color: var(--pl-text);
+        }
+
+        .theme-light .btn-secondary:hover {
+            background: rgba(243, 244, 246, 0.95);
+        }
+
+        .theme-light .nav-item,
+        .theme-light .site-nav__link {
+            color: var(--pl-text) !important;
+        }
+
+        /* ── Dropdown Menu ── */
+        .user-dropdown-menu.show { display: flex !important; }
+        .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
+
+        /* ── Responsive ────────────────────────────────────────────– */
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 2rem 1rem;
+            }
+
+            .settings-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .settings-section {
+                padding: 1.5rem;
+            }
+
+            .theme-selector {
+                flex-direction: column;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-danger,
+            .btn-secondary {
+                width: 100%;
+            }
+
+            .settings-modal-content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body class="site">
+<div class="site-wrap">
+    <header class="site-nav" role="navigation" aria-label="Primary">
+        <a class="site-nav__brand" href="/">
+            <img src="/static/logo.png" alt="PrepLoom Logo" style="height: 32px; width: auto; border-radius: 6px;" />
+            PrepLoom
+        </a>
+        <nav class="site-nav__links" aria-label="Main">
+            <a class="site-nav__link" href="/">Home</a>
+            <a class="site-nav__link" href="/features">Features</a>
+            <a class="site-nav__link" href="/revision">Revision</a>
+            <a class="site-nav__link" href="/about">About</a>
+            <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
+        </nav>
+        <div class="site-nav__auth" id="navAuthSlot">
+            <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
+                <span data-theme-icon>🌙</span>
+            </button>
+            <div style="position: relative; display: inline-block;">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
+                    <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Settings
+                    </a>
+                    <button type="button" id="navLogout" class="hidden" style="padding: 0.75rem 1rem; color: #ef4444; background: transparent; border: none; text-align: left; font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log out
+                    </button>
+                </div>
+            </div>
+            <div id="navAuthButtons">
+                <button type="button" class="btn-nav-outline" data-open-modal="modal-signin">Sign in</button>
+                <button type="button" class="btn-nav-primary" data-open-modal="modal-signup">Sign up</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ambient background -->
+    <div class="ambient">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Main content -->
+    <main class="site-main">
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>Settings</h1>
+            <p>Manage your account preferences and profile information</p>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="settings-section">
+            <h2 class="settings-section-title">Profile Information</h2>
+            
+            <div id="profileStatus" class="status-message"></div>
+
+            <div class="form-group">
+                <label class="form-label required">Full Name</label>
+                <input 
+                    type="text" 
+                    id="nameInput" 
+                    class="form-input" 
+                    placeholder="Your full name"
+                    maxlength="100"
+                />
+                <div class="form-help">Update your display name</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">Email Address</label>
+                <div class="form-input-display" id="emailDisplay">Loading...</div>
+                <div class="form-help">Your email cannot be changed here. Contact support for email changes</div>
+            </div>
+
+            <div class="btn-group">
+                <button id="saveProfileBtn" class="btn-primary">Save Profile</button>
+                <button id="cancelProfileBtn" class="btn-secondary" style="display:none;">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Theme Section -->
+        <div class="settings-section">
+            <h2 class="settings-section-title">Appearance</h2>
+            
+            <div id="themeStatus" class="status-message"></div>
+
+            <div class="form-group">
+                <label class="form-label">Theme</label>
+                <div class="theme-selector">
+                    <div class="theme-option active">
+                        <input 
+                            type="radio" 
+                            id="themeDark" 
+                            name="theme" 
+                            value="dark" 
+                            checked
+                        />
+                        <label for="themeDark">🌙 Dark</label>
+                    </div>
+                    <div class="theme-option">
+                        <input 
+                            type="radio" 
+                            id="themeLight" 
+                            name="theme" 
+                            value="light"
+                        />
+                        <label for="themeLight">☀️ Light</label>
+                    </div>
+                </div>
+                <div class="form-help">Choose your preferred theme. Changes apply immediately across all pages</div>
+            </div>
+        </div>
+
+        <!-- Security Section -->
+        <div class="settings-section">
+            <h2 class="settings-section-title">Security & Account</h2>
+            
+            <div id="securityStatus" class="status-message"></div>
+
+            <div class="form-group">
+                <label class="form-label">Account Status</label>
+                <div class="form-input-display">✓ Active</div>
+                <div class="form-help">Your account is in good standing</div>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-section" style="border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.03);">
+            <h2 class="settings-section-title" style="color: #ef4444;">Danger Zone</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Delete Account</label>
+                <p class="form-help" style="margin-bottom: 1rem;">
+                    Once you delete your account, there is no going back. All your data will be permanently removed.
+                </p>
+                <button id="deleteAccountBtn" class="btn-danger">Delete Account</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div id="deleteModal" class="settings-modal">
+        <div class="settings-modal-content">
+            <h3 class="settings-modal-title">Delete Account?</h3>
+            <p class="settings-modal-description">
+                This action cannot be undone. All your interview data, feedback, and account information will be permanently deleted.
+            </p>
+            <div class="settings-modal-actions">
+                <button id="confirmDeleteBtn" class="btn-danger">Delete Everything</button>
+                <button id="cancelDeleteBtn" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+    </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <span>© 2026 PrepLoom. All rights reserved.</span>
+            <div class="site-footer__links">
+                <a href="/features">Features</a>
+                <a href="/revision">Revision</a>
+                <a href="/about">About</a>
+                <a href="/app">Practice</a>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Sign in modal -->
+<div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signin-title">Sign in</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+        </div>
+        <p class="modal__note">Sign in with Supabase to manage your settings and preferences.</p>
+        <p id="signinError" class="modal-error" hidden></p>
+        <form id="formSignin">
+            <div class="modal__field">
+                <label for="signin-email">Email</label>
+                <input id="signin-email" name="email" type="email" autocomplete="username" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signin-password">Password</label>
+                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Sign in</button>
+        </form>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
+    </div>
+</div>
+
+<!-- Sign up modal -->
+<div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signup-title">Create account</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+        </div>
+        <p class="modal__note">Create an account to save your progress and settings.</p>
+        <p id="signupError" class="modal-error" hidden></p>
+        <form id="formSignup">
+            <div class="modal__field">
+                <label for="signup-name">Name <span class="modal-optional">(optional)</span></label>
+                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Your name" maxlength="120" />
+            </div>
+            <div class="modal__field">
+                <label for="signup-email">Email</label>
+                <input id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signup-password">Password</label>
+                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Create account</button>
+        </form>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
+    </div>
+</div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/theme-manager.js"></script>
+    <script src="/static/js/supabaseClient.js"></script>
+    <script src="/static/js/site.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/settings.js"></script>
+    <script>
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userDropdownMenu');
+            const btn = document.getElementById('navUserEmail');
+            if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+        
+        // Sync Appearance radio buttons with the global theme manager
+        const themeRadios = document.querySelectorAll('input[name="theme"]');
+        if (themeRadios.length > 0) {
+            const syncRadios = () => {
+                const savedTheme = localStorage.getItem('pl-theme') || (document.documentElement.classList.contains('theme-light') ? 'light' : 'dark');
+                const activeRadio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+                if (activeRadio) {
+                    activeRadio.checked = true;
+                    document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+                    activeRadio.closest('.theme-option').classList.add('active');
+                }
+            };
+
+            syncRadios(); // Initial sync on load
+
+            // Listen for changes from the settings panel radio buttons
+            themeRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.checked && typeof applyTheme === 'function') {
+                        applyTheme(e.target.value);
+                        syncRadios();
+                    }
+                });
+            });
+
+            // Sync panel UI if theme is changed via the top nav button or another tab
+            document.getElementById('themeToggle')?.addEventListener('click', () => setTimeout(syncRadios, 10));
+            window.addEventListener('storage', (e) => { if (e.key === 'pl-theme') syncRadios(); });
+        }
+    </script>
+</body>
+</html>

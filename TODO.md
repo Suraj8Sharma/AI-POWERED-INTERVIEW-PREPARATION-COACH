@@ -1,11 +1,10 @@
-# PDF Report Generation TODO
+# Settings Page Functional Implementation
 
-## Plan Steps:
-- [x] Install reportlab: pip install reportlab
-- [x] Backend: Add POST /api/report/{session_id}/pdf in web/api.py using ReportLab to generate PDF from report data
-- [x] Frontend: Update web/static/js/app.js showReport() to fetch/download PDF after rendering
-- [ ] DB: Store PDF path in MongoDB user.reports[] array (for session.user_id)
-- [ ] Test full flow: interview → report → PDF download
-- [ ] Update TODO.md
-- [ ] attempt_completion
+## Plan
+- [x] Create TODO.md
+- [ ] Fix `settings.html` - Add IDs to all inputs, rewrite save/load logic
+- [ ] Enhance `site.js` - Add reduceMotion, ambientOrbs, global helper
+- [ ] Fix `app.html` - Add data-theme, include site.js
+- [ ] Enhance `app.js` - Remove conflicting logic, add clean applyAppSettings()
+- [ ] Test and verify all settings persist across pages
 

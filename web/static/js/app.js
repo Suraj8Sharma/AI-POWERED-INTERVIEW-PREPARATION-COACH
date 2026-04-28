@@ -17,9 +17,6 @@ const startBtn        = $("startBtn");
 const endBtn          = $("endBtn");
 const statusDot       = $("statusDot");
 const statusLabel     = $("statusLabel");
-const sidebar         = $("sidebar");
-const sidebarDrawerHandle = $("sidebarDrawerHandle");
-const shell           = document.querySelector(".shell");
 
 const welcomeView     = $("welcomeView");
 const interviewView   = $("interviewView");
@@ -92,9 +89,6 @@ let recordingTimerInterval = null;
 let liveRecognition = null;
 let recognitionRestartRequested = false;
 let liveTranscriptFinal = "";
-let activeView = welcomeView;
-let interviewDrawerOpen = false;
-let interviewDrawerPinned = false;
 
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -147,106 +141,10 @@ function setStatus(live) {
     statusLabel.textContent = live ? "🟢 Live" : "⚪ Idle";
 }
 
-function isDesktopPracticeLayout() {
-    return window.innerWidth > 960;
-}
-
-function canUseInterviewDrawer() {
-    return activeView === interviewView && isDesktopPracticeLayout();
-}
-
-function syncInterviewLayout() {
-    if (shell) {
-        shell.classList.toggle("shell--focused", canUseInterviewDrawer());
-        shell.classList.toggle("sidebar-open", canUseInterviewDrawer() && interviewDrawerOpen);
-    }
-    if (sidebarDrawerHandle) {
-        const handleLabel = interviewDrawerPinned ? "Close" : "Controls";
-        sidebarDrawerHandle.hidden = !canUseInterviewDrawer();
-        sidebarDrawerHandle.setAttribute("aria-hidden", String(!canUseInterviewDrawer()));
-        sidebarDrawerHandle.setAttribute("aria-expanded", String(canUseInterviewDrawer() && interviewDrawerOpen));
-        sidebarDrawerHandle.setAttribute("aria-label", interviewDrawerPinned ? "Close interview controls" : "Open interview controls");
-        const labelEl = sidebarDrawerHandle.querySelector("span");
-        if (labelEl) labelEl.textContent = handleLabel;
-    }
-    if (sidebar) {
-        sidebar.setAttribute("aria-hidden", String(canUseInterviewDrawer() && !interviewDrawerOpen));
-    }
-}
-
-function openInterviewDrawer(pinned = false) {
-    if (!canUseInterviewDrawer()) return;
-    interviewDrawerOpen = true;
-    if (pinned) interviewDrawerPinned = true;
-    syncInterviewLayout();
-}
-
-function closeInterviewDrawer(force = false) {
-    if (!canUseInterviewDrawer()) return;
-    if (interviewDrawerPinned && !force) return;
-    interviewDrawerPinned = false;
-    interviewDrawerOpen = false;
-    syncInterviewLayout();
-}
-
-function toggleInterviewDrawerPin() {
-    if (!canUseInterviewDrawer()) return;
-    if (interviewDrawerPinned) {
-        closeInterviewDrawer(true);
-        return;
-    }
-    interviewDrawerPinned = true;
-    interviewDrawerOpen = true;
-    syncInterviewLayout();
-}
-
 function switchView(view) {
     [welcomeView, interviewView, reportView].forEach(v => hide(v));
     show(view);
-    activeView = view;
-    interviewDrawerOpen = false;
-    interviewDrawerPinned = false;
-    syncInterviewLayout();
 }
-
-if (sidebarDrawerHandle) {
-    sidebarDrawerHandle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleInterviewDrawerPin();
-    });
-}
-
-if (sidebar) {
-    sidebar.addEventListener("mouseenter", () => {
-        openInterviewDrawer();
-    });
-
-    sidebar.addEventListener("mouseleave", () => {
-        if (!canUseInterviewDrawer() || interviewDrawerPinned) return;
-        closeInterviewDrawer();
-    });
-}
-
-document.addEventListener("click", (event) => {
-    if (!canUseInterviewDrawer() || !interviewDrawerPinned || !sidebar) return;
-    if (sidebar.contains(event.target)) return;
-    closeInterviewDrawer(true);
-});
-
-document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && canUseInterviewDrawer() && interviewDrawerOpen) {
-        closeInterviewDrawer(true);
-    }
-});
-
-window.addEventListener("resize", () => {
-    if (!isDesktopPracticeLayout()) {
-        interviewDrawerOpen = false;
-        interviewDrawerPinned = false;
-    }
-    syncInterviewLayout();
-});
-syncInterviewLayout();
 
 function setSpeakButtonState(recording = false, elapsedSeconds = 0) {
     speakBtn.classList.toggle("recording", recording);
@@ -354,8 +252,19 @@ initTts();
 // ═══════════════════════════════════════════════════════════════════════════
 async function startWebcam() {
     try {
+        let videoConstraints = { facingMode: "user" };
+        // Apply saved resolution preference
+        const resPref = window.__prefRes;
+        if (resPref === '480p') {
+            videoConstraints = { facingMode: "user", width: { ideal: 854 }, height: { ideal: 480 } };
+        } else if (resPref === '1080p') {
+            videoConstraints = { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } };
+        } else {
+            // 720p default
+            videoConstraints = { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } };
+        }
         mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+            video: videoConstraints,
             audio: true,
         });
         videoPreview.srcObject = mediaStream;
@@ -379,6 +288,7 @@ function stopWebcam() {
 //  Load roles on page load
 // ═══════════════════════════════════════════════════════════════════════════
 (async function loadRoles() {
+    if (!roleSelect) return;
     try {
         const data = await api("/api/roles");
         roleSelect.innerHTML = "";
@@ -388,18 +298,258 @@ function stopWebcam() {
             opt.textContent = r;
             roleSelect.appendChild(opt);
         }
+        try {
+            const prefs = JSON.parse(localStorage.getItem('preploom_prefs'));
+            if (prefs && prefs.defaultRole) roleSelect.value = prefs.defaultRole;
+        } catch(e) {}
     } catch (e) {
         roleSelect.innerHTML = '<option value="Data Scientist">Data Scientist</option><option value="AI ML Engineer">AI ML Engineer</option>';
     }
 })();
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Slider update
+//  Apply Settings (comprehensive — reads all settings saved in settings.html)
 // ═══════════════════════════════════════════════════════════════════════════
+window.addEventListener("DOMContentLoaded", () => {
+    try {
+        const prefs = JSON.parse(localStorage.getItem('preploom_prefs'));
+        if (!prefs) return;
+
+        // 1. Role pre-selection
+        if (prefs.defaultRole && roleSelect) {
+            roleSelect.value = prefs.defaultRole;
+        }
+
+        // 2. TTS toggle
+        if (prefs.prefTts !== undefined && ttsCheckbox) {
+            ttsCheckbox.checked = prefs.prefTts;
+        }
+
+        // 3. Show ideal answers
+        if (prefs.prefIdeal !== undefined && showIdealCheck) {
+            showIdealCheck.checked = prefs.prefIdeal;
+        }
+
+        // 4. Code editor
+        if (prefs.prefCode !== undefined) {
+            const editorCheck = $("showEditorCheck");
+            if (editorCheck) editorCheck.checked = prefs.prefCode;
+            const codingWorkspace = $("codingWorkspace");
+            if (codingWorkspace) codingWorkspace.classList.toggle('hidden', !prefs.prefCode);
+        }
+
+        // 5. Live transcript preview
+        if (prefs.prefLiveTranscript !== undefined) {
+            // Stored for use in startAnswerRecording
+            window.__prefLiveTranscript = prefs.prefLiveTranscript;
+        }
+
+        // 6. Auto-enable posture (stored for use when interview starts)
+        if (prefs.prefAutoPosture !== undefined) {
+            window.__prefAutoPosture = prefs.prefAutoPosture;
+        }
+
+        // 7. Body language summary display
+        if (prefs.prefSummary !== undefined) {
+            window.__prefSummary = prefs.prefSummary;
+        }
+
+        // 8. Camera resolution
+        if (prefs.prefRes) {
+            window.__prefRes = prefs.prefRes;
+        }
+
+        // 8b. Frame rate (FPS)
+        if (prefs.prefFps) {
+            window.__prefFps = prefs.prefFps;
+        }
+
+        // 9. Font size
+        if (prefs.fontSizeRange) {
+            document.documentElement.style.fontSize = prefs.fontSizeRange + 'px';
+        }
+
+        // 10. Reduce motion
+        if (prefs.reduceMotion) {
+            document.documentElement.style.setProperty('--transition-theme', '0s');
+            const style = document.createElement('style');
+            style.id = 'reduce-motion-style';
+            style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }';
+            document.head.appendChild(style);
+        }
+
+        // 11. Ambient orbs
+        if (prefs.prefAmbientOrbs === false) {
+            const ambient = document.querySelector('.ambient');
+            if (ambient) ambient.style.display = 'none';
+        }
+
+        // 12. Accent color
+        if (prefs.accent) {
+            const color = prefs.accent;
+            document.documentElement.style.setProperty('--accent', color);
+            const root = document.documentElement;
+            function lightenHex(hex, pct) {
+                if (!hex || !hex.startsWith('#')) return hex;
+                let h = hex.length === 4 ? '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3] : hex;
+                const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+                const li = v => Math.min(255, Math.floor(v + (255 - v) * pct/100));
+                return '#' + [li(r),li(g),li(b)].map(v => v.toString(16).padStart(2,'0')).join('');
+            }
+            function hexToRgba(hex, alpha) {
+                if (!hex || !hex.startsWith('#')) return hex;
+                let h = hex.length === 4 ? '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3] : hex;
+                const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+                return `rgba(${r},${g},${b},${alpha})`;
+            }
+            root.style.setProperty('--accent-2', lightenHex(color, 20));
+            root.style.setProperty('--accent-glow', hexToRgba(color, 0.25));
+            root.style.setProperty('--accent-soft', hexToRgba(color, 0.12));
+            root.style.setProperty('--accent-text', lightenHex(color, 30));
+        }
+
+        // 13. Theme
+        const theme = prefs.theme || localStorage.getItem('preploom_theme') || 'system';
+        const applied = theme === 'system'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : theme;
+        document.documentElement.setAttribute('data-theme', applied);
+
+    } catch (e) {
+        console.warn('PrepLoom: Could not apply settings', e);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Settings Page Logic & Slider Updates
+// ═══════════════════════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+    const isSettingsPage = window.location.pathname.includes('settings');
+    const prefs = JSON.parse(localStorage.getItem('preploom_prefs')) || {};
+
+    // 1. Helper to safely set UI input values
+    const setUIVal = (id, value) => {
+        if (value === undefined) return;
+        const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+        if (el && el.tagName !== 'META') {
+            if (el.type === 'checkbox') el.checked = value === true;
+            else el.value = value;
+            // trigger event for live listeners
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+
+    // 2. Populate UI elements with stored values
+    const currentTheme = (prefs.theme || localStorage.getItem('preploom_theme') || 'system').toLowerCase();
+    setUIVal('themeSelect', currentTheme);
+    setUIVal('theme', currentTheme);
+    setUIVal('accentColor', prefs.accent || '#6c63ff');
+    setUIVal('accent', prefs.accent || '#6c63ff');
+    setUIVal('fontSizeRange', prefs.fontSizeRange || '16');
+    setUIVal('fontSize', prefs.fontSizeRange || '16');
+    setUIVal('ttsRateRange', prefs.ttsRateRange || '0.95');
+    setUIVal('ttsRate', prefs.ttsRateRange || '0.95');
+    setUIVal('voiceSelect', prefs.prefTtsVoice || 'Female');
+    setUIVal('voice', prefs.prefTtsVoice || 'Female');
+    setUIVal('defaultRoleSelect', prefs.defaultRole || 'Software Engineer');
+    
+    if (isSettingsPage) {
+        setUIVal('roleSelect', prefs.defaultRole || 'Software Engineer'); // Only apply if actually on settings page
+        setUIVal('prefTts', prefs.prefTts !== false);
+        setUIVal('prefIdeal', prefs.prefIdeal !== false);
+        setUIVal('prefCode', prefs.prefCode === true);
+    }
+
+    // 3. Connect Sliders to Display values
+    ['fontSizeRange', 'fontSize', 'ttsRateRange', 'ttsRate'].forEach(id => {
+        const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+        const disp = document.getElementById(id + "Val") || document.getElementById(id + "Display") || document.querySelector(`output[for="${id}"]`);
+        if (el && disp) {
+            disp.textContent = el.value;
+            el.addEventListener('input', () => disp.textContent = el.value);
+        }
+    });
+
+    // 4. Bulletproof Save logic
+    function saveSettings(e) {
+        e.preventDefault(); // Stop the form from wiping out the page immediately
+        const newPrefs = { ...prefs };
+
+        const getVal = (id) => {
+            const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+            return (el && el.tagName !== 'META') ? (el.type === 'checkbox' ? el.checked : el.value) : undefined;
+        };
+
+        const theme = getVal('themeSelect') ?? getVal('theme');
+        if (theme !== undefined) {
+            newPrefs.theme = theme.toLowerCase();
+            localStorage.setItem('preploom_theme', theme.toLowerCase());
+        }
+
+        const accent = getVal('accentColor') ?? getVal('accent');
+        if (accent !== undefined) newPrefs.accent = accent;
+
+        const font = getVal('fontSizeRange') ?? getVal('fontSize');
+        if (font !== undefined) newPrefs.fontSizeRange = font;
+
+        const rate = getVal('ttsRateRange') ?? getVal('ttsRate');
+        if (rate !== undefined) newPrefs.ttsRateRange = rate;
+
+        const voice = getVal('voiceSelect') ?? getVal('voice');
+        if (voice !== undefined) newPrefs.prefTtsVoice = voice;
+
+        const role = getVal('defaultRoleSelect') ?? (isSettingsPage ? getVal('roleSelect') : undefined);
+        if (role !== undefined) newPrefs.defaultRole = role;
+
+        const tts = getVal('prefTts') ?? getVal('ttsCheckbox');
+        if (tts !== undefined) newPrefs.prefTts = tts;
+
+        const ideal = getVal('prefIdeal') ?? getVal('showIdealCheck');
+        if (ideal !== undefined) newPrefs.prefIdeal = ideal;
+
+        const code = getVal('prefCode') ?? getVal('showEditorCheck');
+        if (code !== undefined) newPrefs.prefCode = code;
+
+        localStorage.setItem('preploom_prefs', JSON.stringify(newPrefs));
+
+        // Show Success UI and Reload
+        let btn = e.target.tagName === 'BUTTON' ? e.target : (e.submitter || e.target.querySelector('button[type="submit"]'));
+        if (btn) {
+            const origText = btn.innerHTML;
+            btn.innerHTML = "✅ Saved!";
+            setTimeout(() => { btn.innerHTML = origText; window.location.reload(); }, 600);
+        } else {
+            window.location.reload();
+        }
+    }
+
+    // 5. Attach to forms AND buttons to guarantee it intercepts the action
+    const formsToIntercept = new Set();
+    
+    document.querySelectorAll('form').forEach(f => {
+        const id = (f.id || "").toLowerCase();
+        const action = (f.action || "").toLowerCase();
+        if (id.includes('setting') || action.includes('setting') || id.includes('pref') || isSettingsPage) {
+            formsToIntercept.add(f);
+        }
+    });
+
+    document.querySelectorAll('button, .btn, input[type="submit"]').forEach(b => {
+        const text = (b.textContent || b.value || "").toLowerCase();
+        if (text.includes('keep changes') || text.includes('save settings') || text.includes('save changes')) {
+            const form = b.closest('form');
+            if (form) formsToIntercept.add(form);
+            else b.addEventListener('click', saveSettings);
+        }
+    });
+
+    formsToIntercept.forEach(f => f.addEventListener('submit', saveSettings));
+});
 // ═══════════════════════════════════════════════════════════════════════════
 //  START Interview
 // ═══════════════════════════════════════════════════════════════════════════
-startBtn.addEventListener("click", async () => {
+if (startBtn) {
+    startBtn.addEventListener("click", async () => {
     const role = roleSelect.value;
     if (!role) return alert("Please select a role first.");
 
@@ -422,7 +572,9 @@ startBtn.addEventListener("click", async () => {
         switchView(interviewView);
         setStatus(true);
         await startWebcam();
-        startContinuousAnalysis();  // Auto-enable live video analysis
+        if (window.__prefAutoPosture !== false) {
+            startContinuousAnalysis();  // Auto-enable live video analysis unless disabled
+        }
         enableControls(true);
         speak(currentQuestion.question_text);
 
@@ -433,11 +585,13 @@ startBtn.addEventListener("click", async () => {
         startBtn.innerHTML = "▶ Start";
     }
 });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  END Interview
 // ═══════════════════════════════════════════════════════════════════════════
-endBtn.addEventListener("click", async () => {
+if (endBtn) {
+    endBtn.addEventListener("click", async () => {
     if (!sessionId) return;
     if (isRecording) {
         await stopAnswerRecording();
@@ -451,12 +605,13 @@ endBtn.addEventListener("click", async () => {
     enableControls(false);
     await showReport();
 });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Render question
 // ═══════════════════════════════════════════════════════════════════════════
 function renderQuestion(q) {
-    const bubbleText = questionBubble.querySelector(".q-text");
+    const bubbleText = questionBubble.querySelector(".q-bubble-text");
     if (bubbleText) {
         bubbleText.textContent = q.question_text;
     } else {
@@ -694,7 +849,8 @@ async function stopAnswerRecording() {
 // ═══════════════════════════════════════════════════════════════════════════
 //  SPEAK ANSWER (Audio recording)
 // ═══════════════════════════════════════════════════════════════════════════
-speakBtn.addEventListener("click", async () => {
+if (speakBtn) {
+    speakBtn.addEventListener("click", async () => {
     if (isRecording) {
         await stopAnswerRecording();
         return;
@@ -773,6 +929,7 @@ speakBtn.addEventListener("click", async () => {
 
     speakBtn.disabled = false;
 });
+}
 
 // ── Convert webm to WAV ──────────────────────────────────────────────────
 async function convertToWav(webmBlob) {
@@ -847,15 +1004,18 @@ function submitTypedAnswer() {
     updateSubmitState();
 }
 
-sendTypedBtn.addEventListener("click", submitTypedAnswer);
-typeInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); submitTypedAnswer(); }
-});
+if (sendTypedBtn) sendTypedBtn.addEventListener("click", submitTypedAnswer);
+if (typeInput) {
+    typeInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); submitTypedAnswer(); }
+    });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  SHOW IDEAL ANSWER
 // ═══════════════════════════════════════════════════════════════════════════
-showIdealCheck.addEventListener("change", () => {
+if (showIdealCheck) {
+    showIdealCheck.addEventListener("change", () => {
     if (showIdealCheck.checked && currentQuestion && currentQuestion.ideal_answer) {
         idealText.textContent = currentQuestion.ideal_answer;
         show(idealAnswer);
@@ -863,6 +1023,7 @@ showIdealCheck.addEventListener("change", () => {
         hide(idealAnswer);
     }
 });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  ANALYZE POSTURE
@@ -1024,7 +1185,15 @@ function stopContinuousAnalysis() {
 function startFrameCapture() {
     if (frameIntervalId) clearInterval(frameIntervalId);
     
-    // Capture frames at ~15 FPS (every 67ms)
+    // Determine interval from saved FPS preference
+    let intervalMs = 67; // default 15 FPS
+    const fpsPref = window.__prefFps;
+    if (fpsPref === '5 FPS (battery-saver)') {
+        intervalMs = 200; // 5 FPS
+    } else if (fpsPref === '30 FPS (high detail)') {
+        intervalMs = 33; // 30 FPS
+    }
+    
     frameIntervalId = setInterval(() => {
         if (!mediaStream || !continuousAnalysisSocket || continuousAnalysisSocket.readyState !== WebSocket.OPEN) {
             return;
@@ -1060,12 +1229,13 @@ function startFrameCapture() {
             console.error("Frame capture error:", e);
             isProcessingFrame = false;
         }
-    }, 67); // 15 FPS for smooth updates without overloading
+    }, intervalMs);
 
 }
 
 // Event listener for continuous analysis toggle
-continuousAnalysisBtn.addEventListener("click", () => {
+if (continuousAnalysisBtn) {
+    continuousAnalysisBtn.addEventListener("click", () => {
     if (isAnalyzingContinuous) {
         stopContinuousAnalysis();
         setLiveAnalysisState(false);
@@ -1074,11 +1244,13 @@ continuousAnalysisBtn.addEventListener("click", () => {
         setLiveAnalysisState(true);
     }
 });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  SUBMIT ANSWER
 // ═══════════════════════════════════════════════════════════════════════════
-submitBtn.addEventListener("click", async () => {
+if (submitBtn) {
+    submitBtn.addEventListener("click", async () => {
     let codeSubmission = "";
     const codingWorkspace = document.getElementById('codingWorkspace');
     if (codingWorkspace && !codingWorkspace.classList.contains('hidden') && typeof preploomCodeEditor !== 'undefined') {
@@ -1112,11 +1284,13 @@ submitBtn.addEventListener("click", async () => {
         submitBtn.innerHTML = "✅ Submit";
     }
 });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  NEXT QUESTION
 // ═══════════════════════════════════════════════════════════════════════════
-nextBtn.addEventListener("click", async () => {
+if (nextBtn) {
+    nextBtn.addEventListener("click", async () => {
     if (!sessionId) return;
 
     nextBtn.disabled = true;
@@ -1145,13 +1319,16 @@ nextBtn.addEventListener("click", async () => {
         nextBtn.disabled = false;
     }
 });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  REPEAT QUESTION (TTS)
 // ═══════════════════════════════════════════════════════════════════════════
-repeatBtn.addEventListener("click", () => {
-    if (currentQuestion) speak(currentQuestion.question_text);
-});
+if (repeatBtn) {
+    repeatBtn.addEventListener("click", () => {
+        if (currentQuestion) speak(currentQuestion.question_text);
+    });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  RENDER FEEDBACK
@@ -1205,31 +1382,11 @@ async function showReport() {
         const data = await api(`/api/report/${sessionId}`);
         renderReport(data);
         switchView(reportView);
-        // Download PDF
-        try {
-            const token = getPreploomToken();
-            const pdfRes = await fetch(`/api/report/${sessionId}/pdf`, {
-                method: 'POST',
-                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-            });
-            if (pdfRes.ok) {
-                const blob = await pdfRes.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `PrepLoom_Report_${data.role.replace(/ /g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-        } catch (pdfErr) {
-            console.warn('PDF download failed:', pdfErr);
-        }
     } catch (e) {
         alert("Could not load report: " + e.message);
     }
 }
+
 
 function renderReport(r) {
     reportSub.textContent = `Candidate: ${r.name || "—"} | Role: ${r.role} | Questions answered: ${r.total_answered}`;
@@ -1291,11 +1448,13 @@ function toggleBreakdown(header) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  NEW INTERVIEW
 // ═══════════════════════════════════════════════════════════════════════════
-newInterviewBtn.addEventListener("click", () => {
-    sessionId = null;
-    currentQuestion = null;
-    lastAnswer = "";
-    bodyLanguageData = null;
-    switchView(welcomeView);
-    setStatus(false);
-});
+if (newInterviewBtn) {
+    newInterviewBtn.addEventListener("click", () => {
+        sessionId = null;
+        currentQuestion = null;
+        lastAnswer = "";
+        bodyLanguageData = null;
+        switchView(welcomeView);
+        setStatus(false);
+    });
+}

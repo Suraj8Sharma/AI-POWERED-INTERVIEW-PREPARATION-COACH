@@ -33,18 +33,30 @@
     }
 
     function buildProfilePayload(user) {
-      if (!user || !user.id) return null;
-      const metadata = user.user_metadata || {};
-      return {
-        id: user.id,
-        email: user.email || null,
-        name: metadata.name || metadata.full_name || null,
-        avatar_url: metadata.avatar_url || metadata.picture || null,
-        provider: getProvider(user),
-        metadata: metadata,
-        last_sign_in_at: new Date().toISOString()
-      };
-    }
+  if (!user || !user.id) return null;
+  const metadata = user.user_metadata || {};
+  
+  // Build display name first so we can use it for fallback avatar
+  const displayName = (metadata.name && metadata.name.trim())
+    || (metadata.full_name && metadata.full_name.trim())
+    || user.email
+    || 'User';
+
+  // Use Google photo if available, otherwise generate letter avatar
+  const avatarUrl = metadata.avatar_url
+    || metadata.picture
+    || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6c63ff&color=fff&bold=true&size=128`;
+
+  return {
+    id: user.id,
+    email: user.email || null,
+    name: (metadata.name && metadata.name.trim()) || (metadata.full_name && metadata.full_name.trim()) || null,
+    avatar_url: avatarUrl,
+    provider: getProvider(user),
+    metadata: metadata,
+    last_sign_in_at: new Date().toISOString()
+  };
+}
 
     async function syncProfile(user) {
       const payload = buildProfilePayload(user);
@@ -190,7 +202,6 @@ window.supabaseClient.auth.onAuthStateChange(async function(event, session) {
     }
 });
 
-window.dispatchEvent(new Event('supabase:ready'));
     console.log('SB Step 7: window.SB is set ✓');
     window.dispatchEvent(new Event('supabase:ready'));
 

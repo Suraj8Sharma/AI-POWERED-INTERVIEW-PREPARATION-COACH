@@ -902,3 +902,96 @@ a.glow-link:hover {
     color: #fff;
     text-shadow: 0 0 12px rgba(108,99,255,0.5);
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* LIGHT THEME                                                    */
+/* ═══════════════════════════════════════════════════════════════ */
+
+:root.theme-light {
+    --pl-bg: #ffffff;
+    --pl-bg-elevated: #f9fafb;
+    --pl-surface: rgba(249, 250, 251, 0.9);
+    --pl-border: rgba(0, 0, 0, 0.08);
+    --pl-border-strong: rgba(0, 0, 0, 0.14);
+    --pl-text: #1f2937;
+    --pl-muted: rgba(31, 41, 55, 0.62);
+    --pl-faint: rgba(31, 41, 55, 0.38);
+    --pl-accent: #6c63ff;
+    --pl-accent-soft: rgba(108, 99, 255, 0.15);
+    --pl-accent-glow: rgba(108, 99, 255, 0.25);
+    --pl-accent-light: #a78bfa;
+    --pl-teal: #2dd4bf;
+    --pl-teal-soft: rgba(45, 212, 191, 0.12);
+}
+
+body.site.theme-light {
+    background: var(--pl-bg);
+    color: var(--pl-text);
+}
+
+body.site.theme-light::before {
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 99, 255, 0.08), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(45, 212, 191, 0.04), transparent),
+        radial-gradient(ellipse 50% 30% at 0% 30%, rgba(108, 99, 255, 0.05), transparent);
+}
+
+body.site.theme-light::after {
+    background:
+        radial-gradient(circle 300px at 15% 60%, rgba(108,99,255,0.04), transparent),
+        radial-gradient(circle 250px at 85% 80%, rgba(45,212,191,0.02), transparent);
+}
+
+.theme-light .site-nav {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.theme-light .site-nav__link {
+    color: rgba(31, 41, 55, 0.62);
+}
+
+.theme-light .site-nav__link:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--pl-text);
+}
+
+.theme-light .btn-nav-outline {
+    border-color: rgba(0, 0, 0, 0.14);
+    background: transparent;
+    color: var(--pl-text);
+}
+
+.theme-light .btn-nav-outline:hover {
+    border-color: rgba(0, 0, 0, 0.28);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.theme-light .card-pl {
+    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.theme-light .card-pl:hover {
+    border-color: rgba(108, 99, 255, 0.18);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(108,99,255,0.08);
+}
+
+.theme-light .modal-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.theme-light .modal {
+    background: var(--pl-bg-elevated);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 32px 96px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(108,99,255,0.08);
+}
+
+.theme-light .modal__close {
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(31, 41, 55, 0.62);
+}
+
+.theme-light .modal__close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--pl-text);
+}
