@@ -158,34 +158,62 @@ def evaluate_technical_answer(
 
         if is_coding:
             prompt = (
-                "You are an expert technical interviewer evaluating a coding challenge.\n"
+                "You are a meticulous Senior Software Engineer evaluating a candidate's solution to a coding challenge.\n"
+                "Your evaluation must be thorough, covering both the code's technical correctness and the candidate's explanation.\n"
                 f"{role_hint}{diff_hint}"
-                f"Question:\n{question_text}\n\n"
-                f"Ideal Reference:\n{ideal_answer}\n\n"
-                f"Candidate's spoken explanation:\n{user_answer}\n\n"
-                f"Candidate's submitted code:\n{code_submission}\n\n"
-                "Evaluate BOTH the candidate's explanation and their code. Check for Big-O complexity (Time & Space), edge cases, and code cleanliness.\n"
-                "Return ONLY valid JSON with the following keys:\n"
-                "- technical_score: integer 0-100\n"
-                "- strengths: array of up to 3 short strings (e.g. 'Optimal O(n) time', 'Good variable naming')\n"
-                "- improvements: array of up to 3 short strings (e.g. 'Missed empty array edge case')\n"
-                "- missing_points: array of short strings (can be empty)\n"
-                "- short_feedback: one short paragraph summarizing their code quality and explanation.\n"
+                f"## Question:\n{question_text}\n\n"
+                f"## Ideal Reference Solution (for your eyes only):\n{ideal_answer}\n\n"
+                f"## Candidate's Spoken Explanation:\n{user_answer}\n\n"
+                f"## Candidate's Submitted Code:\n```\n{code_submission}\n```\n\n"
+                "## Evaluation Criteria:\n"
+                "1.  **Correctness (50% weight):** Does the code solve the problem correctly? Does it handle all edge cases mentioned in the ideal answer or implied by the problem?\n"
+                "2.  **Efficiency (20% weight):** Is the Big-O time and space complexity optimal? Compare it to the ideal solution.\n"
+                "3.  **Code Quality (15% weight):** Is the code clean, readable, and well-structured? Are variable names meaningful?\n"
+                "4.  **Explanation (15% weight):** Did the candidate clearly explain their approach, logic, and complexity? Does their explanation match the code?\n\n"
+                "## Scoring Rubric:\n"
+                "- **90-100:** Optimal, clean, and correct solution with a clear explanation.\n"
+                "- **75-89:** Correct solution but may be slightly suboptimal or have minor code quality issues.\n"
+                "- **50-74:** The solution works for the main case but fails on important edge cases or is inefficient.\n"
+                "- **<50:** The solution is incorrect, incomplete, or demonstrates a fundamental misunderstanding.\n\n"
+                "## Output Format:\n"
+                "You MUST return a single, valid JSON object and nothing else. Do not add any text before or after the JSON.\n"
+                "The JSON object must have the following keys:\n"
+                "{\n"
+                '  "technical_score": <integer from 0 to 100>,\n'
+                '  "strengths": [<array of up to 3 specific, short strings on what was done well (e.g., "Achieved optimal O(N) time complexity")>],\n'
+                '  "improvements": [<array of up to 3 specific, actionable improvements (e.g., "Code fails for an empty input array", "Explanation of space complexity was incorrect")>],\n'
+                '  "missing_points": [<array of key aspects missed, such as specific edge cases or a more efficient approach>],\n'
+                '  "short_feedback": "<A concise, one-paragraph summary of the evaluation. Start with a clear statement on the solution\'s quality. (e.g., \'The code is correct but can be optimized.\')>"\n'
+                "}"
             )
         else:
             prompt = (
-                "You are an expert technical interviewer.\n"
+                "You are a strict but fair Senior Engineer conducting a technical interview.\n"
+                "Your task is to evaluate the candidate's understanding of a core concept.\n"
                 f"{role_hint}{diff_hint}"
-                "Compare the user's answer with the ideal answer and score technical proficiency.\n\n"
-                f"Question:\n{question_text}\n\n"
-                f"Ideal answer:\n{ideal_answer}\n\n"
-                f"User answer:\n{user_answer}\n\n"
-                "Return ONLY valid JSON with the following keys:\n"
-                "- technical_score: integer 0-100\n"
-                "- strengths: array of up to 3 short strings\n"
-                "- improvements: array of up to 3 short strings\n"
-                "- missing_points: array of short strings (can be empty)\n"
-                "- short_feedback: one short sentence\n"
+                "Analyze the candidate's answer by comparing it to the provided ideal answer. Your evaluation must be critical and precise.\n\n"
+                f"## Question:\n{question_text}\n\n"
+                f"## Ideal Answer (Ground Truth):\n{ideal_answer}\n\n"
+                f"## Candidate's Answer:\n{user_answer}\n\n"
+                "## Evaluation Criteria:\n"
+                "1.  **Accuracy & Completeness (70% weight):** Does the candidate cover all key points from the ideal answer? Are there any technical inaccuracies?\n"
+                "2.  **Clarity & Conciseness (20% weight):** Is the explanation clear, well-structured, and to the point?\n"
+                "3.  **Depth of Knowledge (10% weight):** Does the candidate show a deeper understanding beyond a superficial explanation? Do they use correct terminology?\n\n"
+                "## Scoring Rubric:\n"
+                "- **90-100:** Excellent. Comprehensive, accurate, and clearly articulated. Shows deep understanding.\n"
+                "- **75-89:** Good. Covers most key points but may have minor omissions or lack some depth.\n"
+                "- **50-74:** Average. Understands the concept partially but has significant gaps or inaccuracies.\n"
+                "- **<50:** Poor. Major misunderstandings or a very superficial answer.\n\n"
+                "## Output Format:\n"
+                "You MUST return a single, valid JSON object and nothing else. Do not add any text before or after the JSON.\n"
+                "The JSON object must have the following keys:\n"
+                "{\n"
+                '  "technical_score": <integer from 0 to 100>,\n'
+                '  "strengths": [<array of up to 3 specific, short strings detailing what the candidate did well>],\n'
+                '  "improvements": [<array of up to 3 specific, short, actionable strings for improvement>],\n'
+                '  "missing_points": [<array of key concepts or terms from the ideal answer that the candidate missed>],\n'
+                '  "short_feedback": "<A single, concise paragraph summarizing the evaluation. Start with a direct statement about the quality of the answer. (e.g., \'The answer is strong but lacks detail on X.\')>"\n'
+                "}"
             )
 
         resp = llm.invoke(prompt)

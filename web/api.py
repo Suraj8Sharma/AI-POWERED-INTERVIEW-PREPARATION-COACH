@@ -240,9 +240,10 @@ async def submit_answer(payload: dict):
         "missing_points": tech_eval.get("missing_points", []),
         "short_feedback": tech_eval.get("short_feedback", ""),
         "communication_score": comm_eval.get("communication_score"),
+        "filler_words": comm_eval.get("filler_words", []),
         "filler_count": comm_eval.get("filler_count", 0),
         "wpm": comm_eval.get("wpm", 0),
-        "comm_details": comm_eval.get("details", ""),
+        "comm_details": comm_eval.get("comm_details", ""),
         "confidence_score": confidence_score,
         "bl_summary": bl_summary,
     }
