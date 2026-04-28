@@ -249,8 +249,19 @@ if (window.speechSynthesis) {
 // ═══════════════════════════════════════════════════════════════════════════
 async function startWebcam() {
     try {
+        let videoConstraints = { facingMode: "user" };
+        // Apply saved resolution preference
+        const resPref = window.__prefRes;
+        if (resPref === '480p') {
+            videoConstraints = { facingMode: "user", width: { ideal: 854 }, height: { ideal: 480 } };
+        } else if (resPref === '1080p') {
+            videoConstraints = { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } };
+        } else {
+            // 720p default
+            videoConstraints = { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } };
+        }
         mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+            video: videoConstraints,
             audio: true,
         });
         videoPreview.srcObject = mediaStream;
@@ -294,21 +305,116 @@ function stopWebcam() {
 })();
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Apply Settings
+//  Apply Settings (comprehensive — reads all settings saved in settings.html)
 // ═══════════════════════════════════════════════════════════════════════════
 window.addEventListener("DOMContentLoaded", () => {
     try {
         const prefs = JSON.parse(localStorage.getItem('preploom_prefs'));
         if (!prefs) return;
-            if (prefs.prefTts !== undefined && ttsCheckbox) ttsCheckbox.checked = prefs.prefTts;
-            if (prefs.prefIdeal !== undefined && showIdealCheck) showIdealCheck.checked = prefs.prefIdeal;
+
+        // 1. Role pre-selection
+        if (prefs.defaultRole && roleSelect) {
+            roleSelect.value = prefs.defaultRole;
+        }
+
+        // 2. TTS toggle
+        if (prefs.prefTts !== undefined && ttsCheckbox) {
+            ttsCheckbox.checked = prefs.prefTts;
+        }
+
+        // 3. Show ideal answers
+        if (prefs.prefIdeal !== undefined && showIdealCheck) {
+            showIdealCheck.checked = prefs.prefIdeal;
+        }
+
+        // 4. Code editor
         if (prefs.prefCode !== undefined) {
             const editorCheck = $("showEditorCheck");
             if (editorCheck) editorCheck.checked = prefs.prefCode;
             const codingWorkspace = $("codingWorkspace");
             if (codingWorkspace) codingWorkspace.classList.toggle('hidden', !prefs.prefCode);
         }
-    } catch (e) {}
+
+        // 5. Live transcript preview
+        if (prefs.prefLiveTranscript !== undefined) {
+            // Stored for use in startAnswerRecording
+            window.__prefLiveTranscript = prefs.prefLiveTranscript;
+        }
+
+        // 6. Auto-enable posture (stored for use when interview starts)
+        if (prefs.prefAutoPosture !== undefined) {
+            window.__prefAutoPosture = prefs.prefAutoPosture;
+        }
+
+        // 7. Body language summary display
+        if (prefs.prefSummary !== undefined) {
+            window.__prefSummary = prefs.prefSummary;
+        }
+
+        // 8. Camera resolution
+        if (prefs.prefRes) {
+            window.__prefRes = prefs.prefRes;
+        }
+
+        // 8b. Frame rate (FPS)
+        if (prefs.prefFps) {
+            window.__prefFps = prefs.prefFps;
+        }
+
+        // 9. Font size
+        if (prefs.fontSizeRange) {
+            document.documentElement.style.fontSize = prefs.fontSizeRange + 'px';
+        }
+
+        // 10. Reduce motion
+        if (prefs.reduceMotion) {
+            document.documentElement.style.setProperty('--transition-theme', '0s');
+            const style = document.createElement('style');
+            style.id = 'reduce-motion-style';
+            style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }';
+            document.head.appendChild(style);
+        }
+
+        // 11. Ambient orbs
+        if (prefs.prefAmbientOrbs === false) {
+            const ambient = document.querySelector('.ambient');
+            if (ambient) ambient.style.display = 'none';
+        }
+
+        // 12. Accent color
+        if (prefs.accent) {
+            const color = prefs.accent;
+            document.documentElement.style.setProperty('--accent', color);
+            const root = document.documentElement;
+            function lightenHex(hex, pct) {
+                if (!hex || !hex.startsWith('#')) return hex;
+                let h = hex.length === 4 ? '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3] : hex;
+                const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+                const li = v => Math.min(255, Math.floor(v + (255 - v) * pct/100));
+                return '#' + [li(r),li(g),li(b)].map(v => v.toString(16).padStart(2,'0')).join('');
+            }
+            function hexToRgba(hex, alpha) {
+                if (!hex || !hex.startsWith('#')) return hex;
+                let h = hex.length === 4 ? '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3] : hex;
+                const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+                return `rgba(${r},${g},${b},${alpha})`;
+            }
+            root.style.setProperty('--accent-2', lightenHex(color, 20));
+            root.style.setProperty('--accent-glow', hexToRgba(color, 0.25));
+            root.style.setProperty('--accent-soft', hexToRgba(color, 0.12));
+            root.style.setProperty('--accent-text', lightenHex(color, 30));
+        }
+
+        // 13. Theme
+        const theme = prefs.theme || localStorage.getItem('preploom_theme') || 'system';
+        const applied = theme === 'system'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : theme;
+        document.documentElement.setAttribute('data-theme', applied);
+
+    } catch (e) {
+        console.warn('PrepLoom: Could not apply settings', e);
+    }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -463,7 +569,9 @@ if (startBtn) {
         switchView(interviewView);
         setStatus(true);
         await startWebcam();
-        startContinuousAnalysis();  // Auto-enable live video analysis
+        if (window.__prefAutoPosture !== false) {
+            startContinuousAnalysis();  // Auto-enable live video analysis unless disabled
+        }
         enableControls(true);
         speak(currentQuestion.question_text);
 
@@ -1074,7 +1182,15 @@ function stopContinuousAnalysis() {
 function startFrameCapture() {
     if (frameIntervalId) clearInterval(frameIntervalId);
     
-    // Capture frames at ~15 FPS (every 67ms)
+    // Determine interval from saved FPS preference
+    let intervalMs = 67; // default 15 FPS
+    const fpsPref = window.__prefFps;
+    if (fpsPref === '5 FPS (battery-saver)') {
+        intervalMs = 200; // 5 FPS
+    } else if (fpsPref === '30 FPS (high detail)') {
+        intervalMs = 33; // 30 FPS
+    }
+    
     frameIntervalId = setInterval(() => {
         if (!mediaStream || !continuousAnalysisSocket || continuousAnalysisSocket.readyState !== WebSocket.OPEN) {
             return;
@@ -1110,7 +1226,7 @@ function startFrameCapture() {
             console.error("Frame capture error:", e);
             isProcessingFrame = false;
         }
-    }, 67); // 15 FPS for smooth updates without overloading
+    }, intervalMs);
 
 }
 
