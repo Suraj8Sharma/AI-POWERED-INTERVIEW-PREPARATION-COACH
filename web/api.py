@@ -147,7 +147,7 @@ async def get_public_config():
             or os.getenv("SUPABASE_PROJECT_URL")
             or os.getenv("supabase_url")
             or ""
-        ).strip().strip('"').strip("'"),
+        ).strip().strip('"').strip("'").rstrip("/"),
         "supabase_anon_key": (
             os.getenv("SUPABASE_ANON_KEY")
             or os.getenv("SUPABASE_PUBLISHABLE_KEY")

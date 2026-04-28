@@ -291,6 +291,21 @@
         @media (max-width: 600px) {
             .team-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
         }
+
+        /* ── Light theme text visibility & modal fixes ── */
+        html.theme-light .about-hero h1 { background: none !important; -webkit-text-fill-color: initial !important; color: var(--pl-text, #1f2937) !important; }
+        html.theme-light .about-section-title, html.theme-light .about-card h3, html.theme-light .team-flipcard__name, html.theme-light .about-cta h2, html.theme-light .about-list strong { color: var(--pl-text, #1f2937) !important; }
+        html.theme-light .about-hero p, html.theme-light .about-section-sub, html.theme-light .about-card p, html.theme-light .team-flipcard__role, html.theme-light .team-flipcard__bio, html.theme-light .about-cta p, html.theme-light .about-list li { color: var(--pl-muted, #4b5563) !important; }
+        html.theme-light .about-card, html.theme-light .team-flipcard__front { background: var(--pl-surface, rgba(255,255,255,0.9)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
+        html.theme-light .team-flipcard__hint { color: rgba(31, 41, 55, 0.4) !important; }
+        html.theme-light .site-nav__link { color: var(--pl-text, #1f2937) !important; }
+        html.theme-light .modal { background: var(--pl-surface, rgba(255,255,255,0.95)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
+        html.theme-light .modal__header h2, html.theme-light .modal__field label { color: var(--pl-text, #1f2937) !important; }
+        html.theme-light .modal__note, html.theme-light .modal__footer-text { color: var(--pl-muted, #4b5563) !important; }
+        
+        /* ── Dropdown Menu ── */
+        .user-dropdown-menu.show { display: flex !important; }
+        .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
     </style>
 </head>
 <body class="site">
@@ -308,8 +323,22 @@
             <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
-            <a href="/settings" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Settings" style="text-decoration:none; color:inherit; display:flex; align-items:center; cursor:pointer; font-weight:600; transition: color 0.15s ease;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'"></a>
-            <button type="button" id="navLogout" class="btn-nav-outline hidden">Log out</button>
+            <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
+                <span data-theme-icon>🌙</span>
+            </button>
+            <div style="position: relative; display: inline-block;">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
+                    <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Settings
+                    </a>
+                    <button type="button" id="navLogout" class="hidden" style="padding: 0.75rem 1rem; color: #ef4444; background: transparent; border: none; text-align: left; font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log out
+                    </button>
+                </div>
+            </div>
             <div id="navAuthButtons">
                 <button type="button" class="btn-nav-outline" data-open-modal="modal-signin">Sign in</button>
                 <button type="button" class="btn-nav-primary" data-open-modal="modal-signup">Sign up</button>
@@ -552,10 +581,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/static/js/theme-manager.js"></script>
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
 <script>
+    // Theme toggle
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+    
 (function() {
     // Intersection observer for data-animate (matching revision)
     var els = document.querySelectorAll('[data-animate]');

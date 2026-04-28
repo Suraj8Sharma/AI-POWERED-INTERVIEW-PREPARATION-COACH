@@ -43,6 +43,36 @@
     color-scheme:  dark;
 }
 
+/* ── Light theme variables ── */
+html.theme-light {
+    --bg:          #f9fafb;
+    --bg-2:        #f3f4f6;
+    --bg-3:        #e5e7eb;
+    --surface:     rgba(255, 255, 255, 0.85);
+    --surface-2:   rgba(249, 250, 251, 0.9);
+    --border:      rgba(0,0,0,0.08);
+    --border-md:   rgba(0,0,0,0.12);
+    --border-hi:   rgba(0,0,0,0.2);
+    --text:        #1f2937;
+    --muted:       rgba(55, 65, 81, 0.7);
+    --faint:       rgba(55, 65, 81, 0.4);
+    --accent-glow: rgba(108,99,255,0.15);
+    color-scheme:  light;
+}
+
+html.theme-light .brand-name, html.theme-light .welcome-title-line1, html.theme-light .welcome-sub strong { color: var(--text) !important; }
+html.theme-light .iv-title, html.theme-light .rpt-title { background: none !important; -webkit-text-fill-color: initial !important; color: var(--text) !important; }
+html.theme-light .code-lang-select, html.theme-light .code-lang-select option { color: var(--text) !important; }
+html.theme-light .code-lang-select option { background: var(--bg-2) !important; }
+html.theme-light .modal-overlay > div { background: var(--surface) !important; border-color: var(--border) !important; color: var(--text) !important; }
+html.theme-light .modal-overlay h2 { color: var(--text) !important; }
+html.theme-light .modal-overlay label, html.theme-light .modal-overlay p { color: var(--muted) !important; }
+html.theme-light .modal-overlay input { background: var(--bg-2) !important; color: var(--text) !important; border-color: var(--border-md) !important; }
+html.theme-light .modal-overlay button[data-auth-provider="google"] { color: var(--text) !important; border-color: var(--border-md) !important; }
+html.theme-light .act-btn--submit { color: #16a34a !important; border-color: rgba(34,197,94,0.3) !important; }
+html.theme-light .act-btn--next { color: var(--text) !important; }
+html.theme-light .act-btn--ghost { color: var(--muted) !important; }
+
 html { height: 100%; }
 
 body {
@@ -403,6 +433,15 @@ select.s-input option {
 
 .app-top-nav__inner a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color 0.18s var(--ease); }
 .app-top-nav__inner a:hover { color: var(--text); }
+
+.app-top-nav__theme-toggle {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.app-top-nav__theme-toggle:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
 
 /* ── MAIN ──────────────────────────────────────────────────── */
 .main {
@@ -1514,6 +1553,10 @@ select.s-input option {
         <a href="/features">Features</a>
         <a href="/revision">Revision</a>
         <a href="/about">About</a>
+        <button type="button" id="themeToggle" class="app-top-nav__theme-toggle" title="Toggle theme" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.5rem;">
+            <span data-theme-icon>🌙</span>
+        </button>
+        <a href="/settings" id="appSettingsLink" title="Settings">⚙️</a>
     </div>
 </nav>
 
@@ -1529,7 +1572,7 @@ select.s-input option {
             <span class="welcome-title-line2">your interview?</span>
         </h1>
 
-        <p class="welcome-sub">Select a role from the sidebar and press <strong style="color:#fff">Start</strong> to begin your AI-powered mock session.</p>
+        <p class="welcome-sub">Select a role from the sidebar and press <strong style="color:var(--text)">Start</strong> to begin your AI-powered mock session.</p>
 
         <div class="welcome-chips">
             <span class="w-chip">
@@ -1874,9 +1917,14 @@ select.s-input option {
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/static/js/theme-manager.js"></script>
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/app.js"></script>
+<script>
+    // Theme toggle
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+</script>
 
 <!-- Monaco Editor Loader -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
