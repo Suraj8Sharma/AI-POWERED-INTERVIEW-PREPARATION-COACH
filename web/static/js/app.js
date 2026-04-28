@@ -203,46 +203,49 @@ function stopRecordingTimer() {
 // ═══════════════════════════════════════════════════════════════════════════
 //  TTS (browser speechSynthesis)
 // ═══════════════════════════════════════════════════════════════════════════
+const tts = {
+  supported: false,
+  voices: [],
+};
+
 function speak(text) {
-    if (ttsCheckbox && !ttsCheckbox.checked) return;
-    if (!ttsCheckbox) {
-        try {
-            const prefs = JSON.parse(localStorage.getItem('preploom_prefs'));
-            if (prefs && prefs.prefTts === false) return;
-        } catch(e) {}
-    }
-    if (!text) return;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    
-    let rate = 0.95;
-    let voicePref = "Female";
-    try {
-        const prefs = JSON.parse(localStorage.getItem('preploom_prefs'));
-        if (prefs) {
-            if (prefs.ttsRateRange) rate = parseFloat(prefs.ttsRateRange);
-            if (prefs.prefTtsVoice) voicePref = prefs.prefTtsVoice;
-        }
-    } catch (e) {}
-    utter.rate = rate;
-    utter.pitch = 1.0;
-    // Prefer a female voice
-    const voices = window.speechSynthesis.getVoices();
-    let chosenVoice = null;
-    if (voicePref.includes("Female")) {
-        chosenVoice = voices.find(v => /zira|female|samantha|karen/i.test(v.name));
-    } else if (voicePref.includes("Male")) {
-        chosenVoice = voices.find(v => /david|male|guy/i.test(v.name));
-    }
-    if (chosenVoice) utter.voice = chosenVoice;
-    window.speechSynthesis.speak(utter);
+  if (!tts.supported || !ttsCheckbox.checked || !text) return;
+
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
+
+  if (tts.voices.length === 0) {
+    getVoices();
+  }
+
+  const femaleVoice = tts.voices.find(v => /zira|female|samantha|karen/i.test(v.name));
+  if (femaleVoice) {
+    utter.voice = femaleVoice;
+  }
+
+  window.speechSynthesis.speak(utter);
 }
 
-// Pre-load voices
-if (window.speechSynthesis) {
-    window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+function getVoices() {
+  if (!tts.supported) return;
+  try {
+    tts.voices = window.speechSynthesis.getVoices();
+  } catch (e) {
+    console.warn("TTS: Could not get voices.", e);
+  }
 }
+
+function initTts() {
+  if ("speechSynthesis" in window && "SpeechSynthesisUtterance" in window) {
+    tts.supported = true;
+    window.speechSynthesis.onvoiceschanged = getVoices;
+    getVoices();
+  }
+}
+
+initTts();
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Webcam
@@ -1361,6 +1364,8 @@ function renderFeedback(ev) {
     if (ev.comm_details) rightHTML += `<p class="caption">🗣️ ${ev.comm_details}</p>`;
     if (ev.filler_count || ev.wpm)
         rightHTML += `<p><strong>Fillers:</strong> ${ev.filler_count} &nbsp;|&nbsp; <strong>Pace:</strong> ${ev.wpm} WPM</p>`;
+    if (ev.filler_words && ev.filler_words.length)
+        rightHTML += `<p><strong>Filler words:</strong> <span class="detail-text">${ev.filler_words.join(", ")}</span></p>`;
     if (ev.bl_summary) rightHTML += `<p class="caption">📹 ${ev.bl_summary}</p>`;
 
     feedbackDetails.innerHTML = `
