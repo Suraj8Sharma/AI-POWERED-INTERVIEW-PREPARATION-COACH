@@ -1,135 +1,97 @@
 /**
- * PrepLoom Settings — Theme management and profile settings
- *
- * Handles:
- *  - Theme switching (dark/light) with localStorage persistence
- *  - Profile updates (name)
- *  - Account deletion
- *  - Cross-page theme synchronization
+ * PrepLoom Settings — Preferences, Profile, and Account management
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Theme Management
+//  Preferences Management (Uses PrepLoom from site.js)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const THEME_STORAGE_KEY = 'pl-theme';
-const PROFILE_STORAGE_KEY = 'pl-profile';
-
-/**
- * Initialize theme from localStorage or system preference
- */
-function initializeTheme() {
-    let theme = localStorage.getItem(THEME_STORAGE_KEY);
+function populatePreferences() {
+    const prefs = typeof PrepLoom !== 'undefined' ? PrepLoom.getPrefs() : JSON.parse(localStorage.getItem('preploom_prefs') || '{}');
     
-    // If no saved theme, check system preference
-    if (!theme) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        theme = prefersDark ? 'dark' : 'light';
-    }
-    
-    applyTheme(theme);
-}
-
-/**
- * Apply theme to the document and save to localStorage
- */
-function applyTheme(theme) {
-    const html = document.documentElement;
-    const body = document.querySelector('body');
-    
-    if (theme === 'light') {
-        html.classList.add('theme-light');
-        html.classList.remove('theme-dark');
-        if (body) {
-            body.classList.add('theme-light');
-            body.classList.remove('theme-dark');
+    const setUIVal = (id, value) => {
+        if (value === undefined) return;
+        const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+        if (el) {
+            if (el.type === 'checkbox') el.checked = value === true;
+            else if (el.type === 'radio') {
+                const radio = document.querySelector(`input[name="${el.name}"][value="${value}"]`);
+                if (radio) radio.checked = true;
+            } else el.value = value;
+            el.dispatchEvent(new Event('change', { bubbles: true }));
         }
-    } else {
-        html.classList.remove('theme-light');
-        html.classList.add('theme-dark');
-        if (body) {
-            body.classList.remove('theme-light');
-            body.classList.add('theme-dark');
-        }
-    }
-    
-    // Update the theme toggle icon in navigation
-    updateThemeToggleIcon(theme);
-    
-    // Save to localStorage
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-    
-    // Broadcast to other tabs
-    broadcastThemeChange(theme);
-}
+    };
 
-/**
- * Update theme toggle icon
- */
-function updateThemeToggleIcon(theme) {
-    const icon = document.getElementById('themeIconNav');
-    if (icon) {
-        icon.textContent = theme === 'light' ? '🌙' : '☀️';
-    }
-}
+    setUIVal('roleSelect', prefs.defaultRole || 'Software Engineer');
+    setUIVal('prefTts', prefs.prefTts !== false);
+    setUIVal('prefIdeal', prefs.prefIdeal === true);
+    setUIVal('prefCode', prefs.prefCode === true);
+    setUIVal('prefAutoPosture', prefs.prefAutoPosture !== false);
+    
+    setUIVal('prefRes', prefs.prefRes || '720p');
+    setUIVal('prefFps', prefs.prefFps || '15 FPS (balanced)');
 
-/**
- * Broadcast theme change to other tabs via localStorage
- */
-function broadcastThemeChange(theme) {
-    const timestamp = Date.now();
-    localStorage.setItem('pl-theme-broadcast', JSON.stringify({ theme, timestamp }));
-}
-
-/**
- * Listen for theme changes from other tabs
- */
-function initializeThemeSync() {
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'pl-theme-broadcast' && e.newValue) {
-            try {
-                const { theme } = JSON.parse(e.newValue);
-                applyTheme(theme);
-                updateThemeRadios(theme);
-            } catch (err) {
-                console.error('Error syncing theme:', err);
-            }
-        }
+    const theme = prefs.theme || localStorage.getItem('pl-theme') || 'system';
+    setUIVal('theme', theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme);
+    
+    const themeOptions = document.querySelectorAll('input[name="theme"]');
+    themeOptions.forEach(opt => {
+        if (opt.checked) opt.closest('.theme-option').classList.add('active');
+        else opt.closest('.theme-option').classList.remove('active');
     });
+
+    setUIVal('accentColor', prefs.accent || '#6c63ff');
+    setUIVal('fontSizeRange', prefs.fontSizeRange || '16');
+    setUIVal('reduceMotion', prefs.reduceMotion === true);
+    setUIVal('prefAmbientOrbs', prefs.prefAmbientOrbs !== false);
+    
+    const fsVal = document.getElementById('fontSizeRangeVal');
+    if (fsVal) fsVal.textContent = prefs.fontSizeRange || '16';
 }
 
-/**
- * Update radio buttons to match current theme
- */
-function updateThemeRadios(theme) {
-    const themeDark = document.getElementById('themeDark');
-    const themeLight = document.getElementById('themeLight');
+function savePreferences(e) {
+    if (e) e.preventDefault();
     
-    if (themeDark && themeLight) {
-        if (theme === 'dark') {
-            themeDark.checked = true;
-        } else {
-            themeLight.checked = true;
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        if (!el) {
+            const checkedRadio = document.querySelector(`input[name="${id}"]:checked`);
+            if (checkedRadio) return checkedRadio.value;
+            return undefined;
         }
+        return el.type === 'checkbox' ? el.checked : el.value;
+    };
+
+    const newPrefs = {};
+    const role = getVal('roleSelect'); if (role !== undefined) newPrefs.defaultRole = role;
+    const tts = getVal('prefTts'); if (tts !== undefined) newPrefs.prefTts = tts;
+    const ideal = getVal('prefIdeal'); if (ideal !== undefined) newPrefs.prefIdeal = ideal;
+    const code = getVal('prefCode'); if (code !== undefined) newPrefs.prefCode = code;
+    const posture = getVal('prefAutoPosture'); if (posture !== undefined) newPrefs.prefAutoPosture = posture;
+    
+    const res = getVal('prefRes'); if (res !== undefined) newPrefs.prefRes = res;
+    const fps = getVal('prefFps'); if (fps !== undefined) newPrefs.prefFps = fps;
+
+    const theme = getVal('theme'); if (theme !== undefined) newPrefs.theme = theme;
+    const accent = getVal('accentColor'); if (accent !== undefined) newPrefs.accent = accent;
+    const font = getVal('fontSizeRange'); if (font !== undefined) newPrefs.fontSizeRange = font;
+    const motion = getVal('reduceMotion'); if (motion !== undefined) newPrefs.reduceMotion = motion;
+    const orbs = getVal('prefAmbientOrbs'); if (orbs !== undefined) newPrefs.prefAmbientOrbs = orbs;
+
+    if (typeof PrepLoom !== 'undefined') {
+        PrepLoom.setPrefs(newPrefs);
+        PrepLoom.applyGlobalPreferences();
+    } else {
+        const current = JSON.parse(localStorage.getItem('preploom_prefs') || '{}');
+        Object.assign(current, newPrefs);
+        localStorage.setItem('preploom_prefs', JSON.stringify(current));
     }
     
-    // Update visual active state
-    updateThemeOptionVisuals(theme);
-}
-
-/**
- * Update theme option visual state
- */
-function updateThemeOptionVisuals(theme) {
-    const options = document.querySelectorAll('.theme-option');
-    options.forEach(option => {
-        option.classList.remove('active');
-    });
-    
-    if (theme === 'dark') {
-        options[0]?.classList.add('active');
-    } else {
-        options[1]?.classList.add('active');
+    const btn = document.getElementById('saveAppearanceBtn');
+    if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = "✅ Saved!";
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
     }
 }
 
@@ -137,9 +99,6 @@ function updateThemeOptionVisuals(theme) {
 //  User Profile Management
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Load user profile and populate form
- */
 async function loadUserProfile() {
     try {
         const token = localStorage.getItem('preploom_token');
@@ -170,9 +129,6 @@ async function loadUserProfile() {
     }
 }
 
-/**
- * Populate form with user data
- */
 function populateProfileForm(user) {
     const nameInput = document.getElementById('nameInput');
     const emailDisplay = document.getElementById('emailDisplay');
@@ -186,9 +142,6 @@ function populateProfileForm(user) {
     }
 }
 
-/**
- * Save profile updates
- */
 async function saveProfile() {
     try {
         const token = localStorage.getItem('preploom_token');
@@ -238,9 +191,6 @@ async function saveProfile() {
 //  Account Deletion
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Show delete account confirmation modal
- */
 function showDeleteModal() {
     const modal = document.getElementById('deleteModal');
     if (modal) {
@@ -248,9 +198,6 @@ function showDeleteModal() {
     }
 }
 
-/**
- * Hide delete account modal
- */
 function hideDeleteModal() {
     const modal = document.getElementById('deleteModal');
     if (modal) {
@@ -258,9 +205,6 @@ function hideDeleteModal() {
     }
 }
 
-/**
- * Delete user account
- */
 async function deleteAccount() {
     try {
         const token = localStorage.getItem('preploom_token');
@@ -304,9 +248,6 @@ async function deleteAccount() {
 //  Utilities
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Show status message
- */
 function showStatus(elementId, message, type = 'success') {
     const statusEl = document.getElementById(elementId);
     if (!statusEl) return;
@@ -320,9 +261,6 @@ function showStatus(elementId, message, type = 'success') {
     }, 4000);
 }
 
-/**
- * Handle logout
- */
 function handleLogout() {
     localStorage.removeItem('preploom_token');
     window.location.href = '/';
@@ -333,45 +271,45 @@ function handleLogout() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize theme
-    initializeTheme();
-    initializeThemeSync();
+    populatePreferences();
     
-    // Theme switching
-    const themeDark = document.getElementById('themeDark');
-    const themeLight = document.getElementById('themeLight');
-    const themeToggleNav = document.getElementById('themeToggleNav');
-    
-    if (themeDark) {
-        themeDark.addEventListener('change', () => {
-            applyTheme('dark');
-            updateThemeOptionVisuals('dark');
+    const saveAppearanceBtn = document.getElementById('saveAppearanceBtn');
+    if (saveAppearanceBtn) saveAppearanceBtn.addEventListener('click', savePreferences);
+
+    const fontSizeRange = document.getElementById('fontSizeRange');
+    const fontSizeRangeVal = document.getElementById('fontSizeRangeVal');
+    if (fontSizeRange && fontSizeRangeVal) {
+        fontSizeRange.addEventListener('input', () => {
+            fontSizeRangeVal.textContent = fontSizeRange.value;
         });
     }
-    
-    if (themeLight) {
-        themeLight.addEventListener('change', () => {
-            applyTheme('light');
-            updateThemeOptionVisuals('light');
+
+    const themeRadios = document.querySelectorAll('input[name="theme"]');
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const options = document.querySelectorAll('.theme-option');
+            options.forEach(opt => opt.classList.remove('active'));
+            if (radio.checked) radio.closest('.theme-option').classList.add('active');
+            if (typeof PrepLoom !== 'undefined') PrepLoom.applyTheme(radio.value);
         });
-    }
-    
-    if (themeToggleNav) {
-        themeToggleNav.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'dark';
+    });
+
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const prefs = typeof PrepLoom !== 'undefined' ? PrepLoom.getPrefs() : JSON.parse(localStorage.getItem('preploom_prefs') || '{}');
+            const currentTheme = prefs.theme || localStorage.getItem('pl-theme') || 'dark';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            applyTheme(newTheme);
-            updateThemeRadios(newTheme);
+            if (typeof PrepLoom !== 'undefined') PrepLoom.applyTheme(newTheme);
+            populatePreferences();
         });
     }
     
-    // Profile management
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     if (saveProfileBtn) {
         saveProfileBtn.addEventListener('click', saveProfile);
     }
     
-    // Account deletion
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', showDeleteModal);
@@ -387,16 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmDeleteBtn.addEventListener('click', deleteAccount);
     }
     
-    // Logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
     
-    // Load user profile
     loadUserProfile();
-    
-    // Initialize theme radios to current theme
-    const currentTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'dark';
-    updateThemeRadios(currentTheme);
 });

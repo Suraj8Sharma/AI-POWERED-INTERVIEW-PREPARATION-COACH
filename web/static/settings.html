@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" class="theme-dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -537,6 +537,71 @@
             </div>
         </div>
 
+        <!-- Interview Preferences -->
+        <div class="settings-section">
+            <h2 class="settings-section-title">Interview Preferences</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Default Target Role</label>
+                <select id="roleSelect" class="form-input">
+                    <option value="Data Scientist">Data Scientist</option>
+                    <option value="AI ML Engineer">AI ML Engineer</option>
+                    <option value="Software Engineer">Software Engineer</option>
+                    <option value="Frontend Developer">Frontend Developer</option>
+                    <option value="Product Manager">Product Manager</option>
+                </select>
+                <div class="form-help">The default role loaded when you enter the practice room.</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                    <input type="checkbox" id="prefTts" checked />
+                    <span style="margin-left: 0.5rem; font-weight: 500;">Read questions aloud (TTS)</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                    <input type="checkbox" id="prefIdeal" />
+                    <span style="margin-left: 0.5rem; font-weight: 500;">Show ideal answers by default</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                    <input type="checkbox" id="prefCode" />
+                    <span style="margin-left: 0.5rem; font-weight: 500;">Enable Code Editor Workspace</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                    <input type="checkbox" id="prefAutoPosture" checked />
+                    <span style="margin-left: 0.5rem; font-weight: 500;">Auto-enable live posture analysis</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Media Settings -->
+        <div class="settings-section">
+            <h2 class="settings-section-title">Camera & Video</h2>
+            <div class="form-group">
+                <label class="form-label">Camera Resolution</label>
+                <select id="prefRes" class="form-input">
+                    <option value="480p">480p (Standard)</option>
+                    <option value="720p" selected>720p (HD)</option>
+                    <option value="1080p">1080p (Full HD)</option>
+                </select>
+                <div class="form-help">Higher resolutions may cause lag on slower networks.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Analysis Framerate</label>
+                <select id="prefFps" class="form-input">
+                    <option value="5 FPS (battery-saver)">5 FPS (Battery-saver)</option>
+                    <option value="15 FPS (balanced)" selected>15 FPS (Balanced)</option>
+                    <option value="30 FPS (high detail)">30 FPS (High detail)</option>
+                </select>
+                <div class="form-help">How often your posture is evaluated. Higher FPS uses more CPU.</div>
+            </div>
+        </div>
+
         <!-- Theme Section -->
         <div class="settings-section">
             <h2 class="settings-section-title">Appearance</h2>
@@ -566,7 +631,36 @@
                         <label for="themeLight">☀️ Light</label>
                     </div>
                 </div>
-                <div class="form-help">Choose your preferred theme. Changes apply immediately across all pages</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Accent Color</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="color" id="accentColor" class="form-input" style="width: 60px; height: 40px; padding: 0.25rem;" value="#6c63ff" />
+                    <span class="form-help">Customize your primary interface color</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Font Size (<span id="fontSizeRangeVal">16</span>px)</label>
+                <input type="range" id="fontSizeRange" class="form-input" min="12" max="22" step="1" value="16" style="padding: 0; background: transparent; border: none; height: 2px; appearance: auto;" />
+            </div>
+
+            <div class="form-group">
+                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                    <input type="checkbox" id="reduceMotion" />
+                    <span style="margin-left: 0.5rem; font-weight: 500;">Reduce interface motion (Animations)</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                    <input type="checkbox" id="prefAmbientOrbs" checked />
+                    <span style="margin-left: 0.5rem; font-weight: 500;">Show ambient background orbs</span>
+                </label>
+            </div>
+            
+            <div class="btn-group">
+                <button id="saveAppearanceBtn" class="btn-primary" type="button">Save Settings</button>
             </div>
         </div>
 
@@ -682,7 +776,6 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/static/js/theme-manager.js"></script>
     <script src="/static/js/supabaseClient.js"></script>
     <script src="/static/js/site.js"></script>
     <script src="/static/js/auth.js"></script>

@@ -516,6 +516,7 @@
             <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
                 <span data-theme-icon>🌙</span>
             </button>
+            <a href="/settings" class="btn-nav-outline" title="Settings" style="padding: 0.45rem 0.7rem; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
             <div style="position: relative; display: inline-block;">
                 <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
                 <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
@@ -729,7 +730,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/static/js/theme-manager.js"></script>
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>

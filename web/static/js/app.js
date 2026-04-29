@@ -308,12 +308,11 @@ function stopWebcam() {
 })();
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Apply Settings (comprehensive — reads all settings saved in settings.html)
+//  Apply App Settings
 // ═══════════════════════════════════════════════════════════════════════════
-window.addEventListener("DOMContentLoaded", () => {
+function applyAppSettings() {
     try {
-        const prefs = JSON.parse(localStorage.getItem('preploom_prefs'));
-        if (!prefs) return;
+        const prefs = typeof PrepLoom !== 'undefined' ? PrepLoom.getPrefs() : JSON.parse(localStorage.getItem('preploom_prefs') || '{}');
 
         // 1. Role pre-selection
         if (prefs.defaultRole && roleSelect) {
@@ -340,11 +339,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // 5. Live transcript preview
         if (prefs.prefLiveTranscript !== undefined) {
-            // Stored for use in startAnswerRecording
             window.__prefLiveTranscript = prefs.prefLiveTranscript;
         }
 
-        // 6. Auto-enable posture (stored for use when interview starts)
+        // 6. Auto-enable posture
         if (prefs.prefAutoPosture !== undefined) {
             window.__prefAutoPosture = prefs.prefAutoPosture;
         }
@@ -364,187 +362,12 @@ window.addEventListener("DOMContentLoaded", () => {
             window.__prefFps = prefs.prefFps;
         }
 
-        // 9. Font size
-        if (prefs.fontSizeRange) {
-            document.documentElement.style.fontSize = prefs.fontSizeRange + 'px';
-        }
-
-        // 10. Reduce motion
-        if (prefs.reduceMotion) {
-            document.documentElement.style.setProperty('--transition-theme', '0s');
-            const style = document.createElement('style');
-            style.id = 'reduce-motion-style';
-            style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }';
-            document.head.appendChild(style);
-        }
-
-        // 11. Ambient orbs
-        if (prefs.prefAmbientOrbs === false) {
-            const ambient = document.querySelector('.ambient');
-            if (ambient) ambient.style.display = 'none';
-        }
-
-        // 12. Accent color
-        if (prefs.accent) {
-            const color = prefs.accent;
-            document.documentElement.style.setProperty('--accent', color);
-            const root = document.documentElement;
-            function lightenHex(hex, pct) {
-                if (!hex || !hex.startsWith('#')) return hex;
-                let h = hex.length === 4 ? '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3] : hex;
-                const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
-                const li = v => Math.min(255, Math.floor(v + (255 - v) * pct/100));
-                return '#' + [li(r),li(g),li(b)].map(v => v.toString(16).padStart(2,'0')).join('');
-            }
-            function hexToRgba(hex, alpha) {
-                if (!hex || !hex.startsWith('#')) return hex;
-                let h = hex.length === 4 ? '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3] : hex;
-                const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
-                return `rgba(${r},${g},${b},${alpha})`;
-            }
-            root.style.setProperty('--accent-2', lightenHex(color, 20));
-            root.style.setProperty('--accent-glow', hexToRgba(color, 0.25));
-            root.style.setProperty('--accent-soft', hexToRgba(color, 0.12));
-            root.style.setProperty('--accent-text', lightenHex(color, 30));
-        }
-
-        // 13. Theme
-        const theme = prefs.theme || localStorage.getItem('preploom_theme') || 'system';
-        const applied = theme === 'system'
-            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-            : theme;
-        document.documentElement.setAttribute('data-theme', applied);
-
     } catch (e) {
-        console.warn('PrepLoom: Could not apply settings', e);
+        console.warn('PrepLoom: Could not apply app settings', e);
     }
-});
+}
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  Settings Page Logic & Slider Updates
-// ═══════════════════════════════════════════════════════════════════════════
-document.addEventListener("DOMContentLoaded", () => {
-    const isSettingsPage = window.location.pathname.includes('settings');
-    const prefs = JSON.parse(localStorage.getItem('preploom_prefs')) || {};
-
-    // 1. Helper to safely set UI input values
-    const setUIVal = (id, value) => {
-        if (value === undefined) return;
-        const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
-        if (el && el.tagName !== 'META') {
-            if (el.type === 'checkbox') el.checked = value === true;
-            else el.value = value;
-            // trigger event for live listeners
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    };
-
-    // 2. Populate UI elements with stored values
-    const currentTheme = (prefs.theme || localStorage.getItem('preploom_theme') || 'system').toLowerCase();
-    setUIVal('themeSelect', currentTheme);
-    setUIVal('theme', currentTheme);
-    setUIVal('accentColor', prefs.accent || '#6c63ff');
-    setUIVal('accent', prefs.accent || '#6c63ff');
-    setUIVal('fontSizeRange', prefs.fontSizeRange || '16');
-    setUIVal('fontSize', prefs.fontSizeRange || '16');
-    setUIVal('ttsRateRange', prefs.ttsRateRange || '0.95');
-    setUIVal('ttsRate', prefs.ttsRateRange || '0.95');
-    setUIVal('voiceSelect', prefs.prefTtsVoice || 'Female');
-    setUIVal('voice', prefs.prefTtsVoice || 'Female');
-    setUIVal('defaultRoleSelect', prefs.defaultRole || 'Software Engineer');
-    
-    if (isSettingsPage) {
-        setUIVal('roleSelect', prefs.defaultRole || 'Software Engineer'); // Only apply if actually on settings page
-        setUIVal('prefTts', prefs.prefTts !== false);
-        setUIVal('prefIdeal', prefs.prefIdeal !== false);
-        setUIVal('prefCode', prefs.prefCode === true);
-    }
-
-    // 3. Connect Sliders to Display values
-    ['fontSizeRange', 'fontSize', 'ttsRateRange', 'ttsRate'].forEach(id => {
-        const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
-        const disp = document.getElementById(id + "Val") || document.getElementById(id + "Display") || document.querySelector(`output[for="${id}"]`);
-        if (el && disp) {
-            disp.textContent = el.value;
-            el.addEventListener('input', () => disp.textContent = el.value);
-        }
-    });
-
-    // 4. Bulletproof Save logic
-    function saveSettings(e) {
-        e.preventDefault(); // Stop the form from wiping out the page immediately
-        const newPrefs = { ...prefs };
-
-        const getVal = (id) => {
-            const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
-            return (el && el.tagName !== 'META') ? (el.type === 'checkbox' ? el.checked : el.value) : undefined;
-        };
-
-        const theme = getVal('themeSelect') ?? getVal('theme');
-        if (theme !== undefined) {
-            newPrefs.theme = theme.toLowerCase();
-            localStorage.setItem('preploom_theme', theme.toLowerCase());
-        }
-
-        const accent = getVal('accentColor') ?? getVal('accent');
-        if (accent !== undefined) newPrefs.accent = accent;
-
-        const font = getVal('fontSizeRange') ?? getVal('fontSize');
-        if (font !== undefined) newPrefs.fontSizeRange = font;
-
-        const rate = getVal('ttsRateRange') ?? getVal('ttsRate');
-        if (rate !== undefined) newPrefs.ttsRateRange = rate;
-
-        const voice = getVal('voiceSelect') ?? getVal('voice');
-        if (voice !== undefined) newPrefs.prefTtsVoice = voice;
-
-        const role = getVal('defaultRoleSelect') ?? (isSettingsPage ? getVal('roleSelect') : undefined);
-        if (role !== undefined) newPrefs.defaultRole = role;
-
-        const tts = getVal('prefTts') ?? getVal('ttsCheckbox');
-        if (tts !== undefined) newPrefs.prefTts = tts;
-
-        const ideal = getVal('prefIdeal') ?? getVal('showIdealCheck');
-        if (ideal !== undefined) newPrefs.prefIdeal = ideal;
-
-        const code = getVal('prefCode') ?? getVal('showEditorCheck');
-        if (code !== undefined) newPrefs.prefCode = code;
-
-        localStorage.setItem('preploom_prefs', JSON.stringify(newPrefs));
-
-        // Show Success UI and Reload
-        let btn = e.target.tagName === 'BUTTON' ? e.target : (e.submitter || e.target.querySelector('button[type="submit"]'));
-        if (btn) {
-            const origText = btn.innerHTML;
-            btn.innerHTML = "✅ Saved!";
-            setTimeout(() => { btn.innerHTML = origText; window.location.reload(); }, 600);
-        } else {
-            window.location.reload();
-        }
-    }
-
-    // 5. Attach to forms AND buttons to guarantee it intercepts the action
-    const formsToIntercept = new Set();
-    
-    document.querySelectorAll('form').forEach(f => {
-        const id = (f.id || "").toLowerCase();
-        const action = (f.action || "").toLowerCase();
-        if (id.includes('setting') || action.includes('setting') || id.includes('pref') || isSettingsPage) {
-            formsToIntercept.add(f);
-        }
-    });
-
-    document.querySelectorAll('button, .btn, input[type="submit"]').forEach(b => {
-        const text = (b.textContent || b.value || "").toLowerCase();
-        if (text.includes('keep changes') || text.includes('save settings') || text.includes('save changes')) {
-            const form = b.closest('form');
-            if (form) formsToIntercept.add(form);
-            else b.addEventListener('click', saveSettings);
-        }
-    });
-
-    formsToIntercept.forEach(f => f.addEventListener('submit', saveSettings));
-});
+window.addEventListener("DOMContentLoaded", applyAppSettings);
 // ═══════════════════════════════════════════════════════════════════════════
 //  START Interview
 // ═══════════════════════════════════════════════════════════════════════════

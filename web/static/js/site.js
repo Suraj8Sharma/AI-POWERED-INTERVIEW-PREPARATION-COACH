@@ -1,13 +1,27 @@
 /**
  * PrepLoom — global preferences applier (marketing + app pages).
  */
-(function () {
+const PrepLoom = (function () {
+    const PREFS_KEY = 'preploom_prefs';
+    const THEME_KEY = 'pl-theme';
+
     function getPrefs() {
         try {
-            var stored = localStorage.getItem('preploom_prefs');
+            var stored = localStorage.getItem(PREFS_KEY);
             if (stored) return JSON.parse(stored);
         } catch (e) {}
         return {};
+    }
+
+    function setPrefs(newPrefs) {
+        try {
+            var current = getPrefs();
+            var merged = Object.assign({}, current, newPrefs);
+            localStorage.setItem(PREFS_KEY, JSON.stringify(merged));
+            return merged;
+        } catch (e) {
+            return newPrefs;
+        }
     }
 
     function lightenHex(hex, pct) {
@@ -27,18 +41,46 @@
         return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
     }
 
+    function updateThemeToggleIcons(theme) {
+        var icons = document.querySelectorAll('[data-theme-icon]');
+        var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        icons.forEach(function(icon) {
+            icon.textContent = isDark ? '☀️' : '🌙';
+        });
+    }
+
     function applyTheme(theme) {
         var t = (theme || 'system').toLowerCase();
         var isDark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         var applied = isDark ? 'dark' : 'light';
+        
         document.documentElement.setAttribute('data-theme', applied);
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-            if (document.body) document.body.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            if (document.body) document.body.classList.remove('dark');
+        document.documentElement.classList.toggle('theme-dark', isDark);
+        document.documentElement.classList.toggle('theme-light', !isDark);
+        if (document.body) {
+            document.body.classList.toggle('theme-dark', isDark);
+            document.body.classList.toggle('theme-light', !isDark);
         }
+        
+        updateThemeToggleIcons(t);
+        
+        // Save compatibility keys
+        localStorage.setItem(THEME_KEY, applied);
+        
+        // Save the raw preference
+        if (theme) {
+            var prefs = getPrefs();
+            if (prefs.theme !== theme) {
+                setPrefs({ theme: theme });
+            }
+        }
+    }
+
+    function toggleTheme() {
+        var prefs = getPrefs();
+        var current = prefs.theme || localStorage.getItem(THEME_KEY) || 'dark';
+        var next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
     }
 
     function applyAccent(color) {
@@ -66,7 +108,7 @@
             if (!existing) {
                 var style = document.createElement('style');
                 style.id = 'reduce-motion-style';
-                style.textContent = '*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }';
+                style.textContent = '*, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; animation-iteration-count: 1 !important; }';
                 document.head.appendChild(style);
             }
         } else {
@@ -78,13 +120,14 @@
     function applyAmbientOrbs(enabled) {
         var orbs = document.querySelector('.ambient');
         if (orbs) {
-            orbs.style.opacity = enabled === false ? '0' : '1';
+            orbs.style.display = (enabled === false) ? 'none' : 'block';
+            orbs.style.opacity = (enabled === false) ? '0' : '1';
         }
     }
 
     function applyGlobalPreferences() {
         var prefs = getPrefs();
-        var theme = localStorage.getItem('preploom_theme') || prefs.theme || 'system';
+        var theme = prefs.theme || 'system';
         applyTheme(theme);
         applyAccent(prefs.accent);
         applyFontSize(prefs.fontSizeRange);
@@ -92,25 +135,38 @@
         applyAmbientOrbs(prefs.prefAmbientOrbs);
     }
 
+    // Initial application
     applyGlobalPreferences();
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyGlobalPreferences);
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'preploom_prefs' || e.key === 'preploom_theme') applyGlobalPreferences();
+    // Listeners
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+        if ((getPrefs().theme || 'system') === 'system') {
+            applyGlobalPreferences();
+        }
     });
+
+    window.addEventListener('storage', function(e) {
+        if (e.key === PREFS_KEY || e.key === THEME_KEY || e.key === 'preploom_theme') applyGlobalPreferences();
+    });
+
     document.addEventListener("DOMContentLoaded", applyGlobalPreferences);
 
-    if (typeof MutationObserver !== 'undefined') {
-        var observer = new MutationObserver(function() {
-            if (document.body) {
-                applyGlobalPreferences();
-                observer.disconnect();
-            }
-        });
-        if (!document.body) observer.observe(document.documentElement, { childList: true });
-    }
+    // Exported API
+    return {
+        getPrefs: getPrefs,
+        setPrefs: setPrefs,
+        applyTheme: applyTheme,
+        toggleTheme: toggleTheme,
+        applyAccent: applyAccent,
+        applyFontSize: applyFontSize,
+        applyReduceMotion: applyReduceMotion,
+        applyAmbientOrbs: applyAmbientOrbs,
+        applyGlobalPreferences: applyGlobalPreferences
+    };
+})();
 
-    // Modal helpers
+// Modal helpers
+(function () {
     function openModal(id) {
         document.querySelectorAll('.modal-overlay.is-open').forEach(function (o) {
             closeModal(o);
@@ -131,24 +187,22 @@
         }
     }
 
-    document.querySelectorAll('[data-open-modal]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var id = btn.getAttribute('data-open-modal');
-            if (id) openModal(id);
-        });
-    });
+    document.addEventListener('click', function(e) {
+        var openBtn = e.target.closest('[data-open-modal]');
+        if (openBtn) {
+            openModal(openBtn.getAttribute('data-open-modal'));
+            return;
+        }
 
-    document.querySelectorAll('.modal-overlay').forEach(function (overlay) {
-        overlay.addEventListener('click', function (e) {
-            if (e.target === overlay) closeModal(overlay);
-        });
-    });
+        var closeBtn = e.target.closest('[data-close-modal]');
+        if (closeBtn) {
+            closeModal(closeBtn.closest('.modal-overlay'));
+            return;
+        }
 
-    document.querySelectorAll('[data-close-modal]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var overlay = btn.closest('.modal-overlay');
-            closeModal(overlay);
-        });
+        if (e.target.classList.contains('modal-overlay')) {
+            closeModal(e.target);
+        }
     });
 
     document.addEventListener('keydown', function (e) {
@@ -156,3 +210,10 @@
         document.querySelectorAll('.modal-overlay.is-open').forEach(closeModal);
     });
 })();
+
+// Global compatibility function
+function toggleTheme() {
+    if (typeof PrepLoom !== 'undefined') {
+        PrepLoom.toggleTheme();
+    }
+}
