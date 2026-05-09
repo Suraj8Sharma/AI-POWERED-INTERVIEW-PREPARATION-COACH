@@ -6,11 +6,11 @@
     <meta name="description" content="PrepLoom — Practice mock interviews with AI feedback on technical skills, communication, and presence." />
     <title>Practice — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/site.css" />
     <style>
 /* ============================================================
-   PREPLOOM PRACTICE ROOM — COMPLETE REDESIGN
-   Matches: revision.html premium dark theme
+   PREPLOOM PRACTICE ROOM — REDESIGN
    ============================================================ */
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -84,50 +84,6 @@ body {
     flex-direction: column;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
-}
-
-/* ── Ambient orbs ──────────────────────────────────────────── */
-.ambient {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-}
-
-.orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(110px);
-    animation: orbFloat 22s ease-in-out infinite;
-}
-
-.orb-1 {
-    width: 650px; height: 650px;
-    background: radial-gradient(circle, rgba(108,99,255,0.22), transparent 70%);
-    top: -15%; left: -12%;
-}
-
-.orb-2 {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(45,212,191,0.13), transparent 70%);
-    top: 35%; right: -14%;
-    animation-delay: -7s;
-    animation-duration: 28s;
-}
-
-.orb-3 {
-    width: 420px; height: 420px;
-    background: radial-gradient(circle, rgba(167,139,250,0.12), transparent 70%);
-    bottom: -12%; left: 28%;
-    animation-delay: -14s;
-    animation-duration: 34s;
-}
-
-@keyframes orbFloat {
-    0%,100% { transform: translate(0,0) scale(1); }
-    33%      { transform: translate(28px,-36px) scale(1.04); }
-    66%      { transform: translate(-18px,22px) scale(0.96); }
 }
 
 /* ── Layout shell ──────────────────────────────────────────── */
@@ -205,9 +161,6 @@ body {
     margin-top: 0.5rem;
 }
 
-#appAuthHint a { color: var(--accent-2); text-decoration: none; }
-#appAuthHint a:hover { text-decoration: underline; }
-
 /* Divider */
 .s-divider {
     height: 1px;
@@ -224,11 +177,9 @@ body {
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--bg-3);
+    color: var(--faint);
     margin-bottom: 0.6rem;
 }
-
-.s-label svg { opacity: 0; }
 
 /* Inputs */
 .s-input {
@@ -243,78 +194,6 @@ body {
     outline: none;
     transition: border-color 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
 }
-
-.s-input:focus {
-    border-color: var(--accent);
-    background: rgba(108,99,255,0.06);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.s-input::placeholder { color: var(--faint); }
-
-select.s-input {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    cursor: pointer;
-    background-color: var(--bg-2);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.7)' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.85rem center;
-    padding-right: 2.5rem;
-}
-
-select.s-input option {
-    background-color: #2b3459;
-    color: #faf4f4;
-}
-
-/* Toggle */
-.toggle-row {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.55rem 0;
-}
-
-.toggle {
-    position: relative;
-    width: 38px; height: 20px;
-    flex-shrink: 0;
-}
-
-.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-
-.toggle-track {
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.08);
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-}
-
-.toggle-track::after {
-    content: '';
-    position: absolute;
-    top: 2px; left: 2px;
-    width: 14px; height: 14px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform 0.2s var(--ease);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-}
-
-.toggle input:checked ~ .toggle-track {
-    background: var(--accent);
-    border-color: rgba(108,99,255,0.5);
-    box-shadow: 0 0 14px var(--accent-glow);
-}
-
-.toggle input:checked ~ .toggle-track::after { transform: translateX(18px); }
-
-.toggle-label { font-size: 0.8rem; color: var(--muted); }
 
 /* Sidebar buttons */
 .s-btn-row {
@@ -339,77 +218,11 @@ select.s-input option {
     border: 1px solid transparent;
 }
 
-.s-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
-
 .s-btn--start {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     color: #fff;
     border-color: rgba(108,99,255,0.4);
-    box-shadow: 0 2px 14px var(--accent-glow);
 }
-
-.s-btn--start:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(108,99,255,0.4);
-}
-
-.s-btn--end {
-    background: rgba(255,255,255,0.05);
-    color: var(--muted);
-    border-color: var(--border);
-}
-
-.s-btn--end:hover:not(:disabled) {
-    background: rgba(239,68,68,0.1);
-    border-color: rgba(239,68,68,0.25);
-    color: #fca5a5;
-}
-
-/* Status */
-.s-status {
-    margin-top: auto;
-    padding-top: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    font-size: 0.75rem;
-    color: var(--faint);
-}
-
-.status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--faint);
-    transition: background 0.3s, box-shadow 0.3s;
-    flex-shrink: 0;
-}
-
-.status-dot.live {
-    background: var(--green);
-    box-shadow: 0 0 12px rgba(34,197,94,0.6);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%,100% { box-shadow: 0 0 12px rgba(34,197,94,0.6); }
-    50%      { box-shadow: 0 0 20px rgba(34,197,94,0.25); }
-}
-
-.s-back {
-    margin-top: 0.65rem;
-    font-size: 0.72rem;
-}
-
-.s-back a {
-    color: var(--faint);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    transition: color 0.15s;
-}
-
-.s-back a:hover { color: var(--accent-2); }
 
 /* ── App Top Nav ───────────────────────────────────────────── */
 .app-top-nav {
@@ -431,17 +244,7 @@ select.s-input option {
     backdrop-filter: blur(12px);
 }
 
-.app-top-nav__inner a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: color 0.18s var(--ease); }
-.app-top-nav__inner a:hover { color: var(--text); }
-
-.app-top-nav__theme-toggle {
-    transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.app-top-nav__theme-toggle:hover {
-    transform: scale(1.1);
-    opacity: 0.8;
-}
+.app-top-nav__inner a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
 
 /* ── MAIN ──────────────────────────────────────────────────── */
 .main {
@@ -451,17 +254,7 @@ select.s-input option {
     width: 100%;
     position: relative;
     z-index: 1;
-    animation: fadeIn 0.4s var(--ease);
 }
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-.hidden { display: none !important; }
-
-.view { animation: fadeIn 0.35s var(--ease); }
 
 /* ── WELCOME VIEW ──────────────────────────────────────────── */
 .welcome-wrap {
@@ -475,54 +268,6 @@ select.s-input option {
     position: relative;
 }
 
-.welcome-glow {
-    position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 500px; height: 350px;
-    background: radial-gradient(ellipse, rgba(108,99,255,0.18), transparent 70%);
-    filter: blur(60px);
-    pointer-events: none;
-    z-index: 0;
-}
-
-.welcome-eyebrow {
-    position: relative;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.42rem 1rem;
-    border-radius: 999px;
-    border: 1px solid rgba(45,212,191,0.3);
-    background: rgba(45,212,191,0.07);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--teal);
-    margin-bottom: 1.75rem;
-    animation: fadeSlideDown 0.6s ease both;
-}
-
-.welcome-eyebrow::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--teal);
-    box-shadow: 0 0 8px var(--teal);
-    animation: pillDot 2s ease-in-out infinite;
-}
-
-@keyframes pillDot { 0%,100%{opacity:1} 50%{opacity:0.35} }
-@keyframes fadeSlideDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
-
-.welcome-title {
-    position: relative; z-index: 1;
-    margin-bottom: 1.25rem;
-}
-
 .welcome-title-line1 {
     display: block;
     font-family: 'Fraunces', Georgia, serif;
@@ -531,7 +276,6 @@ select.s-input option {
     letter-spacing: -0.03em;
     line-height: 1.05;
     color: #fff;
-    animation: fadeSlideDown 0.6s 0.08s ease both;
 }
 
 .welcome-title-line2 {
@@ -545,914 +289,57 @@ select.s-input option {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: fadeSlideDown 0.6s 0.15s ease both;
 }
 
-.welcome-sub {
-    position: relative; z-index: 1;
-    font-size: 1rem;
-    color: var(--muted);
-    max-width: 46ch;
-    line-height: 1.65;
-    margin-bottom: 2.5rem;
-    animation: fadeSlideDown 0.6s 0.22s ease both;
-}
-
-.welcome-chips {
-    position: relative; z-index: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    justify-content: center;
-    margin-bottom: 2.5rem;
-    animation: fadeSlideDown 0.6s 0.28s ease both;
-}
-
-.w-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.5rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.03);
-    font-size: 0.8rem;
-    color: var(--muted);
-    backdrop-filter: blur(8px);
-    transition: border-color 0.2s, color 0.2s, transform 0.2s;
-}
-
-.w-chip:hover {
-    border-color: rgba(108,99,255,0.3);
-    color: var(--text);
-    transform: translateY(-1px);
-}
-
-.w-chip__icon {
-    width: 24px; height: 24px;
-    border-radius: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-}
-
-/* Steps */
-.welcome-steps {
-    position: relative; z-index: 1;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0;
-    flex-wrap: wrap;
-    animation: fadeSlideDown 0.6s 0.35s ease both;
-}
-
-.w-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    max-width: 150px;
-    text-align: center;
-}
-
-.w-step__num {
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #8071ff);
-    color: #fff;
-    font-size: 0.85rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 18px var(--accent-glow);
-}
-
-.w-step p {
-    font-size: 0.78rem;
-    color: var(--muted);
-    line-height: 1.45;
-}
-
-.w-connector {
-    width: 60px; height: 1px;
-    background: linear-gradient(90deg, rgba(108,99,255,0.4), rgba(108,99,255,0.1));
-    margin: 0 0 2rem;
-    flex-shrink: 0;
-    align-self: center;
-}
-
-/* ── INTERVIEW VIEW ────────────────────────────────────────── */
-
-/* Top bar */
-.iv-topbar {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1.25rem;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.iv-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.75) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.3rem;
-}
-
-.iv-sub { color: var(--muted); font-size: 0.83rem; margin-bottom: 0.6rem; }
-
-.kpi-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-
-.kpi {
-    padding: 4px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    backdrop-filter: blur(8px);
-}
-
-.kpi b { color: var(--text); font-weight: 600; }
-
-/* Panels */
+/* ── Panels ── */
 .panel {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--r);
-    backdrop-filter: blur(16px) saturate(1.2);
-    -webkit-backdrop-filter: blur(16px) saturate(1.2);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.04);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    overflow: hidden;
+    backdrop-filter: blur(16px);
+    margin-bottom: 1rem;
 }
 
-.panel:hover {
-    border-color: rgba(108,99,255,0.12);
-}
-
-.panel__header {
-    padding: 1rem 1.25rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.01em;
-    margin-bottom: 0.85rem;
-}
-
-.panel__header svg { color: var(--accent-2); opacity: 0.7; }
-
+.panel__header { padding: 1rem 1.25rem 0.5rem; font-weight: 700; font-size: 0.82rem; color: var(--text); }
 .panel__body { padding: 0 1.25rem 1.25rem; }
 
-/* Interview grid */
-.iv-grid-top {
-    margin-bottom: 1rem;
-}
-
-.iv-grid-lower {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-/* ── VIDEO PANEL ───────────────────────────────────────────── */
-#videoPanel .panel__body {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: 1rem;
-    align-items: start;
-}
-
-.video-col {}
-
-.video-wrap {
-    position: relative;
-    border-radius: var(--r-sm);
-    overflow: hidden;
-    background: #000;
-    aspect-ratio: 16/10;
-    border: 1px solid var(--border);
-    box-shadow: 0 4px 28px rgba(0,0,0,0.45);
-}
-
-.video-wrap video {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.video-badge {
-    position: absolute;
-    top: 10px; left: 10px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 0.62rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    color: #fff;
-    background: rgba(239,68,68,0.85);
-    backdrop-filter: blur(4px);
-    animation: livePulse 2s ease-in-out infinite;
-    z-index: 2;
-}
-
-@keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-.video-controls-col {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-/* Live analysis button */
-.live-btn {
-    width: 100%;
-    padding: 0.6rem 0.9rem;
-    border-radius: var(--r-xs);
-    font-size: 0.78rem;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.04);
-    color: var(--muted);
-    transition: all 0.18s var(--ease);
-}
-
-.live-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.live-btn.active {
-    background: rgba(108,99,255,0.15);
-    border-color: rgba(108,99,255,0.35);
-    color: var(--accent-2);
-    box-shadow: 0 0 16px rgba(108,99,255,0.15);
-}
-
-.live-btn:hover:not(:disabled):not(.active) {
-    background: rgba(255,255,255,0.06);
-    border-color: var(--border-md);
-    color: var(--text);
-}
-
-/* Metrics */
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.4rem;
-}
-
-.metric-card {
-    padding: 0.7rem 0.4rem;
-    text-align: center;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border);
-    border-radius: var(--r-xs);
-    transition: border-color 0.2s;
-}
-
-.metric-card:hover { border-color: rgba(108,99,255,0.2); }
-
-.metric-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--accent-2);
-    line-height: 1;
-}
-
-.metric-lbl {
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin-top: 0.25rem;
-}
-
-.bl-caption {
-    font-size: 0.75rem;
-    color: var(--muted);
-    line-height: 1.5;
-    padding: 0.5rem 0.65rem;
-    background: rgba(255,255,255,0.02);
-    border-radius: var(--r-xs);
-    border: 1px solid var(--border);
-}
-
-/* ── QUESTION PANEL ────────────────────────────────────────── */
+/* ── Question ── */
 .q-bubble {
     display: flex;
     gap: 0.8rem;
-    align-items: flex-start;
-    padding: 1rem 1.1rem;
-    background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(129,140,248,0.04));
-    border: 1px solid rgba(108,99,255,0.13);
+    padding: 1rem;
+    background: rgba(108,99,255,0.05);
     border-radius: var(--r-sm);
-    margin-bottom: 1rem;
+    border: 1px solid rgba(108,99,255,0.1);
 }
 
 .q-avatar {
-    width: 34px; height: 34px;
-    min-width: 34px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), #8071ff);
+    width: 32px; height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.68rem;
     font-weight: 900;
-    color: #fff;
-    box-shadow: 0 2px 10px var(--accent-glow);
-    flex-shrink: 0;
+    font-size: 0.7rem;
 }
 
-.q-text {
-    flex: 1;
-    font-size: 0.92rem;
-    line-height: 1.6;
-    color: var(--text);
-}
-
-/* Section micro-label */
-.micro-label {
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin: 0.85rem 0 0.45rem;
-}
-
-/* Answer controls */
-.answer-ctrls { margin-bottom: 0.6rem; }
-
-.btn-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-
-/* Speak button */
-.speak-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.65rem 1.35rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #fff;
-    box-shadow: 0 4px 18px var(--accent-glow);
-    transition: all 0.18s var(--ease);
-    min-width: 170px;
-    justify-content: center;
-}
-
-.speak-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 28px rgba(108,99,255,0.45);
-}
-
-.speak-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-
-.speak-btn.recording {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    box-shadow: 0 4px 18px rgba(239,68,68,0.35);
-}
-
-.speak-btn.recording:hover:not(:disabled) {
-    box-shadow: 0 8px 28px rgba(239,68,68,0.5);
-}
-
-/* Checkbox label */
-.check-label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.78rem;
-    color: var(--muted);
-    cursor: pointer;
-    transition: color 0.15s;
-}
-
-.check-label:hover { color: var(--text); }
-.check-label input { accent-color: var(--accent); }
-
-/* Recording indicator */
-.rec-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.32rem 0.7rem;
-    border-radius: 999px;
-    background: rgba(239,68,68,0.08);
-    border: 1px solid rgba(239,68,68,0.2);
-    color: #fca5a5;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-top: 0.65rem;
-}
-
-.rec-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--red);
-    box-shadow: 0 0 0 0 rgba(239,68,68,0.6);
-    animation: recPulse 1.2s ease-out infinite;
-}
-
-@keyframes recPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
-    70%  { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
-    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-}
-
-/* STT status */
-.stt-status {
-    padding: 0.5rem 0.8rem;
-    border-radius: var(--r-xs);
-    font-size: 0.78rem;
-    font-weight: 500;
-    margin: 0.4rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    animation: fadeIn 0.3s ease;
-}
-
-.stt-status.recording { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
-.stt-status.transcribing { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #fcd34d; }
-.stt-status.done { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: #86efac; }
-
-/* Textarea */
-.s-textarea {
-    width: 100%;
-    padding: 0.65rem 0.85rem;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: var(--r-xs);
-    color: var(--text);
-    font-size: 0.84rem;
-    font-family: inherit;
-    resize: vertical;
-    outline: none;
-    transition: border-color 0.18s, box-shadow 0.18s;
-    line-height: 1.55;
-    margin: 0.4rem 0;
-}
-
-.s-textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-/* Ideal answer box */
-.ideal-box {
-    background: rgba(108,99,255,0.07);
-    border: 1px solid rgba(108,99,255,0.14);
-    border-radius: var(--r-sm);
-    padding: 0.85rem 1rem;
-    margin: 0.5rem 0;
-    animation: fadeIn 0.3s ease;
-}
-
-.ideal-header {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--accent-2);
-    margin-bottom: 0.45rem;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-}
-
-.ideal-box p {
-    font-size: 0.82rem;
-    color: var(--muted);
-    line-height: 1.6;
-}
-
-/* Type row */
-.type-row {
-    display: flex;
-    gap: 0.4rem;
-    margin: 0.5rem 0;
-}
-
-.type-row .s-input { flex: 1; }
-
-.icon-btn {
-    width: 40px; height: 40px;
-    border-radius: var(--r-xs);
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.04);
-    color: var(--muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.18s;
-    flex-shrink: 0;
-}
-
-.icon-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.08);
-    border-color: var(--border-md);
-    color: var(--text);
-}
-
-.icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-/* Action row */
-.action-row {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-}
-
-.act-btn {
-    flex: 1;
-    padding: 0.62rem 0.5rem;
-    border-radius: var(--r-xs);
-    font-size: 0.8rem;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    transition: all 0.18s var(--ease);
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.04);
-    color: var(--muted);
-}
-
-.act-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
-
-.act-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-}
-
-.act-btn--submit {
-    background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(22,163,74,0.15));
-    border-color: rgba(34,197,94,0.25);
-    color: #86efac;
-}
-
-.act-btn--submit:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(34,197,94,0.28), rgba(22,163,74,0.2));
-    box-shadow: 0 4px 16px rgba(34,197,94,0.2);
-}
-
-.act-btn--next {
-    background: rgba(255,255,255,0.05);
-    border-color: var(--border-md);
-    color: var(--text);
-}
-
-.act-btn--next:hover:not(:disabled) {
-    background: rgba(108,99,255,0.1);
-    border-color: rgba(108,99,255,0.25);
-}
-
-.act-btn--ghost {
-    background: transparent;
-    border-color: transparent;
-    color: var(--faint);
-}
-
-.act-btn--ghost:hover:not(:disabled) {
-    background: rgba(255,255,255,0.04);
-    border-color: var(--border);
-    color: var(--muted);
-}
-
-/* ── CODE EDITOR ───────────────────────────────────────────── */
-.code-editor-wrap {
-    height: 350px;
-    border: 1px solid var(--border);
-    border-radius: 0 0 var(--r-sm) var(--r-sm);
-    overflow: hidden;
-    position: relative;
-}
-#codeEditor {
-    width: 100%;
-    height: 100%;
-}
-.code-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.6rem 1rem;
-    background: rgba(14,16,24,0.9);
-    border: 1px solid var(--border);
-    border-bottom: none;
-    border-radius: var(--r-sm) var(--r-sm) 0 0;
-}
-.code-lang-select {
-    /* 1. Background and Border */
-    background: rgba(108, 99, 255, 0.08);
-    border: 1px solid rgba(108, 99, 255, 0.3); /* Slightly increased opacity for better visibility */
-    border-radius: 4px;
-    
-    /* 2. Fix the text color so it pops on the dark background */
-    color: #ffffff; 
-    
-    /* 3. Sizing and Spacing */
-    padding: 0.35rem 0.6rem; /* Slightly larger padding for a better click target */
-    font-size: 0.85rem; 
-    
-    /* 4. Usability */
-    outline: none;
-    cursor: pointer;
-}
-
-/* 5. Style the actual dropdown list items */
-.code-lang-select option {
-    background: #1a1a2e; /* Matches your dark navy/black background */
-    color: #ffffff;      /* White text for the list items */
-    padding: 10px;       
-}
-
-/* ── FEEDBACK PANEL ────────────────────────────────────────── */
-.fb-empty {
-    padding: 0.75rem 0;
-    font-size: 0.82rem;
-    color: var(--faint);
-    line-height: 1.55;
-}
-
-.score-row {
-    display: flex;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.1rem;
-}
-
-.score-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    transition: transform 0.15s;
-}
-
-.score-pill:hover { transform: scale(1.04); }
-.score-pill.green { color: var(--green); border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.07); }
-.score-pill.amber { color: var(--amber); border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.07); }
-.score-pill.red   { color: var(--red);   border-color: rgba(239,68,68,0.25);  background: rgba(239,68,68,0.07); }
-
-.fb-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.1rem;
-    font-size: 0.8rem;
-    line-height: 1.65;
-}
-
-.fb-details strong { color: var(--text); font-weight: 600; }
-.fb-details .dt { color: var(--muted); }
-
-/* ── REPORT VIEW ───────────────────────────────────────────── */
-.rpt-header { margin-bottom: 1.5rem; }
-
-.rpt-title {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.75) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.3rem;
-}
-
-.rpt-sub { font-size: 0.82rem; color: var(--muted); }
-
-/* Score cards */
-.score-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.85rem;
-    margin-bottom: 2rem;
-}
-
-.score-card {
-    text-align: center;
-    padding: 1.5rem 0.75rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    backdrop-filter: blur(8px);
-    transition: border-color 0.2s, transform 0.2s;
-    animation: fadeIn 0.5s ease both;
-}
-
-.score-card:hover {
-    border-color: rgba(108,99,255,0.2);
-    transform: translateY(-2px);
-}
-
-.score-card:nth-child(2) { animation-delay: 0.07s; }
-.score-card:nth-child(3) { animation-delay: 0.14s; }
-.score-card:nth-child(4) { animation-delay: 0.21s; }
-
-.sc-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 0.4rem;
-}
-
-.sc-lbl {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-}
-
-/* Section title */
-.sec-title {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--text);
-    margin: 1.5rem 0 0.8rem;
-    letter-spacing: -0.01em;
-}
-
-/* Breakdown cards */
-.bd-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    margin-bottom: 0.55rem;
-    overflow: hidden;
-    transition: border-color 0.2s;
-}
-
-.bd-card:hover { border-color: rgba(255,255,255,0.1); }
-
-.bd-header {
-    padding: 0.85rem 1rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.83rem;
-    font-weight: 600;
-    transition: background 0.15s;
-}
-
-.bd-header:hover { background: rgba(255,255,255,0.02); }
-
-.bd-arrow {
-    font-size: 0.72rem;
-    color: var(--faint);
-    transition: transform 0.2s var(--ease);
-}
-
-.bd-header.open .bd-arrow { transform: rotate(180deg); }
-
-.bd-body { display: none; padding: 0 1rem 1rem; }
-.bd-body.open { display: block; animation: fadeIn 0.25s ease; }
-
-.bd-scores {
-    display: flex;
-    gap: 1.25rem;
-    margin-bottom: 0.6rem;
-}
-
-.bd-item { text-align: center; }
-
-.bd-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.3rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.bd-lbl {
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin-top: 0.2rem;
-}
-
-/* Tips */
-.tip-item {
-    padding: 0.6rem 0;
-    font-size: 0.86rem;
-    line-height: 1.55;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-}
-
-.tip-item:last-child { border-bottom: none; }
-
-/* New interview btn */
-.btn-new-interview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    padding: 0.9rem;
-    margin-top: 2rem;
-    border: none;
-    border-radius: var(--r-sm);
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #fff;
-    font-size: 0.92rem;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    box-shadow: 0 4px 22px var(--accent-glow);
-    transition: all 0.18s var(--ease);
-}
-
-.btn-new-interview:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(108,99,255,0.45);
-}
-
-/* ── Spinner ────────────────────────────────────────────────── */
-.spinner {
-    display: inline-block;
-    width: 14px; height: 14px;
-    border: 2px solid rgba(255,255,255,0.15);
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin 0.65s linear infinite;
-    vertical-align: middle;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Responsive ────────────────────────────────────────────── */
+/* Responsive */
 @media (max-width: 960px) {
-    body { flex-direction: column; }
     .shell { flex-direction: column; }
-    .sidebar {
-        width: 100%;
-        min-height: auto;
-        max-height: none;
-        position: relative;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        padding: 1rem;
-        gap: 0.75rem;
-    }
-    .s-status, .s-back { display: none; }
+    .sidebar { width: 100%; min-height: auto; max-height: none; position: relative; }
     .main { padding: 1rem; }
-    .iv-grid-lower { grid-template-columns: 1fr; }
-    #videoPanel .panel__body { grid-template-columns: 1fr; }
-    .score-cards { grid-template-columns: repeat(2, 1fr); }
-    .fb-details { grid-template-columns: 1fr; }
-    .metrics-grid { grid-template-columns: repeat(4, 1fr); }
-    .welcome-steps { flex-direction: column; align-items: center; gap: 0.75rem; }
-    .w-connector { width: 1px; height: 30px; background: linear-gradient(180deg, rgba(108,99,255,0.4), transparent); margin: 0; }
-    .app-top-nav { justify-content: center; margin-bottom: 1rem; }
-    .app-top-nav__inner { width: 100%; justify-content: center; gap: 1rem; flex-wrap: wrap; }
 }
-    </style>
+
+/* ── Dropdown Menu ── */
+.user-dropdown-menu.show { display: flex !important; }
+.nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
+
+</style>
+    <link rel="stylesheet" href="/static/css/future-pages.css" />
 </head>
-<body>
+<body class="app-future">
 
 <!-- Ambient background -->
 <div class="ambient" aria-hidden="true">
@@ -1463,15 +350,11 @@ select.s-input option {
 
 <div class="shell">
 
-<!-- ══════════════════════════════════════════════════════════
-     SIDEBAR
-══════════════════════════════════════════════════════════ -->
 <aside class="sidebar" id="sidebar">
-
     <div>
         <div class="brand-row">
             <div class="brand-mark">
-            <img src="/static/logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;" />
+                <img src="/static/logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;" />
             </div>
             <div>
                 <div class="brand-name">PrepLoom</div>
@@ -1484,26 +367,12 @@ select.s-input option {
     <div class="s-divider"></div>
 
     <div>
-        <div class="s-label">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Candidate
-        </div>
+        <div class="s-label">Candidate</div>
         <input type="text" id="candidateName" class="s-input" placeholder="Your name" />
     </div>
 
     <div style="margin-top:0.9rem;">
-        <div class="toggle-row">
-            <label class="toggle" id="ttsToggle">
-                <input type="checkbox" id="ttsCheckbox" checked />
-                <span class="toggle-track"></span>
-            </label>
-            <span class="toggle-label">Read questions aloud</span>
-        </div>
-
-        <div class="s-label" style="margin-top:0.85rem;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-            Target Role
-        </div>
+        <div class="s-label">Target Role</div>
         <select id="roleSelect" class="s-input">
             <option value="">Loading roles…</option>
         </select>
@@ -1512,446 +381,111 @@ select.s-input option {
     <div class="s-divider"></div>
 
     <div class="s-btn-row">
-        <button id="startBtn" class="s-btn s-btn--start">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Start
-        </button>
-        <button id="endBtn" class="s-btn s-btn--end">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-            End
-        </button>
+        <button id="startBtn" class="s-btn s-btn--start">Start</button>
+        <button id="endBtn" class="s-btn s-btn--end">End</button>
     </div>
 
-    <a href="/settings" class="s-btn s-btn--end" style="width: 100%; margin-top: 0.5rem; text-decoration: none; justify-content: center;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-    </a>
+    <a href="/settings" class="s-btn s-btn--end" style="width: 100%; margin-top: 0.5rem; text-decoration: none; justify-content: center;">Settings</a>
 
     <div class="s-status">
         <span class="status-dot" id="statusDot"></span>
         <span id="statusLabel">Idle</span>
     </div>
-
-    <p class="s-back">
-        <a href="/">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            Back to PrepLoom
-        </a>
-    </p>
-
 </aside>
 
-<!-- ══════════════════════════════════════════════════════════
-     MAIN
-══════════════════════════════════════════════════════════ -->
 <main class="main" id="main">
-
-<!-- ─── APP TOP NAV ──────────────────────────────────────── -->
-<nav class="app-top-nav">
-    <div class="app-top-nav__inner">
-        <a href="/">Home</a>
-        <a href="/features">Features</a>
-        <a href="/revision">Revision</a>
-        <a href="/about">About</a>
-        <button type="button" id="themeToggle" class="app-top-nav__theme-toggle" title="Toggle theme" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.5rem;">
-            <span data-theme-icon>🌙</span>
-        </button>
-        <a href="/settings" id="appSettingsLink" title="Settings">⚙️</a>
-    </div>
-</nav>
-
-<!-- ─── WELCOME VIEW ──────────────────────────────────────── -->
-<section id="welcomeView" class="view">
-    <div class="welcome-wrap">
-        <div class="welcome-glow" aria-hidden="true"></div>
-
-        <span class="welcome-eyebrow">Practice Room</span>
-
-        <h1 class="welcome-title">
-            <span class="welcome-title-line1">Ready to ace</span>
-            <span class="welcome-title-line2">your interview?</span>
-        </h1>
-
-        <p class="welcome-sub">Select a role from the sidebar and press <strong style="color:var(--text)">Start</strong> to begin your AI-powered mock session.</p>
-
-        <div class="welcome-chips">
-            <span class="w-chip">
-                <span class="w-chip__icon" style="background:rgba(108,99,255,0.15)">📚</span>
-                Technical scoring
-            </span>
-            <span class="w-chip">
-                <span class="w-chip__icon" style="background:rgba(45,212,191,0.12)">🗣️</span>
-                Communication analysis
-            </span>
-            <span class="w-chip">
-                <span class="w-chip__icon" style="background:rgba(167,139,250,0.12)">📹</span>
-                Presence &amp; posture
-            </span>
-            <span class="w-chip">
-                <span class="w-chip__icon" style="background:rgba(34,197,94,0.1)">⚡</span>
-                Instant feedback
-            </span>
-        </div>
-
-        <div class="welcome-steps">
-            <div class="w-step">
-                <div class="w-step__num">1</div>
-                <p>Enter your name &amp; choose a role</p>
-            </div>
-            <div class="w-connector"></div>
-            <div class="w-step">
-                <div class="w-step__num">2</div>
-                <p>Answer questions via voice or text</p>
-            </div>
-            <div class="w-connector"></div>
-            <div class="w-step">
-                <div class="w-step__num">3</div>
-                <p>Get instant AI feedback &amp; report</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ─── INTERVIEW VIEW ─────────────────────────────────────── -->
-<section id="interviewView" class="view hidden">
-
-    <!-- Top bar -->
-    <div class="iv-topbar">
-        <div>
-            <h2 class="iv-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;opacity:0.65"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                Interview Room
-            </h2>
-            <div class="iv-sub">Live session in progress</div>
-            <div class="kpi-row" id="kpiRow">
-                <span class="kpi"><b>Role</b> &middot; <span id="kpiRole">—</span></span>
-                <span class="kpi"><b>Q</b> &middot; <span id="kpiQ">—</span></span>
-                <span class="kpi"><b>Level</b> &middot; <span id="kpiLevel">—</span></span>
-                <span class="kpi"><b>Topic</b> &middot; <span id="kpiTopic">—</span></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Video + Live metrics row -->
-    <div class="iv-grid-top">
-        <div class="panel" id="videoPanel">
-            <div class="panel__header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                Video Coach
-            </div>
-            <div class="panel__body">
-                <!-- Video -->
-                <div class="video-col">
-                    <div class="video-wrap">
-                        <video id="videoPreview" autoplay playsinline muted></video>
-                        <canvas id="snapshotCanvas" class="hidden"></canvas>
-                        <div class="video-badge">LIVE</div>
-                    </div>
-                </div>
-
-                <!-- Controls + metrics -->
-                <div class="video-controls-col">
-                    <button id="continuousAnalysisBtn" class="live-btn" disabled>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="12" r="8"/><path d="M12 3v6m0 6v6"/></svg>
-                        <span id="liveStatusText">Live Posture Ready</span>
+    <header class="site-nav" role="navigation" aria-label="Primary" style="margin-bottom: 2rem; max-width: none; background: rgba(7, 10, 18, 0.42);">
+        <a class="site-nav__brand" href="/">
+            <img src="/static/logo.png" alt="PrepLoom Logo" style="height: 32px; width: auto; border-radius: 6px;" />
+            PrepLoom
+        </a>
+        <nav class="site-nav__links" aria-label="Main">
+            <a class="site-nav__link" href="/">Home</a>
+            <a class="site-nav__link" href="/features">Features</a>
+            <a class="site-nav__link" href="/revision">Revision</a>
+            <a class="site-nav__link" href="/about">About</a>
+            <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
+        </nav>
+        <div class="site-nav__auth" id="navAuthSlot">
+            <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
+                <span data-theme-icon aria-hidden="true"></span>
+            </button>
+            <a href="/settings" class="btn-nav-outline" title="Settings" style="padding: 0.45rem 0.7rem; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
+            <div style="position: relative; display: inline-block;">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
+                    <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Settings
+                    </a>
+                    <button type="button" id="navLogout" class="hidden" style="padding: 0.75rem 1rem; color: #ef4444; background: transparent; border: none; text-align: left; font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log out
                     </button>
-
-                    <div id="bodyMetrics" class="metrics-grid hidden">
-                        <div class="metric-card">
-                            <div class="metric-val" id="metricOpenness">—</div>
-                            <div class="metric-lbl">Openness</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-val" id="metricFidgeting">—</div>
-                            <div class="metric-lbl">Fidgeting</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-val" id="metricEngage">—</div>
-                            <div class="metric-lbl">Engagement</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-val" id="metricPosture">—</div>
-                            <div class="metric-lbl">Posture</div>
-                        </div>
-                    </div>
-
-                    <p id="blSummary" class="bl-caption hidden"></p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Question + Feedback row -->
-    <div class="iv-grid-lower">
-
-        <!-- Question / Answer panel -->
-        <div class="panel" id="interviewPanel">
-            <div class="panel__header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                Interview
+            <div id="navAuthButtons">
+                <button type="button" class="btn-nav-outline" data-open-modal="modal-signin">Sign in</button>
+                <button type="button" class="btn-nav-primary" data-open-modal="modal-signup">Sign up</button>
             </div>
-            <div class="panel__body">
+        </div>
+    </header>
 
+    <section id="welcomeView" class="view hero-parallax-container">
+        <canvas id="heroParticles" class="hero-particles" aria-hidden="true" style="height: 300px;"></canvas>
+        <div class="hero-mesh" aria-hidden="true"></div>
+
+        <!-- Telemetry-style status elements -->
+        <div class="telemetry-card telemetry-card--north" data-parallax="15" style="top: 10%; right: 15%; min-width: 160px;">
+            <span class="telemetry-card__label">Engine Status</span>
+            <div class="telemetry-card__stat" style="background:transparent; border:none; padding:0;">
+                <strong style="color:var(--pl-teal);">Ready</strong>
+                <span>Simulation core</span>
+            </div>
+        </div>
+
+        <div class="welcome-wrap">
+            <h1 class="welcome-title" data-animate="up">
+                <span class="welcome-title-line1">Ready to ace</span>
+                <span class="welcome-title-line2">your interview?</span>
+            </h1>
+            <p class="welcome-sub" data-animate="up" data-delay="100">Select a role from the sidebar and press <strong>Start</strong> to begin.</p>
+        </div>
+    </section>
+
+    <section id="interviewView" class="view hidden">
+        <div class="panel">
+            <div class="panel__header">Interview Session</div>
+            <div class="panel__body">
                 <div class="q-bubble" id="questionBubble">
                     <div class="q-avatar">AI</div>
                     <div class="q-text">Loading question…</div>
                 </div>
-
-                <div class="micro-label">Your answer</div>
-
-                <div class="answer-ctrls">
-                    <div class="btn-row">
-                        <button id="speakBtn" class="speak-btn" disabled>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                            <span id="speakBtnText">Speak Answer</span>
-                        </button>
-                        <label class="check-label">
-                            <input type="checkbox" id="showIdealCheck" />
-                            Show ideal
-                        </label>
-                        <label class="check-label">
-                            <input type="checkbox" id="showEditorCheck" />
-                            Code Editor
-                        </label>
-                    </div>
-                    <div id="recordingIndicator" class="rec-indicator hidden">
-                        <span class="rec-dot"></span>
-                        <span id="recordingTimer">0:00</span>
-                    </div>
-                </div>
-
-                <div id="sttStatus" class="stt-status hidden"></div>
-
-                <textarea id="transcriptArea" class="s-textarea hidden" rows="4" placeholder="Your transcript will appear live while you speak…" readonly></textarea>
-
-                <div id="idealAnswer" class="ideal-box hidden">
-                    <div class="ideal-header">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        Ideal Answer
-                    </div>
-                    <p id="idealText"></p>
-                </div>
-
-                <div id="codingWorkspace" class="hidden" style="margin-top: 1rem; margin-bottom: 1rem; animation: fadeIn 0.3s ease;">
-                    <div class="code-toolbar">
-                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--teal); letter-spacing: 0.05em; text-transform: uppercase;">Technical Workspace</div>
-                        <select id="codeLangSelect" class="code-lang-select">
-                            <option value="python">Python</option>
-                            <option value="javascript">JavaScript</option>
-                            <option value="java">Java</option>
-                            <option value="cpp">C++</option>
-                        </select>
-                    </div>
-                    <div class="code-editor-wrap">
-                        <div id="codeEditor"></div>
-                    </div>
-                </div>
-
-                <div class="type-row">
-                    <input type="text" id="typeInput" class="s-input" placeholder="Or type your answer here…" disabled />
-                    <button id="sendTypedBtn" class="icon-btn" disabled>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
-                </div>
-
-                <div class="action-row">
-                    <button id="submitBtn" class="act-btn act-btn--submit" disabled>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Submit
-                    </button>
-                    <button id="nextBtn" class="act-btn act-btn--next" disabled>
-                        Next
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                    <button id="repeatBtn" class="act-btn act-btn--ghost" disabled>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                        Repeat
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Feedback panel -->
-        <div class="panel" id="feedbackPanel">
-            <div class="panel__header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                Feedback
-            </div>
-            <div class="panel__body">
-                <div id="feedbackContent" class="fb-empty">
-                    Speak or type your answer, then submit for evaluation.
-                </div>
-                <div id="feedbackScores" class="hidden">
-                    <div class="score-row" id="scoreRow"></div>
-                    <div class="fb-details" id="feedbackDetails"></div>
+                <div class="action-row" style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                    <button id="speakBtn" class="act-btn">Speak Answer</button>
+                    <button id="submitBtn" class="act-btn act-btn--submit">Submit</button>
                 </div>
             </div>
         </div>
+    </section>
 
-    </div>
-</section>
-
-<!-- ─── REPORT VIEW ────────────────────────────────────────── -->
-<section id="reportView" class="view hidden">
-
-    <div class="rpt-header">
-        <div class="rpt-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;opacity:0.65"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Interview Report
-        </div>
-        <p class="rpt-sub" id="reportSub"></p>
-    </div>
-
-    <div class="score-cards" id="reportScores"></div>
-
-    <h3 class="sec-title">Per-question Breakdown</h3>
-    <div id="reportBreakdown"></div>
-
-    <h3 class="sec-title">💡 Improvement Tips</h3>
-    <div id="reportTips"></div>
-
-    <button id="newInterviewBtn" class="btn-new-interview">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Start New Interview
-    </button>
-
-</section>
-
+    <section id="reportView" class="view hidden">
+        <h2>Interview Report</h2>
+        <div id="reportScores"></div>
+        <button id="newInterviewBtn" class="btn-new-interview">Start New Interview</button>
+    </section>
 </main>
-</div><!-- /.shell -->
 
-<!-- ══════════════════════════════════════════════════════════
-     MODALS
-══════════════════════════════════════════════════════════ -->
-<div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title" style="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;visibility:hidden;transition:opacity 0.2s,visibility 0.2s;">
-    <div style="width:100%;max-width:400px;border-radius:16px;border:1px solid rgba(255,255,255,0.14);background:#0e1018;padding:1.75rem;box-shadow:0 24px 80px rgba(0,0,0,0.55);transform:scale(0.96) translateY(8px);transition:transform 0.2s;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;">
-            <h2 id="signin-title" style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;">Sign in</h2>
-            <button type="button" class="modal__close" data-close-modal aria-label="Close" style="width:36px;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,0.06);color:rgba(240,242,248,0.62);font-size:1.25rem;cursor:pointer;">×</button>
-        </div>
-        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Sign in with Supabase to save your interview sessions securely.</p>
-        <p id="signinError" class="modal-error" hidden style="font-size:0.82rem;color:#f87171;margin-bottom:0.75rem;"></p>
-        <form id="formSignin">
-            <div style="margin-bottom:1rem;">
-                <label style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(240,242,248,0.38);margin-bottom:0.35rem;" for="signin-email">Email</label>
-                <input id="signin-email" name="email" type="email" autocomplete="username" placeholder="you@example.com" required class="s-input" style="background:rgba(255,255,255,0.04);" />
-            </div>
-            <div style="margin-bottom:1rem;">
-                <label style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(240,242,248,0.38);margin-bottom:0.35rem;" for="signin-password">Password</label>
-                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" class="s-input" style="background:rgba(255,255,255,0.04);" />
-            </div>
-            <button type="submit" style="width:100%;padding:0.75rem;margin-top:0.35rem;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Sign in</button>
-        </form>
-        <button type="button" data-auth-provider="google" data-error-target="signinError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Continue with Google</button>
-        <p style="text-align:center;margin-top:1rem;font-size:0.82rem;color:rgba(240,242,248,0.38);">No account? <button type="button" data-open-modal="modal-signup" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-family:inherit;font-size:inherit;">Sign up</button></p>
-    </div>
 </div>
 
-<div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title" style="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;visibility:hidden;transition:opacity 0.2s,visibility 0.2s;">
-    <div style="width:100%;max-width:400px;border-radius:16px;border:1px solid rgba(255,255,255,0.14);background:#0e1018;padding:1.75rem;box-shadow:0 24px 80px rgba(0,0,0,0.55);transform:scale(0.96) translateY(8px);transition:transform 0.2s;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;">
-            <h2 id="signup-title" style="font-size:1.2rem;font-weight:700;letter-spacing:-0.02em;">Create account</h2>
-            <button type="button" class="modal__close" data-close-modal aria-label="Close" style="width:36px;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,0.06);color:rgba(240,242,248,0.62);font-size:1.25rem;cursor:pointer;">×</button>
-        </div>
-        <p style="font-size:0.82rem;color:#2dd4bf;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:0.65rem 0.85rem;margin-bottom:1.25rem;line-height:1.45;">Create an account to save your progress and access full reports.</p>
-        <p id="signupError" class="modal-error" hidden style="font-size:0.82rem;color:#f87171;margin-bottom:0.75rem;"></p>
-        <form id="formSignup">
-            <div style="margin-bottom:1rem;">
-                <label style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(240,242,248,0.38);margin-bottom:0.35rem;" for="signup-name">Name <span style="font-weight:400;color:rgba(240,242,248,0.28);text-transform:none;letter-spacing:normal;">(optional)</span></label>
-                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Your name" maxlength="120" class="s-input" style="background:rgba(255,255,255,0.04);" />
-            </div>
-            <div style="margin-bottom:1rem;">
-                <label style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(240,242,248,0.38);margin-bottom:0.35rem;" for="signup-email">Email</label>
-                <input id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required class="s-input" style="background:rgba(255,255,255,0.04);" />
-            </div>
-            <div style="margin-bottom:1rem;">
-                <label style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:rgba(240,242,248,0.38);margin-bottom:0.35rem;" for="signup-password">Password</label>
-                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required minlength="8" class="s-input" style="background:rgba(255,255,255,0.04);" />
-            </div>
-            <button type="submit" style="width:100%;padding:0.75rem;margin-top:0.35rem;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Create account</button>
-        </form>
-        <button type="button" data-auth-provider="google" data-error-target="signupError" style="width:100%;padding:0.75rem;margin-top:0.75rem;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:transparent;color:#fff;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;">Continue with Google</button>
-        <p style="text-align:center;margin-top:1rem;font-size:0.82rem;color:rgba(240,242,248,0.38);">Already have an account? <button type="button" data-open-modal="modal-signin" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-family:inherit;font-size:inherit;">Sign in</button></p>
-    </div>
-</div>
-
-<script>
-// Modal logic (inline, no dependency on site.js)
-(function() {
-    function openModal(id) {
-        document.querySelectorAll('.modal-overlay.is-open').forEach(closeModal);
-        var el = document.getElementById(id);
-        if (el) {
-            el.classList.add('is-open');
-            el.style.opacity = '1';
-            el.style.visibility = 'visible';
-            el.setAttribute('aria-hidden', 'false');
-            var inner = el.querySelector('div');
-            if (inner) inner.style.transform = 'scale(1) translateY(0)';
-            document.body.style.overflow = 'hidden';
-        }
-    }
-    function closeModal(el) {
-        if (!el) return;
-        el.classList.remove('is-open');
-        el.style.opacity = '0';
-        el.style.visibility = 'hidden';
-        el.setAttribute('aria-hidden', 'true');
-        var inner = el.querySelector('div');
-        if (inner) inner.style.transform = 'scale(0.96) translateY(8px)';
-        document.body.style.overflow = '';
-    }
-    document.querySelectorAll('[data-open-modal]').forEach(function(btn) {
-        btn.addEventListener('click', function() { openModal(btn.getAttribute('data-open-modal')); });
-    });
-    document.querySelectorAll('.modal-overlay').forEach(function(o) {
-        o.addEventListener('click', function(e) { if (e.target === o) closeModal(o); });
-    });
-    document.querySelectorAll('[data-close-modal]').forEach(function(btn) {
-        btn.addEventListener('click', function() { closeModal(btn.closest('.modal-overlay')); });
-    });
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.is-open').forEach(closeModal);
-    });
-})();
-</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/app.js"></script>
 <script>
-    // Theme toggle
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
 </script>
 
-<!-- Monaco Editor Loader -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-<script>
-    let preploomCodeEditor = null;
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
-    require(['vs/editor/editor.main'], function() {
-        preploomCodeEditor = monaco.editor.create(document.getElementById('codeEditor'), {
-            value: '# Write your optimal solution here...\n',
-            language: 'python',
-            theme: 'vs-dark',
-            automaticLayout: true,
-            minimap: { enabled: false },
-            fontSize: 14,
-            fontFamily: "'JetBrains Mono', monospace",
-            padding: { top: 16, bottom: 16 },
-            scrollBeyondLastLine: false
-        });
-        
-        document.getElementById('codeLangSelect').addEventListener('change', function(e) {
-            monaco.editor.setModelLanguage(preploomCodeEditor.getModel(), e.target.value);
-        });
-    });
-
-    document.getElementById('showEditorCheck').addEventListener('change', function(e) {
-        document.getElementById('codingWorkspace').classList.toggle('hidden', !e.target.checked);
-    });
-</script>
 </body>
 </html>

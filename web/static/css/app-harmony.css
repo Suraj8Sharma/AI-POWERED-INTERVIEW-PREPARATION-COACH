@@ -1,0 +1,300 @@
+.app-future {
+    background:
+        radial-gradient(circle at top center, rgba(108, 99, 255, 0.12), transparent 42%),
+        radial-gradient(circle at 82% 18%, rgba(45, 212, 191, 0.08), transparent 24%),
+        linear-gradient(180deg, rgba(6, 8, 13, 1) 0%, rgba(7, 8, 12, 1) 100%);
+}
+
+.app-future .orb {
+    filter: blur(130px);
+}
+
+.app-future [data-theme-icon] {
+    width: 1rem;
+    height: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-future [data-theme-icon] svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.app-future .sidebar {
+    background: rgba(7, 10, 18, 0.82);
+    border-right-color: rgba(255, 255, 255, 0.08);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
+}
+
+.app-future .brand-mark {
+    box-shadow: 0 12px 32px rgba(108, 99, 255, 0.24), 0 0 0 1px rgba(108, 99, 255, 0.22);
+}
+
+.app-future .brand-name,
+.app-future .welcome-title,
+.app-future .iv-title,
+.app-future .rpt-title {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+    letter-spacing: -0.05em;
+}
+
+.app-future .s-btn,
+.app-future .live-btn,
+.app-future .act-btn,
+.app-future .code-toggle-btn {
+    border-radius: 999px;
+}
+
+.app-future .s-btn--start,
+.app-future .act-btn--submit,
+.app-future .code-toggle-btn.active {
+    background: linear-gradient(135deg, #6c63ff 0%, #2dd4bf 135%);
+    box-shadow: 0 16px 36px rgba(108, 99, 255, 0.28);
+}
+
+.app-future .s-btn--end,
+.app-future .act-btn--ghost,
+.app-future .act-btn--next,
+.app-future #appSettingsLink,
+.app-future .app-top-nav__theme-toggle {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.app-future .s-input,
+.app-future .panel,
+.app-future .metric-card,
+.app-future .q-bubble,
+.app-future .eval-card,
+.app-future .report-card,
+.app-future .code-editor-shell,
+.app-future .comm-stat,
+.app-future .timeline-card {
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.app-future .app-top-nav {
+    padding: 0.9rem 1rem 0;
+}
+
+.app-future .app-top-nav__inner {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    background: rgba(8, 12, 20, 0.72);
+    box-shadow: 0 18px 40px rgba(3, 8, 20, 0.18);
+    backdrop-filter: blur(18px);
+}
+
+.app-future .app-top-nav__inner a,
+.app-future .app-top-nav__theme-toggle,
+.app-future #appSettingsLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.app-future .app-top-nav__inner a:hover,
+.app-future .app-top-nav__theme-toggle:hover,
+.app-future #appSettingsLink:hover {
+    color: var(--text);
+    background: rgba(108, 99, 255, 0.1);
+    border-color: rgba(108, 99, 255, 0.24);
+    transform: translateY(-1px);
+}
+
+.app-future .app-top-nav__theme-toggle,
+.app-future #appSettingsLink {
+    min-width: 40px;
+}
+
+.app-future #appSettingsLink {
+    font-size: 0;
+    position: relative;
+}
+
+.app-future #appSettingsLink::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    display: block;
+    background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.36.49.83.83 1.51 1H21a2 2 0 0 1 0 4h-.09c-.67.17-1.15.52-1.51 1z'/%3E%3C/svg%3E");
+}
+
+.app-future .welcome-wrap {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    background:
+        linear-gradient(135deg, rgba(11, 16, 28, 0.92), rgba(8, 10, 18, 0.78)),
+        radial-gradient(circle at top left, rgba(108, 99, 255, 0.14), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.1), transparent 28%);
+    box-shadow: 0 28px 72px rgba(3, 8, 20, 0.28);
+}
+
+.app-future .welcome-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 50px 50px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.28));
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.app-future .welcome-glow {
+    opacity: 0.9;
+}
+
+.app-future .welcome-eyebrow {
+    border-color: rgba(45, 212, 191, 0.22);
+    background: rgba(45, 212, 191, 0.08);
+}
+
+.app-future .welcome-title {
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 0.96;
+}
+
+.app-future .welcome-title-line2 {
+    background: linear-gradient(135deg, #ffffff 0%, #b3b7ff 48%, #63f0da 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.app-future .welcome-sub {
+    color: rgba(240, 242, 248, 0.72);
+}
+
+.app-future .welcome-chips {
+    gap: 0.8rem;
+}
+
+.app-future .w-chip,
+.app-future .w-step,
+.app-future .panel,
+.app-future .metric-card,
+.app-future .q-bubble,
+.app-future .code-editor-shell {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(13, 18, 30, 0.82), rgba(9, 12, 22, 0.62));
+}
+
+.app-future .w-chip {
+    backdrop-filter: blur(14px);
+}
+
+.app-future .w-step__num {
+    background: rgba(108, 99, 255, 0.16);
+}
+
+.app-future .panel {
+    border-radius: 24px;
+}
+
+.app-future .panel__header {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+    letter-spacing: -0.03em;
+}
+
+.app-future .iv-title,
+.app-future .rpt-title {
+    background: linear-gradient(135deg, #ffffff 0%, #b3b7ff 48%, #63f0da 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.app-future .kpi,
+.app-future .iv-sub,
+.app-future .bl-caption,
+.app-future .rpt-sub,
+.app-future .q-text,
+.app-future .answer-help {
+    color: rgba(240, 242, 248, 0.66);
+}
+
+.app-future .video-wrap,
+.app-future .metric-card,
+.app-future .q-bubble,
+.app-future .ans-box,
+.app-future .comm-panel,
+.app-future .report-card {
+    border-radius: 22px;
+}
+
+.app-future .status-dot,
+.app-future .video-badge {
+    box-shadow: 0 0 18px currentColor;
+}
+
+.app-future .s-back a {
+    color: rgba(240, 242, 248, 0.58);
+}
+
+@media (max-width: 920px) {
+    .app-future .app-top-nav__inner {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+html.theme-light .app-future {
+    background:
+        radial-gradient(circle at top center, rgba(108, 99, 255, 0.08), transparent 42%),
+        radial-gradient(circle at 82% 18%, rgba(45, 212, 191, 0.05), transparent 24%),
+        linear-gradient(180deg, #f7f8fc 0%, #eef2f8 100%);
+}
+
+html.theme-light .app-future .sidebar,
+html.theme-light .app-future .app-top-nav__inner,
+html.theme-light .app-future .welcome-wrap,
+html.theme-light .app-future .w-chip,
+html.theme-light .app-future .w-step,
+html.theme-light .app-future .panel,
+html.theme-light .app-future .metric-card,
+html.theme-light .app-future .q-bubble,
+html.theme-light .app-future .code-editor-shell,
+html.theme-light .app-future .app-top-nav__theme-toggle,
+html.theme-light .app-future #appSettingsLink {
+    background: rgba(255, 255, 255, 0.86);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 20px 50px rgba(30, 41, 59, 0.08);
+}
+
+html.theme-light .app-future .welcome-title-line1,
+html.theme-light .app-future .brand-name,
+html.theme-light .app-future .panel__header,
+html.theme-light .app-future .q-avatar {
+    color: var(--text) !important;
+}
+
+html.theme-light .app-future .welcome-title-line2,
+html.theme-light .app-future .iv-title,
+html.theme-light .app-future .rpt-title {
+    background: linear-gradient(135deg, #101828 0%, #2b3a66 48%, #0f766e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+html.theme-light .app-future #appSettingsLink::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.36.49.83.83 1.51 1H21a2 2 0 0 1 0 4h-.09c-.67.17-1.15.52-1.51 1z'/%3E%3C/svg%3E");
+}

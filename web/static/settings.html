@@ -6,25 +6,29 @@
     <meta name="description" content="Settings — PrepLoom" />
     <title>Settings — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <style>
         /* ── Settings page overrides ────────────────────────────────── */
         .settings-container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 3rem 2rem;
+            padding: 2rem 1.5rem 4rem;
             min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
 
         .settings-header {
             margin-bottom: 3rem;
-            animation: fadeSlideDown 0.5s ease;
+            text-align: center;
+            padding: 3rem 0;
+            position: relative;
         }
 
         .settings-header h1 {
             font-family: 'Fraunces', Georgia, serif;
-            font-size: 2.5rem;
+            font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 700;
             margin-bottom: 0.5rem;
             background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 50%, #2dd4bf 100%);
@@ -36,23 +40,19 @@
         .settings-header p {
             color: var(--pl-muted);
             font-size: 1rem;
+            max-width: 40ch;
+            margin: 0 auto;
         }
 
         /* ── Settings sections ─────────────────────────────────────── */
         .settings-section {
-            background: var(--pl-surface);
+            background: rgba(14, 16, 24, 0.6);
             border: 1px solid var(--pl-border);
             border-radius: var(--pl-radius);
             padding: 2rem;
             margin-bottom: 2rem;
             backdrop-filter: blur(10px);
-            animation: fadeSlideUp 0.5s ease;
-            animation-fill-mode: both;
         }
-
-        .settings-section:nth-child(2) { animation-delay: 0.1s; }
-        .settings-section:nth-child(3) { animation-delay: 0.2s; }
-        .settings-section:nth-child(4) { animation-delay: 0.3s; }
 
         .settings-section-title {
             font-size: 1.3rem;
@@ -242,7 +242,6 @@
             border-radius: var(--pl-radius-sm);
             margin-bottom: 1rem;
             display: none;
-            animation: slideDown 0.3s ease;
         }
 
         .status-message.show {
@@ -270,7 +269,6 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: fadeIn 0.2s ease;
         }
 
         .settings-modal.show {
@@ -284,7 +282,6 @@
             padding: 2rem;
             max-width: 400px;
             width: 90%;
-            animation: slideUp 0.3s ease;
         }
 
         .settings-modal-title {
@@ -308,112 +305,6 @@
         .settings-modal-actions .btn-primary,
         .settings-modal-actions .btn-secondary {
             flex: 1;
-        }
-
-        /* ── Animations ────────────────────────────────────────────– */
-        @keyframes fadeSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* ── Dark theme (default) ────────────────────────────────────– */
-        :root.theme-dark {
-            --pl-bg: #07080c;
-            --pl-bg-elevated: #0e1018;
-            --pl-surface: rgba(18, 20, 30, 0.72);
-            --pl-text: #f4f4f7;
-            --pl-muted: rgba(244, 244, 247, 0.62);
-        }
-
-        /* ── Light theme ────────────────────────────────────────────– */
-        :root.theme-light {
-            --pl-bg: #ffffff;
-            --pl-bg-elevated: #f9fafb;
-            --pl-surface: rgba(249, 250, 251, 0.9);
-            --pl-border: rgba(0, 0, 0, 0.08);
-            --pl-border-strong: rgba(0, 0, 0, 0.14);
-            --pl-text: #1f2937;
-            --pl-muted: rgba(31, 41, 55, 0.62);
-            --pl-faint: rgba(31, 41, 55, 0.38);
-        }
-
-        body.site.theme-light {
-            background: var(--pl-bg);
-            color: var(--pl-text);
-        }
-
-        .theme-light .form-input,
-        .theme-light .form-input-display {
-            background: rgba(249, 250, 251, 0.8);
-            color: var(--pl-text);
-            border-color: var(--pl-border-strong);
-        }
-
-        .theme-light .form-input:focus {
-            border-color: #6c63ff;
-            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
-        }
-
-        .theme-light .theme-option {
-            background: rgba(249, 250, 251, 0.8);
-        }
-
-        .theme-light .btn-secondary {
-            background: rgba(249, 250, 251, 0.8);
-            color: var(--pl-text);
-        }
-
-        .theme-light .btn-secondary:hover {
-            background: rgba(243, 244, 246, 0.95);
-        }
-
-        .theme-light .nav-item,
-        .theme-light .site-nav__link {
-            color: var(--pl-text) !important;
         }
 
         /* ── Dropdown Menu ── */
@@ -453,8 +344,9 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/static/css/future-pages.css" />
 </head>
-<body class="site">
+<body class="site future-page future-page--settings">
 <div class="site-wrap">
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
@@ -470,11 +362,11 @@
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
             <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
-                <span data-theme-icon>🌙</span>
+                <span data-theme-icon aria-hidden="true"></span>
             </button>
             <div style="position: relative; display: inline-block;">
-                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
-                <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
                     <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         Settings
@@ -492,201 +384,207 @@
         </div>
     </header>
 
-    <!-- Ambient background -->
-    <div class="ambient">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
-
     <!-- Main content -->
-    <main class="site-main">
-    <div class="settings-container">
-        <div class="settings-header">
-            <h1>Settings</h1>
-            <p>Manage your account preferences and profile information</p>
-        </div>
-
-        <!-- Profile Section -->
-        <div class="settings-section">
-            <h2 class="settings-section-title">Profile Information</h2>
-            
-            <div id="profileStatus" class="status-message"></div>
-
-            <div class="form-group">
-                <label class="form-label required">Full Name</label>
-                <input 
-                    type="text" 
-                    id="nameInput" 
-                    class="form-input" 
-                    placeholder="Your full name"
-                    maxlength="100"
-                />
-                <div class="form-help">Update your display name</div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label required">Email Address</label>
-                <div class="form-input-display" id="emailDisplay">Loading...</div>
-                <div class="form-help">Your email cannot be changed here. Contact support for email changes</div>
-            </div>
-
-            <div class="btn-group">
-                <button id="saveProfileBtn" class="btn-primary">Save Profile</button>
-                <button id="cancelProfileBtn" class="btn-secondary" style="display:none;">Cancel</button>
+    <main class="site-main hero-parallax-container">
+        <canvas id="heroParticles" class="hero-particles" aria-hidden="true" style="height: 400px;"></canvas>
+        <div class="hero-mesh" aria-hidden="true"></div>
+        
+        <!-- Telemetry-style status elements -->
+        <div class="telemetry-card telemetry-card--north" data-parallax="12" style="top: 10%; left: 8%;">
+            <span class="telemetry-card__label">Preferences</span>
+            <div class="telemetry-card__stat" style="background:transparent; border:none; padding:0;">
+                <strong style="color:var(--pl-teal);">Synced</strong>
+                <span>Global profile</span>
             </div>
         </div>
 
-        <!-- Interview Preferences -->
-        <div class="settings-section">
-            <h2 class="settings-section-title">Interview Preferences</h2>
-            
-            <div class="form-group">
-                <label class="form-label">Default Target Role</label>
-                <select id="roleSelect" class="form-input">
-                    <option value="Data Scientist">Data Scientist</option>
-                    <option value="AI ML Engineer">AI ML Engineer</option>
-                    <option value="Software Engineer">Software Engineer</option>
-                    <option value="Frontend Developer">Frontend Developer</option>
-                    <option value="Product Manager">Product Manager</option>
-                </select>
-                <div class="form-help">The default role loaded when you enter the practice room.</div>
+        <div class="settings-container">
+            <div class="settings-header" data-animate="down">
+                <h1>Settings</h1>
+                <p>Manage your account preferences and profile information</p>
             </div>
-            
-            <div class="form-group">
-                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="prefTts" checked />
-                    <span style="margin-left: 0.5rem; font-weight: 500;">Read questions aloud (TTS)</span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="prefIdeal" />
-                    <span style="margin-left: 0.5rem; font-weight: 500;">Show ideal answers by default</span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="prefCode" />
-                    <span style="margin-left: 0.5rem; font-weight: 500;">Enable Code Editor Workspace</span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="prefAutoPosture" checked />
-                    <span style="margin-left: 0.5rem; font-weight: 500;">Auto-enable live posture analysis</span>
-                </label>
-            </div>
-        </div>
 
-        <!-- Media Settings -->
-        <div class="settings-section">
-            <h2 class="settings-section-title">Camera & Video</h2>
-            <div class="form-group">
-                <label class="form-label">Camera Resolution</label>
-                <select id="prefRes" class="form-input">
-                    <option value="480p">480p (Standard)</option>
-                    <option value="720p" selected>720p (HD)</option>
-                    <option value="1080p">1080p (Full HD)</option>
-                </select>
-                <div class="form-help">Higher resolutions may cause lag on slower networks.</div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Analysis Framerate</label>
-                <select id="prefFps" class="form-input">
-                    <option value="5 FPS (battery-saver)">5 FPS (Battery-saver)</option>
-                    <option value="15 FPS (balanced)" selected>15 FPS (Balanced)</option>
-                    <option value="30 FPS (high detail)">30 FPS (High detail)</option>
-                </select>
-                <div class="form-help">How often your posture is evaluated. Higher FPS uses more CPU.</div>
-            </div>
-        </div>
+            <!-- Profile Section -->
+            <div class="settings-section" data-animate="up" data-delay="100">
+                <h2 class="settings-section-title">Profile Information</h2>
+                
+                <div id="profileStatus" class="status-message"></div>
 
-        <!-- Theme Section -->
-        <div class="settings-section">
-            <h2 class="settings-section-title">Appearance</h2>
-            
-            <div id="themeStatus" class="status-message"></div>
+                <div class="form-group">
+                    <label class="form-label required">Full Name</label>
+                    <input 
+                        type="text" 
+                        id="nameInput" 
+                        class="form-input" 
+                        placeholder="Your full name"
+                        maxlength="100"
+                    />
+                    <div class="form-help">Update your display name</div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Theme</label>
-                <div class="theme-selector">
-                    <div class="theme-option active">
-                        <input 
-                            type="radio" 
-                            id="themeDark" 
-                            name="theme" 
-                            value="dark" 
-                            checked
-                        />
-                        <label for="themeDark">🌙 Dark</label>
-                    </div>
-                    <div class="theme-option">
-                        <input 
-                            type="radio" 
-                            id="themeLight" 
-                            name="theme" 
-                            value="light"
-                        />
-                        <label for="themeLight">☀️ Light</label>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label required">Email Address</label>
+                    <div class="form-input-display" id="emailDisplay">Loading...</div>
+                    <div class="form-help">Your email cannot be changed here. Contact support for email changes</div>
+                </div>
+
+                <div class="btn-group">
+                    <button id="saveProfileBtn" class="btn-primary">Save Profile</button>
+                    <button id="cancelProfileBtn" class="btn-secondary" style="display:none;">Cancel</button>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Accent Color</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <input type="color" id="accentColor" class="form-input" style="width: 60px; height: 40px; padding: 0.25rem;" value="#6c63ff" />
-                    <span class="form-help">Customize your primary interface color</span>
+            <!-- Interview Preferences -->
+            <div class="settings-section" data-animate="up" data-delay="200">
+                <h2 class="settings-section-title">Interview Preferences</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Default Target Role</label>
+                    <select id="roleSelect" class="form-input">
+                        <option value="Data Scientist">Data Scientist</option>
+                        <option value="AI ML Engineer">AI ML Engineer</option>
+                        <option value="Software Engineer">Software Engineer</option>
+                        <option value="Frontend Developer">Frontend Developer</option>
+                        <option value="Product Manager">Product Manager</option>
+                    </select>
+                    <div class="form-help">The default role loaded when you enter the practice room.</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                        <input type="checkbox" id="prefTts" checked />
+                        <span style="margin-left: 0.5rem; font-weight: 500;">Read questions aloud (TTS)</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                        <input type="checkbox" id="prefIdeal" />
+                        <span style="margin-left: 0.5rem; font-weight: 500;">Show ideal answers by default</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                        <input type="checkbox" id="prefCode" />
+                        <span style="margin-left: 0.5rem; font-weight: 500;">Enable Code Editor Workspace</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                        <input type="checkbox" id="prefAutoPosture" checked />
+                        <span style="margin-left: 0.5rem; font-weight: 500;">Auto-enable live posture analysis</span>
+                    </label>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Font Size (<span id="fontSizeRangeVal">16</span>px)</label>
-                <input type="range" id="fontSizeRange" class="form-input" min="12" max="22" step="1" value="16" style="padding: 0; background: transparent; border: none; height: 2px; appearance: auto;" />
+            <!-- Media Settings -->
+            <div class="settings-section" data-animate="up" data-delay="300">
+                <h2 class="settings-section-title">Camera & Video</h2>
+                <div class="form-group">
+                    <label class="form-label">Camera Resolution</label>
+                    <select id="prefRes" class="form-input">
+                        <option value="480p">480p (Standard)</option>
+                        <option value="720p" selected>720p (HD)</option>
+                        <option value="1080p">1080p (Full HD)</option>
+                    </select>
+                    <div class="form-help">Higher resolutions may cause lag on slower networks.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Analysis Framerate</label>
+                    <select id="prefFps" class="form-input">
+                        <option value="5 FPS (battery-saver)">5 FPS (Battery-saver)</option>
+                        <option value="15 FPS (balanced)" selected>15 FPS (Balanced)</option>
+                        <option value="30 FPS (high detail)">30 FPS (High detail)</option>
+                    </select>
+                    <div class="form-help">How often your posture is evaluated. Higher FPS uses more CPU.</div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="reduceMotion" />
-                    <span style="margin-left: 0.5rem; font-weight: 500;">Reduce interface motion (Animations)</span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="prefAmbientOrbs" checked />
-                    <span style="margin-left: 0.5rem; font-weight: 500;">Show ambient background orbs</span>
-                </label>
-            </div>
-            
-            <div class="btn-group">
-                <button id="saveAppearanceBtn" class="btn-primary" type="button">Save Settings</button>
-            </div>
-        </div>
+            <!-- Theme Section -->
+            <div class="settings-section" data-animate="up" data-delay="400">
+                <h2 class="settings-section-title">Appearance</h2>
+                
+                <div id="themeStatus" class="status-message"></div>
 
-        <!-- Security Section -->
-        <div class="settings-section">
-            <h2 class="settings-section-title">Security & Account</h2>
-            
-            <div id="securityStatus" class="status-message"></div>
+                <div class="form-group">
+                    <label class="form-label">Theme</label>
+                    <div class="theme-selector">
+                        <div class="theme-option active">
+                            <input 
+                                type="radio" 
+                                id="themeDark" 
+                                name="theme" 
+                                value="dark" 
+                                checked
+                            />
+                            <label for="themeDark">🌙 Dark</label>
+                        </div>
+                        <div class="theme-option">
+                            <input 
+                                type="radio" 
+                                id="themeLight" 
+                                name="theme" 
+                                value="light"
+                            />
+                            <label for="themeLight">☀️ Light</label>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Account Status</label>
-                <div class="form-input-display">✓ Active</div>
-                <div class="form-help">Your account is in good standing</div>
+                <div class="form-group">
+                    <label class="form-label">Accent Color</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="color" id="accentColor" class="form-input" style="width: 60px; height: 40px; padding: 0.25rem;" value="#6c63ff" />
+                        <span class="form-help">Customize your primary interface color</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Font Size (<span id="fontSizeRangeVal">16</span>px)</label>
+                    <input type="range" id="fontSizeRange" class="form-input" min="12" max="22" step="1" value="16" style="padding: 0; background: transparent; border: none; height: 2px; appearance: auto;" />
+                </div>
+
+                <div class="form-group">
+                    <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                        <input type="checkbox" id="reduceMotion" />
+                        <span style="margin-left: 0.5rem; font-weight: 500;">Reduce interface motion (Animations)</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="theme-option" style="padding: 0.75rem; justify-content: flex-start; cursor: pointer;">
+                        <input type="checkbox" id="prefAmbientOrbs" checked />
+                        <span style="margin-left: 0.5rem; font-weight: 500;">Show ambient background orbs</span>
+                    </label>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="saveAppearanceBtn" class="btn-primary" type="button">Save Settings</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Danger Zone -->
-        <div class="settings-section" style="border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.03);">
-            <h2 class="settings-section-title" style="color: #ef4444;">Danger Zone</h2>
-            
-            <div class="form-group">
-                <label class="form-label">Delete Account</label>
-                <p class="form-help" style="margin-bottom: 1rem;">
-                    Once you delete your account, there is no going back. All your data will be permanently removed.
-                </p>
-                <button id="deleteAccountBtn" class="btn-danger">Delete Account</button>
+            <!-- Security Section -->
+            <div class="settings-section" data-animate="up" data-delay="500">
+                <h2 class="settings-section-title">Security & Account</h2>
+                
+                <div id="securityStatus" class="status-message"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Account Status</label>
+                    <div class="form-input-display">✓ Active</div>
+                    <div class="form-help">Your account is in good standing</div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-section" data-animate="up" data-delay="600" style="border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.03);">
+                <h2 class="settings-section-title" style="color: #ef4444;">Danger Zone</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Delete Account</label>
+                    <p class="form-help" style="margin-bottom: 1rem;">
+                        Once you delete your account, there is no going back. All your data will be permanently removed.
+                    </p>
+                    <button id="deleteAccountBtn" class="btn-danger">Delete Account</button>
+                </div>
             </div>
         </div>
     </main>
@@ -704,8 +602,6 @@
             </div>
         </div>
     </div>
-    </div>
-    </main>
 
     <footer class="site-footer">
         <div class="site-footer__inner">
@@ -781,46 +677,7 @@
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/settings.js"></script>
     <script>
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('userDropdownMenu');
-            const btn = document.getElementById('navUserEmail');
-            if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.remove('show');
-            }
-        });
-
         document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
-        
-        // Sync Appearance radio buttons with the global theme manager
-        const themeRadios = document.querySelectorAll('input[name="theme"]');
-        if (themeRadios.length > 0) {
-            const syncRadios = () => {
-                const savedTheme = localStorage.getItem('pl-theme') || (document.documentElement.classList.contains('theme-light') ? 'light' : 'dark');
-                const activeRadio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
-                if (activeRadio) {
-                    activeRadio.checked = true;
-                    document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-                    activeRadio.closest('.theme-option').classList.add('active');
-                }
-            };
-
-            syncRadios(); // Initial sync on load
-
-            // Listen for changes from the settings panel radio buttons
-            themeRadios.forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    if (e.target.checked && typeof applyTheme === 'function') {
-                        applyTheme(e.target.value);
-                        syncRadios();
-                    }
-                });
-            });
-
-            // Sync panel UI if theme is changed via the top nav button or another tab
-            document.getElementById('themeToggle')?.addEventListener('click', () => setTimeout(syncRadios, 10));
-            window.addEventListener('storage', (e) => { if (e.key === 'pl-theme') syncRadios(); });
-        }
     </script>
 </body>
 </html>

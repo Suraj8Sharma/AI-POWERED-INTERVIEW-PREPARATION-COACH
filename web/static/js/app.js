@@ -1167,34 +1167,130 @@ function renderFeedback(ev) {
     if (cfs != null) parts.push(cfs);
     const ov = Math.round(parts.reduce((a, b) => a + b, 0) / parts.length);
 
+    // Header Summary
     scoreRow.innerHTML = `
-        <span class="score-pill ${scoreColor(ov)}">🎯 Overall: ${ov}/100</span>
-        <span class="score-pill ${scoreColor(ts)}">📚 Technical: ${ts}/100</span>
-        <span class="score-pill ${scoreColor(cs)}">🗣️ Communication: ${cs}/100</span>
-        <span class="score-pill ${cfs != null ? scoreColor(cfs) : ''}">📹 Confidence: ${cfs != null ? cfs + '/100' : '—'}</span>
+        <span class="score-pill ${scoreColor(ov)}" style="font-size: 0.9rem; padding: 10px 24px; border-width: 2px;">
+            🎯 Final Assessment: ${ov}% Overall Match
+        </span>
     `;
 
-    let leftHTML = "";
-    if (ev.short_feedback) leftHTML += `<p class="caption">💬 ${ev.short_feedback}</p>`;
-    if (ev.strengths && ev.strengths.length)
-        leftHTML += `<p><strong>Strengths:</strong> <span class="detail-text">${ev.strengths.slice(0, 3).join(" • ")}</span></p>`;
-    if (ev.improvements && ev.improvements.length)
-        leftHTML += `<p><strong>To improve:</strong> <span class="detail-text">${ev.improvements.slice(0, 3).join(" • ")}</span></p>`;
-    if (ev.missing_points && ev.missing_points.length)
-        leftHTML += `<p><strong>Missing:</strong> <span class="detail-text">${ev.missing_points.slice(0, 5).join(", ")}</span></p>`;
+    // Map Technical Growth Items
+    const techGrowth = [
+        ...(ev.missing_points || []).map(m => ({ icon: '❓', text: m, type: 'neg' })),
+        ...(ev.improvements || []).map(imp => ({ icon: '🚀', text: imp, type: 'warn' }))
+    ];
 
-    let rightHTML = "";
-    if (ev.comm_details) rightHTML += `<p class="caption">🗣️ ${ev.comm_details}</p>`;
-    if (ev.filler_count || ev.wpm)
-        rightHTML += `<p><strong>Fillers:</strong> ${ev.filler_count} &nbsp;|&nbsp; <strong>Pace:</strong> ${ev.wpm} WPM</p>`;
-    if (ev.filler_words && ev.filler_words.length)
-        rightHTML += `<p><strong>Filler words:</strong> <span class="detail-text">${ev.filler_words.join(", ")}</span></p>`;
-    if (ev.bl_summary) rightHTML += `<p class="caption">📹 ${ev.bl_summary}</p>`;
-
-    feedbackDetails.innerHTML = `
-        <div class="detail-col">${leftHTML}</div>
-        <div class="detail-col">${rightHTML}</div>
+    // Build the Horizontal Evaluation Table
+    let tableHTML = `
+        <div style="margin-bottom: 20px;">
+            <p style="font-style: italic; color: var(--text); font-size: 1.05rem; line-height: 1.6;">"${ev.short_feedback || ""}"</p>
+        </div>
+        
+        <div class="fb-table-wrap">
+            <table class="fb-table">
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Evaluation Criteria</th>
+                        <th style="text-align: center; border-left: 1px solid var(--border-md);">📚 Technical Depth</th>
+                        <th style="text-align: center; border-left: 1px solid var(--border-md);">🗣️ Communication</th>
+                        <th style="text-align: center; border-left: 1px solid var(--border-md);">📹 Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Row 1: Score -->
+                    <tr>
+                        <td class="fb-dim-cell">Performance Score</td>
+                        <td style="text-align: center; border-left: 1px solid var(--border);">
+                            <span class="score-pill ${scoreColor(ts)}" style="font-size: 1.1rem; min-width: 60px; justify-content: center;">${ts}%</span>
+                        </td>
+                        <td style="text-align: center; border-left: 1px solid var(--border);">
+                            <span class="score-pill ${scoreColor(cs)}" style="font-size: 1.1rem; min-width: 60px; justify-content: center;">${cs}%</span>
+                        </td>
+                        <td style="text-align: center; border-left: 1px solid var(--border);">
+                            <span class="score-pill ${cfs != null ? scoreColor(cfs) : ''}" style="font-size: 1.1rem; min-width: 60px; justify-content: center;">${cfs != null ? cfs + '%' : '—'}</span>
+                        </td>
+                    </tr>
+                    
+                    <!-- Row 2: Strengths -->
+                    <tr>
+                        <td class="fb-dim-cell">Key Strengths</td>
+                        <td style="border-left: 1px solid var(--border);">
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${(ev.strengths || []).map(s => `
+                                    <div class="fb-pill-item" style="background: rgba(34,197,94,0.06); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(34,197,94,0.12);">
+                                        <span class="fb-pill-icon">✅</span>
+                                        <span class="fb-pill-text pos">${s}</span>
+                                    </div>
+                                `).join('') || "—"}
+                            </div>
+                        </td>
+                        <td style="border-left: 1px solid var(--border);">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div class="fb-pill-item">
+                                    <span class="fb-pill-icon">⚡</span>
+                                    <span class="fb-pill-text neu">Pace: <b>${ev.wpm || 0} WPM</b></span>
+                                </div>
+                                <div class="fb-pill-item">
+                                    <span class="fb-pill-icon">📉</span>
+                                    <span class="fb-pill-text neu">Fillers: <b>${ev.filler_count || 0}</b></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="border-left: 1px solid var(--border);">
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${(ev.bl_observations || []).slice(0, 2).map(ob => `
+                                    <div class="fb-pill-item" style="background: rgba(108,99,255,0.06); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(108,99,255,0.12);">
+                                        <span class="fb-pill-icon">👁️</span>
+                                        <span class="fb-pill-text neu">${ob}</span>
+                                    </div>
+                                `).join('') || (cfs != null ? "✅ Stable presence" : "—")}
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Row 3: Growth -->
+                    <tr>
+                        <td class="fb-dim-cell">Areas for Growth</td>
+                        <td style="border-left: 1px solid var(--border);">
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${techGrowth.map(g => `
+                                    <div class="fb-pill-item" style="background: rgba(255,255,255,0.03); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);">
+                                        <span class="fb-pill-icon">${g.icon}</span>
+                                        <span class="fb-pill-text ${g.type}">${g.text}</span>
+                                    </div>
+                                `).join('') || "—"}
+                            </div>
+                        </td>
+                        <td style="border-left: 1px solid var(--border);">
+                             ${ev.comm_details ? `
+                                <div class="fb-pill-item" style="background: rgba(255,255,255,0.03); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);">
+                                    <span class="fb-pill-icon">💬</span>
+                                    <span class="fb-pill-text neu">${ev.comm_details}</span>
+                                </div>
+                            ` : "—"}
+                        </td>
+                        <td style="border-left: 1px solid var(--border);">
+                             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${(ev.bl_observations || []).slice(2, 4).map(ob => `
+                                    <div class="fb-pill-item" style="background: rgba(245,158,11,0.06); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.12);">
+                                        <span class="fb-pill-icon">👁️</span>
+                                        <span class="fb-pill-text warn">${ob}</span>
+                                    </div>
+                                `).join('') || (ev.bl_summary ? `
+                                    <div class="fb-pill-item" style="background: rgba(255,255,255,0.03); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);">
+                                        <span class="fb-pill-icon">📹</span>
+                                        <span class="fb-pill-text neu">${ev.bl_summary}</span>
+                                    </div>
+                                ` : "—")}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     `;
+
+    feedbackDetails.innerHTML = tableHTML;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

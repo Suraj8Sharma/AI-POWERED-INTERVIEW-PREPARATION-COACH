@@ -114,20 +114,48 @@ div[data-testid="stAppViewContainer"] { padding-top: 3.5rem; }
     margin: 0.5rem 0;
 }
 
-/* Section label */
-.section-label {
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--text-muted); margin: 1rem 0 0.35rem 0;
+/* Feedback Sections */
+.fb-section {
+    padding: 16px; border-radius: 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+}
+.fb-section-title {
+    font-size: 0.85rem; font-weight: 800; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
 }
 
-/* Score card in dashboard */
-.score-card {
-    text-align: center; padding: 20px 12px;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 14px;
+/* Feedback Items */
+.fb-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    margin-bottom: 8px; font-size: 0.92rem;
+    border: 1px solid transparent;
 }
-.score-card .value { font-size: 2.2rem; font-weight: 900; }
-.score-card .label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+.fb-item.strength { 
+    background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.15); color: #86efac;
+}
+.fb-item.improvement { 
+    background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.15); color: #fcd34d;
+}
+.fb-item.missing { 
+    background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.15); color: #fca5a5;
+}
+.fb-item.neutral { 
+    background: rgba(108,99,255,0.08); border-color: rgba(108,99,255,0.15); color: #c4b5fd;
+}
+
+.fb-icon { font-size: 1.1rem; flex-shrink: 0; }
+.fb-text { line-height: 1.4; }
+
+/* Score Large */
+.fb-score-large {
+    font-size: 2.8rem; font-weight: 900; line-height: 1;
+    margin-bottom: 4px;
+}
+.fb-score-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
 
 /* Streamlit overrides */
 div.stButton > button {
@@ -547,20 +575,7 @@ with col_interview:
         # ── Submit: evaluate all 3 dimensions ──────────────
         if submit_btn and has_answer:
             with st.spinner("🧠 Evaluating your answer across all dimensions…"):
-                # 1. Technical score (LLM / heuristic)
-                tech_eval = evaluate_technical_answer(
-                    question_text=q.question_text,
-                    ideal_answer=q.ideal_answer or "",
-                    user_answer=st.session_state["last_answer"],
-                    role_tag=q.role_tag,
-                    difficulty_level=q.difficulty_level,
-                )
-
-                # 2. Communication score (NLP)
-                duration = st.session_state.get("answer_duration", 7.0)
-                comm_eval = analyze_communication(st.session_state["last_answer"], duration)
-
-                # 3. Confidence score (body language)
+                # 3. Confidence score (body language) - Move this up so we can use it in tech eval
                 bl_data = st.session_state.get("body_language")
                 if bl_data and not bl_data.get("error") and bl_data.get("pose_visible_fraction", 0) > 0:
                     o = float(bl_data.get("openness", 0.5))
@@ -569,9 +584,25 @@ with col_interview:
                     f = float(bl_data.get("fidgeting", 0.5))
                     confidence_score = int(round(np.clip((o + e + p + (1.0 - f)) / 4.0, 0.0, 1.0) * 100))
                     bl_summary = bl_data.get("summary", "")
+                    bl_obs = bl_data.get("observations", [])
                 else:
                     confidence_score = None
                     bl_summary = "No body language data captured for this question."
+                    bl_obs = []
+
+                # 1. Technical score (LLM / heuristic)
+                tech_eval = evaluate_technical_answer(
+                    question_text=q.question_text,
+                    ideal_answer=q.ideal_answer or "",
+                    user_answer=st.session_state["last_answer"],
+                    role_tag=q.role_tag,
+                    difficulty_level=q.difficulty_level,
+                    body_language_summary=bl_summary,
+                )
+
+                # 2. Communication score (NLP)
+                duration = st.session_state.get("answer_duration", 7.0)
+                comm_eval = analyze_communication(st.session_state["last_answer"], duration)
 
                 # Combined per-question result
                 combined = {
@@ -585,9 +616,10 @@ with col_interview:
                     "communication_score": comm_eval.get("communication_score"),
                     "filler_count": comm_eval.get("filler_count", 0),
                     "wpm": comm_eval.get("wpm", 0),
-                    "comm_details": comm_eval.get("details", ""),
+                    "comm_details": comm_eval.get("comm_details", ""),
                     "confidence_score": confidence_score,
                     "bl_summary": bl_summary,
+                    "bl_observations": bl_obs,
                 }
                 st.session_state["current_eval"] = combined
                 st.session_state["evaluations"].append(combined)
@@ -635,58 +667,119 @@ with col_interview:
 # ═══════════════════════════════════════════════════════════════════════════
 if interview_active:
     st.write("")
-    st.markdown('<div class="iv-card">', unsafe_allow_html=True)
-    st.markdown("##### 📊 Feedback")
-
     ev = st.session_state.get("current_eval")
+    
     if ev:
-        # ── 3D Score pills ─────────────────────────────────
-        sc1, sc2, sc3, sc4 = st.columns(4)
+        st.markdown('<div class="iv-card">', unsafe_allow_html=True)
+        
+        # ── 1. Header with Overall Score ───────────────────
         ts = ev.get("technical_score", 0) or 0
         cs = ev.get("communication_score", 0) or 0
         cfs = ev.get("confidence_score")
-        overall_parts = [ts, cs]
+        
+        scores_to_avg = [ts, cs]
         if cfs is not None:
-            overall_parts.append(cfs)
-        ov = int(round(sum(overall_parts) / max(1, len(overall_parts))))
+            scores_to_avg.append(cfs)
+        ov = int(round(sum(scores_to_avg) / max(1, len(scores_to_avg))))
+        
+        ov_col1, ov_col2 = st.columns([1, 4])
+        with ov_col1:
+            st.markdown(f"""
+                <div style="text-align: center;">
+                    <div class="fb-score-large" style="color: {_score_color(ov) == 'green' and '#22c55e' or (_score_color(ov) == 'amber' and '#f59e0b' or '#ef4444')};">{ov}%</div>
+                    <div class="fb-score-label">Overall Match</div>
+                </div>
+            """, unsafe_allow_html=True)
+        with ov_col2:
+            st.markdown(f"""
+                <div style="padding: 10px 0;">
+                    <h3 style="margin: 0; font-weight: 800; color: var(--text-primary);">Interview Performance Summary</h3>
+                    <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-style: italic; font-size: 1.05rem;">"{ev.get('short_feedback', '')}"</p>
+                </div>
+            """, unsafe_allow_html=True)
 
-        with sc1:
-            st.markdown(f'<div class="score-pill {_score_color(ov)}">🎯 Overall: {ov}/100</div>', unsafe_allow_html=True)
-        with sc2:
-            st.markdown(f'<div class="score-pill {_score_color(ts)}">📚 Technical: {ts}/100</div>', unsafe_allow_html=True)
-        with sc3:
-            st.markdown(f'<div class="score-pill {_score_color(cs)}">🗣️ Communication: {cs}/100</div>', unsafe_allow_html=True)
-        with sc4:
-            if cfs is not None:
-                st.markdown(f'<div class="score-pill {_score_color(cfs)}">📹 Confidence: {cfs}/100</div>', unsafe_allow_html=True)
-            else:
-                st.markdown('<div class="score-pill">📹 Confidence: —</div>', unsafe_allow_html=True)
+        st.markdown('<div style="height: 20px;"></div>', unsafe_allow_html=True)
 
-        # ── Detailed feedback ──────────────────────────────
-        d1, d2 = st.columns(2)
-        with d1:
-            if ev.get("short_feedback"):
-                st.caption(f"💬 {ev['short_feedback']}")
+        # ── 2. Three-Dimensional Dashboard ──────────────────
+        d_tech, d_comm, d_conf = st.columns(3, gap="large")
+
+        with d_tech:
+            st.markdown(f"""
+                <div class="fb-section">
+                    <div class="fb-section-title">📚 Technical Depth <span class="score-pill {_score_color(ts)}" style="margin-left: auto;">{ts}%</span></div>
+            """, unsafe_allow_html=True)
+            
             if ev.get("strengths"):
-                st.markdown("**Strengths:** " + " • ".join(ev["strengths"][:3]))
-            if ev.get("improvements"):
-                st.markdown("**To improve:** " + " • ".join(ev["improvements"][:3]))
+                for s in ev["strengths"][:2]:
+                    st.markdown(f'<div class="fb-item strength"><span class="fb-icon">✅</span><span class="fb-text">{s}</span></div>', unsafe_allow_html=True)
+            
             if ev.get("missing_points"):
-                st.markdown("**Missing:** " + ", ".join(ev["missing_points"][:5]))
-        with d2:
-            if ev.get("comm_details"):
-                st.caption(f"🗣️ {ev['comm_details']}")
-            fc = ev.get("filler_count", 0)
+                for m in ev["missing_points"][:3]:
+                    st.markdown(f'<div class="fb-item missing"><span class="fb-icon">❓</span><span class="fb-text">{m}</span></div>', unsafe_allow_html=True)
+            
+            if ev.get("improvements"):
+                for imp in ev["improvements"][:2]:
+                    st.markdown(f'<div class="fb-item improvement"><span class="fb-icon">🚀</span><span class="fb-text">{imp}</span></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with d_comm:
+            st.markdown(f"""
+                <div class="fb-section">
+                    <div class="fb-section-title">🗣️ Communication <span class="score-pill {_score_color(cs)}" style="margin-left: auto;">{cs}%</span></div>
+            """, unsafe_allow_html=True)
+            
             wpm = ev.get("wpm", 0)
-            if fc or wpm:
-                st.markdown(f"**Fillers:** {fc} &nbsp;|&nbsp; **Pace:** {wpm} WPM")
-            if ev.get("bl_summary"):
-                st.caption(f"📹 {ev['bl_summary']}")
+            fc = ev.get("filler_count", 0)
+            st.markdown(f"""
+                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <div style="flex: 1; text-align: center; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">{wpm}</div>
+                        <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700;">WPM</div>
+                    </div>
+                    <div style="flex: 1; text-align: center; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--amber);">{fc}</div>
+                        <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700;">FILLERS</div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if ev.get("comm_details"):
+                st.markdown(f'<div class="fb-item neutral"><span class="fb-icon">💬</span><span class="fb-text">{ev["comm_details"]}</span></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with d_conf:
+            st.markdown(f"""
+                <div class="fb-section">
+                    <div class="fb-section-title">📹 Confidence <span class="score-pill {cfs and _score_color(cfs) or ''}" style="margin-left: auto;">{cfs or '—'}%</span></div>
+            """, unsafe_allow_html=True)
+            
+            if cfs is not None:
+                if ev.get("bl_observations"):
+                    for ob in ev["bl_observations"][:4]:
+                        st.markdown(f'<div class="fb-item neutral"><span class="fb-icon">👁️</span><span class="fb-text">{ob}</span></div>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<div class="fb-item neutral"><span class="fb-icon">📹</span><span class="fb-text">{ev.get("bl_summary", "Stability looks good.")}</span></div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="fb-item neutral" style="opacity: 0.5;"><span class="fb-icon">📷</span><span class="fb-text">No camera data captured for this question.</span></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     elif st.session_state.get("last_answer"):
-        st.caption("Answer captured. Click **Submit** to get 3D feedback.")
-        st.code(st.session_state["last_answer"][:400], language=None)
+        st.markdown(f"""
+            <div class="iv-card" style="text-align: center; padding: 30px; border-style: dashed; border-color: var(--accent); background: rgba(108,99,255,0.03);">
+                <div style="font-size: 1.5rem; margin-bottom: 10px;">💡 Answer Captured</div>
+                <div style="color: var(--text-secondary); margin-bottom: 20px;">Review your transcript above and click <b>Submit</b> for a detailed performance analysis.</div>
+                <div style="font-family: monospace; font-size: 0.85rem; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; color: var(--text-muted);">
+                    "{st.session_state['last_answer'][:200]}..."
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
     else:
-        st.caption("Speak or type your answer, then Submit for evaluation.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+            <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                <div style="font-size: 3rem; margin-bottom: 10px; filter: grayscale(1); opacity: 0.3;">📊</div>
+                <div style="font-weight: 600; font-size: 1.1rem;">Waiting for your response</div>
+                <div style="font-size: 0.9rem;">Your performance breakdown will appear here.</div>
+            </div>
+        """, unsafe_allow_html=True)

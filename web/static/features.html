@@ -6,7 +6,7 @@
     <meta name="description" content="PrepLoom features — Technical practice, communication analysis, and video presence feedback for interview prep." />
     <title>Features — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <style>
         /* ── Features hero ────────────────────────────────────── */
@@ -57,7 +57,6 @@
             text-transform: uppercase;
             color: #2dd4bf;
             margin-bottom: 2rem;
-            animation: fadeSlideDown 0.6s ease both;
         }
 
         .hero-eyebrow-pill::before {
@@ -83,7 +82,6 @@
             letter-spacing: -0.03em;
             line-height: 1.07;
             color: #fff;
-            animation: fadeSlideDown 0.65s 0.1s ease both;
         }
 
         .feat-hero__line2 {
@@ -98,7 +96,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 1.5rem;
-            animation: fadeSlideDown 0.65s 0.18s ease both;
         }
 
         .feat-hero__lead {
@@ -107,7 +104,6 @@
             max-width: 52ch;
             margin: 0 auto 2.5rem;
             line-height: 1.65;
-            animation: fadeSlideDown 0.65s 0.26s ease both;
         }
 
         /* Filter pills (like revision tabs) */
@@ -117,7 +113,6 @@
             gap: 0.6rem;
             justify-content: center;
             margin-bottom: 0;
-            animation: fadeSlideDown 0.65s 0.34s ease both;
         }
 
         .feat-pill {
@@ -152,7 +147,7 @@
             margin: 3rem 0;
         }
 
-        /* ── Scroll reveal ────────────────────────────────────── */
+        /* ── Feature blocks ───────────────────────────────────── */
         .section-eyebrow {
             font-size: 0.72rem;
             font-weight: 700;
@@ -160,12 +155,7 @@
             text-transform: uppercase;
             color: #2dd4bf;
             margin-bottom: 0.75rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-        .section-eyebrow.visible { opacity: 1; transform: translateY(0); }
 
         .section-title-large {
             font-family: 'Fraunces', serif;
@@ -175,38 +165,22 @@
             line-height: 1.12;
             color: #fff;
             margin-bottom: 0.75rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s 0.08s ease, transform 0.5s 0.08s ease;
         }
-
-        .section-title-large.visible { opacity: 1; transform: translateY(0); }
 
         .section-subtitle {
             color: rgba(244,244,247,0.55);
             font-size: 0.95rem;
             max-width: 50ch;
             margin-bottom: 2.25rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s 0.14s ease, transform 0.5s 0.14s ease;
         }
 
-        .section-subtitle.visible { opacity: 1; transform: translateY(0); }
-
-        /* ── Big feature blocks ───────────────────────────────── */
         .feature-block {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 3rem;
             align-items: center;
             margin-bottom: 4rem;
-            opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
         }
-
-        .feature-block.visible { opacity: 1; transform: translateY(0); }
 
         .feature-block--reverse { direction: rtl; }
         .feature-block--reverse > * { direction: ltr; }
@@ -218,8 +192,6 @@
             }
             .feature-block--reverse > * { direction: ltr; }
         }
-
-        .feature-block__text {}
 
         .feature-block__num {
             display: inline-flex;
@@ -301,13 +273,6 @@
             justify-content: center;
         }
 
-        .feature-block__visual::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(108,99,255,0.08), transparent 60%);
-        }
-
         .visual-icon-large {
             font-size: 4.5rem;
             position: relative;
@@ -368,14 +333,6 @@
         }
 
         /* ── Comparison table ─────────────────────────────────── */
-        .compare-table-wrap {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .compare-table-wrap.visible { opacity: 1; transform: translateY(0); }
-
         .compare-table {
             width: 100%;
             border-collapse: collapse;
@@ -452,12 +409,7 @@
             background: linear-gradient(135deg, rgba(108,99,255,0.1) 0%, rgba(14,16,24,0.8) 60%, rgba(45,212,191,0.06) 100%);
             text-align: center;
             overflow: hidden;
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
         }
-
-        .cta-band.visible { opacity: 1; transform: translateY(0); }
 
         .cta-band::before {
             content: '';
@@ -491,34 +443,6 @@
             position: relative;
         }
 
-        .btn-hero-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.9rem 1.8rem;
-            border-radius: 999px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            font-family: inherit;
-            border: none;
-            background: linear-gradient(135deg, #6c63ff 0%, #8b84ff 100%);
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(108,99,255,0.4);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .btn-hero-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 44px rgba(108,99,255,0.5);
-        }
-
-        @keyframes fadeSlideDown {
-            from { opacity: 0; transform: translateY(-12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
         @media (max-width: 640px) {
             .feat-hero { padding: 3.5rem 0.5rem 3rem; }
         }
@@ -539,8 +463,9 @@
         .user-dropdown-menu.show { display: flex !important; }
         .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
     </style>
+    <link rel="stylesheet" href="/static/css/future-pages.css" />
 </head>
-<body class="site">
+<body class="site future-page future-page--features">
 <div class="site-wrap">
 
     <header class="site-nav" role="navigation" aria-label="Primary">
@@ -557,12 +482,12 @@
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
             <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
-                <span data-theme-icon>🌙</span>
+                <span data-theme-icon aria-hidden="true"></span>
             </button>
             <a href="/settings" class="btn-nav-outline" title="Settings" style="padding: 0.45rem 0.7rem; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
             <div style="position: relative; display: inline-block;">
-                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
-                <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
                     <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         Settings
@@ -583,17 +508,39 @@
     <main class="site-main">
 
         <!-- ═══ HERO ═══ -->
-        <section class="feat-hero" aria-labelledby="feat-title">
+        <section class="feat-hero hero-parallax-container" aria-labelledby="feat-title">
+            <canvas id="heroParticles" class="hero-particles" aria-hidden="true"></canvas>
+            <div class="hero-mesh" aria-hidden="true"></div>
             <div class="feat-hero__bg" aria-hidden="true"></div>
             <div class="feat-hero__noise" aria-hidden="true"></div>
+
+            <!-- Telemetry-style status elements -->
+            <div class="telemetry-card telemetry-card--north" data-parallax="20" style="top: 15%; right: 10%;">
+                <span class="telemetry-card__label">Analysis Pipeline</span>
+                <div class="telemetry-card__bars">
+                    <div class="telemetry-card__bar">
+                        <div class="telemetry-card__bar-label"><span>Accuracy</span><span>98%</span></div>
+                        <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 98%"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="telemetry-card telemetry-card--south" data-parallax="12" style="bottom: 20%; left: 8%;">
+                <span class="telemetry-card__label">Real-time Signals</span>
+                <div class="telemetry-card__grid">
+                    <div class="telemetry-card__stat"><strong>Live</strong><span>Voice</span></div>
+                    <div class="telemetry-card__stat"><strong>Live</strong><span>Video</span></div>
+                </div>
+            </div>
+
             <div class="feat-hero__inner">
-                <span class="hero-eyebrow-pill">What's inside</span>
+                <span class="hero-eyebrow-pill" data-animate="down">What's inside</span>
                 <h1 id="feat-title">
-                    <span class="feat-hero__line1">Every tool you need</span>
-                    <span class="feat-hero__line2">to walk in ready.</span>
+                    <span class="feat-hero__line1" data-animate="down" data-delay="100">Every tool you need</span>
+                    <span class="feat-hero__line2" data-animate="down" data-delay="200">to walk in ready.</span>
                 </h1>
-                <p class="feat-hero__lead">PrepLoom is built around how real interviews are scored — substance, signal, and presence. Here's what you get in the practice room today.</p>
-                <div class="feat-pills" role="navigation" aria-label="Jump to section">
+                <p class="feat-hero__lead" data-animate="up" data-delay="300">PrepLoom is built around how real interviews are scored — substance, signal, and presence. Here's what you get in the practice room today.</p>
+                <div class="feat-pills" role="navigation" aria-label="Jump to section" data-animate="up" data-delay="400">
                     <a class="feat-pill" href="#questions">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                         Questions
@@ -618,11 +565,11 @@
 
         <!-- ═══ FEATURES DETAIL ═══ -->
         <section id="questions" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Role-aware questions</p>
-            <h2 class="section-title-large js-reveal">Questions built around your target role.</h2>
-            <p class="section-subtitle js-reveal">Pull from a structured RAG-powered bank aligned to your target role. Each session mixes behavioural and technical prompts.</p>
+            <p class="section-eyebrow" data-animate="up">Role-aware questions</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">Questions built around your target role.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Pull from a structured RAG-powered bank aligned to your target role. Each session mixes behavioural and technical prompts.</p>
 
-            <div class="feature-block js-reveal-block">
+            <div class="feature-block" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>01</span> Question bank</div>
                     <h3 class="feature-block__title">Structured, role-specific question sets.</h3>
@@ -650,11 +597,11 @@
         <div class="section-divider" aria-hidden="true"></div>
 
         <section id="evaluation" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Answer evaluation</p>
-            <h2 class="section-title-large js-reveal">LLM scoring that actually explains itself.</h2>
-            <p class="section-subtitle js-reveal">Submit spoken or typed answers for feedback on reasoning and accuracy. Ideal answers reveal a strong baseline to compare against.</p>
+            <p class="section-eyebrow" data-animate="up">Answer evaluation</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">LLM scoring that actually explains itself.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Submit spoken or typed answers for feedback on reasoning and accuracy. Ideal answers reveal a strong baseline to compare against.</p>
 
-            <div class="feature-block feature-block--reverse js-reveal-block">
+            <div class="feature-block feature-block--reverse" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>02</span> Evaluation</div>
                     <h3 class="feature-block__title">Strengths, gaps, and what you missed.</h3>
@@ -682,11 +629,11 @@
         <div class="section-divider" aria-hidden="true"></div>
 
         <section id="communication" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Communication signals</p>
-            <h2 class="section-title-large js-reveal">Notice how you sound before the real room does.</h2>
-            <p class="section-subtitle js-reveal">Filler words, pacing, and structure — the signals a hiring manager notices without naming them.</p>
+            <p class="section-eyebrow" data-animate="up">Communication signals</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">Notice how you sound before the real room does.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Filler words, pacing, and structure — the signals a hiring manager notices without naming them.</p>
 
-            <div class="feature-block js-reveal-block">
+            <div class="feature-block" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>03</span> Communication</div>
                     <h3 class="feature-block__title">NLP analysis on every answer.</h3>
@@ -714,11 +661,11 @@
         <div class="section-divider" aria-hidden="true"></div>
 
         <section id="presence" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Video &amp; posture</p>
-            <h2 class="section-title-large js-reveal">Presence is a skill. Practice it.</h2>
-            <p class="section-subtitle js-reveal">Optional camera-based signals on openness, engagement, and posture — a nudge, not a verdict. Comfort still comes first.</p>
+            <p class="section-eyebrow" data-animate="up">Video &amp; posture</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">Presence is a skill. Practice it.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Optional camera-based signals on openness, engagement, and posture — a nudge, not a verdict. Comfort still comes first.</p>
 
-            <div class="feature-block feature-block--reverse js-reveal-block">
+            <div class="feature-block feature-block--reverse" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>04</span> Presence</div>
                     <h3 class="feature-block__title">Live body language via MediaPipe.</h3>
@@ -747,10 +694,10 @@
 
         <!-- ═══ COMPARISON TABLE ═══ -->
         <section style="padding: 2rem 0 3rem;">
-            <p class="section-eyebrow js-reveal">At a glance</p>
-            <h2 class="section-title-large js-reveal">PrepLoom vs the alternatives.</h2>
+            <p class="section-eyebrow" data-animate="up">At a glance</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">PrepLoom vs the alternatives.</h2>
 
-            <div class="compare-table-wrap js-reveal-block" style="overflow-x:auto; border-radius:16px; border:1px solid rgba(255,255,255,0.06); background: rgba(14,16,24,0.6);">
+            <div class="compare-table-wrap" data-animate="up" data-delay="200" style="overflow-x:auto; border-radius:16px; border:1px solid rgba(255,255,255,0.06); background: rgba(14,16,24,0.6);">
                 <table class="compare-table">
                     <thead>
                         <tr>
@@ -809,7 +756,7 @@
         </section>
 
         <!-- ═══ CTA ═══ -->
-        <div class="cta-band js-reveal-card" role="complementary">
+        <div class="cta-band" data-animate="up" role="complementary">
             <h2>Open the practice room.</h2>
             <p>Select a role, answer questions at your own pace, and walk away with a full report in under 20 minutes.</p>
             <a class="btn-hero-primary" href="/app">
@@ -895,20 +842,6 @@
     // Theme toggle
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
     
-    // Scroll-reveal observer
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.js-reveal, .js-reveal-card, .js-reveal-block').forEach(el => {
-        revealObserver.observe(el);
-    });
-
     // Smooth-scroll for anchor pills
     document.querySelectorAll('.feat-pill[href^="#"]').forEach(link => {
         link.addEventListener('click', e => {

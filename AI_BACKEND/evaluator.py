@@ -131,6 +131,7 @@ def evaluate_technical_answer(
     code_submission: str | None = None,
     role_tag: str | None = None,
     difficulty_level: str | None = None,
+    body_language_summary: str | None = None,
 ) -> dict[str, Any]:
     """
     Returns feedback as JSON-like dict:
@@ -146,10 +147,12 @@ def evaluate_technical_answer(
     user_answer = user_answer or ""
     ideal_answer = ideal_answer or ""
     code_submission = code_submission or ""
+    bl_hint = f"\n## Candidate's Body Language & Confidence (Observations):\n{body_language_summary}\n" if body_language_summary else ""
 
     # LLM scoring (best effort)
     try:
         llm = _get_llm()
+        
 
         role_hint = f"Role: {role_tag}.\n" if role_tag else ""
         diff_hint = f"Difficulty: {difficulty_level}.\n" if difficulty_level else ""
@@ -159,17 +162,18 @@ def evaluate_technical_answer(
         if is_coding:
             prompt = (
                 "You are a meticulous Senior Software Engineer evaluating a candidate's solution to a coding challenge.\n"
-                "Your evaluation must be thorough, covering both the code's technical correctness and the candidate's explanation.\n"
+                "Your evaluation must be thorough, covering both the code's technical correctness, the candidate's explanation, and their non-verbal confidence.\n"
                 f"{role_hint}{diff_hint}"
                 f"## Question:\n{question_text}\n\n"
                 f"## Ideal Reference Solution (for your eyes only):\n{ideal_answer}\n\n"
                 f"## Candidate's Spoken Explanation:\n{user_answer}\n\n"
-                f"## Candidate's Submitted Code:\n```\n{code_submission}\n```\n\n"
+                f"## Candidate's Submitted Code:\n```\n{code_submission}\n```\n"
+                f"{bl_hint}\n"
                 "## Evaluation Criteria:\n"
                 "1.  **Correctness (50% weight):** Does the code solve the problem correctly? Does it handle all edge cases mentioned in the ideal answer or implied by the problem?\n"
                 "2.  **Efficiency (20% weight):** Is the Big-O time and space complexity optimal? Compare it to the ideal solution.\n"
                 "3.  **Code Quality (15% weight):** Is the code clean, readable, and well-structured? Are variable names meaningful?\n"
-                "4.  **Explanation (15% weight):** Did the candidate clearly explain their approach, logic, and complexity? Does their explanation match the code?\n\n"
+                "4.  **Presentation & Confidence (15% weight):** Did the candidate clearly explain their approach? Does their body language (if provided) reflect confidence?\n\n"
                 "## Scoring Rubric:\n"
                 "- **90-100:** Optimal, clean, and correct solution with a clear explanation.\n"
                 "- **75-89:** Correct solution but may be slightly suboptimal or have minor code quality issues.\n"
@@ -180,10 +184,10 @@ def evaluate_technical_answer(
                 "The JSON object must have the following keys:\n"
                 "{\n"
                 '  "technical_score": <integer from 0 to 100>,\n'
-                '  "strengths": [<array of up to 3 specific, short strings on what was done well (e.g., "Achieved optimal O(N) time complexity")>],\n'
-                '  "improvements": [<array of up to 3 specific, actionable improvements (e.g., "Code fails for an empty input array", "Explanation of space complexity was incorrect")>],\n'
-                '  "missing_points": [<array of key aspects missed, such as specific edge cases or a more efficient approach>],\n'
-                '  "short_feedback": "<A concise, one-paragraph summary of the evaluation. Start with a clear statement on the solution\'s quality. (e.g., \'The code is correct but can be optimized.\')>"\n'
+                '  "strengths": [<array of up to 3 specific, short strings on what was done well>],\n'
+                '  "improvements": [<array of up to 3 specific, actionable improvements>],\n'
+                '  "missing_points": [<array of key aspects missed>],\n'
+                '  "short_feedback": "<A concise, one-paragraph summary of the evaluation. Integrate insights from the body language observations if they impacted your perception of their confidence.>"\n'
                 "}"
             )
         else:
@@ -195,24 +199,24 @@ def evaluate_technical_answer(
                 f"## Question:\n{question_text}\n\n"
                 f"## Ideal Answer (Ground Truth):\n{ideal_answer}\n\n"
                 f"## Candidate's Answer:\n{user_answer}\n\n"
+                f"{bl_hint}\n"
                 "## Evaluation Criteria:\n"
                 "1.  **Accuracy & Completeness (70% weight):** Does the candidate cover all key points from the ideal answer? Are there any technical inaccuracies?\n"
-                "2.  **Clarity & Conciseness (20% weight):** Is the explanation clear, well-structured, and to the point?\n"
-                "3.  **Depth of Knowledge (10% weight):** Does the candidate show a deeper understanding beyond a superficial explanation? Do they use correct terminology?\n\n"
+                "2.  **Clarity & Confidence (30% weight):** Is the explanation clear and well-structured? Does their body language reflect professional confidence?\n\n"
                 "## Scoring Rubric:\n"
                 "- **90-100:** Excellent. Comprehensive, accurate, and clearly articulated. Shows deep understanding.\n"
                 "- **75-89:** Good. Covers most key points but may have minor omissions or lack some depth.\n"
                 "- **50-74:** Average. Understands the concept partially but has significant gaps or inaccuracies.\n"
                 "- **<50:** Poor. Major misunderstandings or a very superficial answer.\n\n"
                 "## Output Format:\n"
-                "You MUST return a single, valid JSON object and nothing else. Do not add any text before or after the JSON.\n"
+                "You MUST return a single, valid JSON object and nothing else.\n"
                 "The JSON object must have the following keys:\n"
                 "{\n"
                 '  "technical_score": <integer from 0 to 100>,\n'
                 '  "strengths": [<array of up to 3 specific, short strings detailing what the candidate did well>],\n'
                 '  "improvements": [<array of up to 3 specific, short, actionable strings for improvement>],\n'
                 '  "missing_points": [<array of key concepts or terms from the ideal answer that the candidate missed>],\n'
-                '  "short_feedback": "<A single, concise paragraph summarizing the evaluation. Start with a direct statement about the quality of the answer. (e.g., \'The answer is strong but lacks detail on X.\')>"\n'
+                '  "short_feedback": "<A single, concise paragraph summarizing the evaluation. Ground your feedback in both technical content and non-verbal confidence.>"\n'
                 "}"
             )
 

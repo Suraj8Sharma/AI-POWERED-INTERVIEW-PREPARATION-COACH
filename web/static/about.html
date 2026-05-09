@@ -6,7 +6,7 @@
     <meta name="description" content="About PrepLoom — Our mission is to make rigorous, calm interview practice accessible before the high-stakes moment." />
     <title>About — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <style>
         /* ── About-specific styles matching revision ── */
@@ -62,7 +62,6 @@
             animation: blink 2s ease-in-out infinite;
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        @keyframes fadeDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
         .about-hero h1 {
             font-family: 'Fraunces', serif;
             font-size: clamp(2rem, 5vw, 3rem);
@@ -73,15 +72,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 0.75rem;
-            animation: fadeUp 0.7s ease 0.1s both;
         }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         .about-hero p {
             color: var(--pl-muted);
             font-size: 1.02rem;
             max-width: 50ch;
             margin: 0 auto 2rem;
-            animation: fadeUp 0.7s ease 0.2s both;
         }
 
         /* Team flipcards like revision flashcards */
@@ -261,54 +257,13 @@
             font-weight: 600;
         }
 
-        /* Animated entrance */
-        [data-animate] {
-            opacity: 0;
-            transform: translateY(18px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        [data-animate].visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .about-cta {
-            text-align: center;
-            padding: 3rem 0 1rem;
-        }
-        .about-cta h2 {
-            font-family: 'Fraunces', serif;
-            font-size: 1.6rem;
-            font-weight: 650;
-            margin-bottom: 0.5rem;
-        }
-        .about-cta p { 
-            color: var(--pl-muted); 
-            margin-bottom: 1.5rem; 
-            font-size: 0.9rem; 
-        }
-
-        @media (max-width: 600px) {
-            .team-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-        }
-
-        /* ── Light theme text visibility & modal fixes ── */
-        html.theme-light .about-hero h1 { background: none !important; -webkit-text-fill-color: initial !important; color: var(--pl-text, #1f2937) !important; }
-        html.theme-light .about-section-title, html.theme-light .about-card h3, html.theme-light .team-flipcard__name, html.theme-light .about-cta h2, html.theme-light .about-list strong { color: var(--pl-text, #1f2937) !important; }
-        html.theme-light .about-hero p, html.theme-light .about-section-sub, html.theme-light .about-card p, html.theme-light .team-flipcard__role, html.theme-light .team-flipcard__bio, html.theme-light .about-cta p, html.theme-light .about-list li { color: var(--pl-muted, #4b5563) !important; }
-        html.theme-light .about-card, html.theme-light .team-flipcard__front { background: var(--pl-surface, rgba(255,255,255,0.9)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
-        html.theme-light .team-flipcard__hint { color: rgba(31, 41, 55, 0.4) !important; }
-        html.theme-light .site-nav__link { color: var(--pl-text, #1f2937) !important; }
-        html.theme-light .modal { background: var(--pl-surface, rgba(255,255,255,0.95)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
-        html.theme-light .modal__header h2, html.theme-light .modal__field label { color: var(--pl-text, #1f2937) !important; }
-        html.theme-light .modal__note, html.theme-light .modal__footer-text { color: var(--pl-muted, #4b5563) !important; }
-        
         /* ── Dropdown Menu ── */
         .user-dropdown-menu.show { display: flex !important; }
         .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
     </style>
+    <link rel="stylesheet" href="/static/css/future-pages.css" />
 </head>
-<body class="site">
+<body class="site future-page future-page--about">
 <div class="site-wrap">
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
@@ -324,12 +279,12 @@
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
             <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
-                <span data-theme-icon>🌙</span>
+                <span data-theme-icon aria-hidden="true"></span>
             </button>
             <a href="/settings" class="btn-nav-outline" title="Settings" style="padding: 0.45rem 0.7rem; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
             <div style="position: relative; display: inline-block;">
-                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
-                <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
                     <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         Settings
@@ -348,24 +303,46 @@
     </header>
 
     <main class="site-main">
-        <div class="about-hero">
+        <div class="about-hero hero-parallax-container">
+            <canvas id="heroParticles" class="hero-particles" aria-hidden="true"></canvas>
+            <div class="hero-mesh" aria-hidden="true"></div>
             <div class="about-hero__bg" aria-hidden="true"></div>
             <div class="about-hero__noise" aria-hidden="true"></div>
+
+            <!-- Telemetry-style status elements -->
+            <div class="telemetry-card telemetry-card--north" data-parallax="15" style="top: 15%; left: 10%;">
+                <span class="telemetry-card__label">Project Signal</span>
+                <div class="telemetry-card__bars">
+                    <div class="telemetry-card__bar">
+                        <div class="telemetry-card__bar-label"><span>Completeness</span><span>94%</span></div>
+                        <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 94%"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="telemetry-card telemetry-card--south" data-parallax="25" style="bottom: 20%; right: 12%;">
+                <span class="telemetry-card__label">System Health</span>
+                <div class="telemetry-card__grid">
+                    <div class="telemetry-card__stat"><strong>OK</strong><span>API</span></div>
+                    <div class="telemetry-card__stat"><strong>OK</strong><span>AI</span></div>
+                </div>
+            </div>
+
             <div class="about-hero__inner">
-            <div class="about-hero__eyebrow">
+            <div class="about-hero__eyebrow" data-animate="down">
                 <span class="dot"></span>
                 Meet the builders
             </div>
-            <h1>About PrepLoom</h1>
-            <p>We believe preparation should feel focused and repeatable—not frantic. PrepLoom is a capstone-grade workspace for mock interviews: technical depth, how you sound, and how you show up.</p>
+            <h1 data-animate="up" data-delay="100">About PrepLoom</h1>
+            <p data-animate="up" data-delay="200">We believe preparation should feel focused and repeatable—not frantic. PrepLoom is a capstone-grade workspace for mock interviews: technical depth, how you sound, and how you show up.</p>
             </div>
         </div>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">Our Building Team</h2>
             <p class="about-section-sub">The developers, designers, and minds behind PrepLoom. Proudly built as a capstone project.</p>
 
-            <div class="team-grid" data-animate>
+            <div class="team-grid" data-animate="up" data-delay="100">
                 
                 <div class="team-flipcard mentor" tabindex="0">
                     <div class="team-flipcard__inner">
@@ -460,7 +437,7 @@
             </div>
         </section>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">Our Mission</h2>
             <p class="about-section-sub">Give candidates a single place to rehearse under pressure.</p>
             <div class="about-card">
@@ -477,7 +454,7 @@
             </div>
         </section>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">What's Next</h2>
             <div class="about-card">
                 <div class="about-card__head">
@@ -493,7 +470,7 @@
             </div>
         </section>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">Get In Touch</h2>
             <div class="about-card">
                 <div class="about-card__head">
@@ -509,7 +486,7 @@
             </div>
         </section>
 
-        <div class="about-cta" data-animate>
+        <div class="about-cta" data-animate="up">
             <h2>Ready to practice?</h2>
             <p>Open the practice room and run a timed mock interview.</p>
             <a class="btn-hero-primary" href="/app">Start Practice →</a>
@@ -588,22 +565,6 @@
 <script>
     // Theme toggle
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
-    
-(function() {
-    // Intersection observer for data-animate (matching revision)
-    var els = document.querySelectorAll('[data-animate]');
-    var io = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                var el = entry.target;
-                var delay = el.getAttribute('data-delay') || 0;
-                setTimeout(function() { el.classList.add('visible'); }, delay);
-                io.unobserve(el);
-            }
-        });
-    }, { threshold: 0.08 });
-    els.forEach(function(el) { io.observe(el); });
-})();
 </script>
 </body>
 </html>

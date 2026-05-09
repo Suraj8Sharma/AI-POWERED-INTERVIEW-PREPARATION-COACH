@@ -3,506 +3,28 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="PrepLoom — Weave confidence into every interview. AI-powered mock interviews with feedback on technical depth, communication, and presence." />
-    <title>PrepLoom — AI interview preparation</title>
+    <meta name="description" content="PrepLoom is an AI interview coach that blends technical scoring, communication analysis, and presence feedback into one modern mock interview workspace." />
+    <title>PrepLoom - AI interview preparation</title>
     <link rel="icon" href="/static/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
-    <style>
-        /* ── Hero overhaul ────────────────────────────────────────── */
-        .home-hero {
-            position: relative;
-            text-align: center;
-            padding: 5rem 1rem 4.5rem;
-            overflow: hidden;
-        }
-
-        .home-hero__bg {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            background:
-                radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108,99,255,0.28), transparent),
-                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(45,212,191,0.1), transparent),
-                radial-gradient(ellipse 40% 30% at 10% 60%, rgba(108,99,255,0.08), transparent);
-        }
-
-        .home-hero__noise {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.025;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-            background-size: 200px 200px;
-        }
-
-        .home-hero__inner {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-eyebrow-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.45rem 1.1rem;
-            border-radius: 999px;
-            border: 1px solid rgba(45,212,191,0.3);
-            background: rgba(45,212,191,0.07);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #2dd4bf;
-            margin-bottom: 2rem;
-            animation: fadeSlideDown 0.6s ease both;
-        }
-
-        .hero-eyebrow-pill::before {
-            content: '';
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #2dd4bf;
-            box-shadow: 0 0 8px #2dd4bf;
-            animation: pillDot 2s ease-in-out infinite;
-        }
-
-        @keyframes pillDot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .hero-title-line1 {
-            display: block;
-            font-family: 'Fraunces', Georgia, serif;
-            font-size: clamp(2.8rem, 7vw, 5rem);
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1.05;
-            color: #fff;
-            animation: fadeSlideDown 0.65s 0.1s ease both;
-        }
-
-        .hero-title-line2 {
-            display: block;
-            font-family: 'Fraunces', Georgia, serif;
-            font-size: clamp(2.8rem, 7vw, 5rem);
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1.05;
-            background: linear-gradient(135deg, #6c63ff 0%, #a78bfa 50%, #2dd4bf 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1.5rem;
-            animation: fadeSlideDown 0.65s 0.18s ease both;
-        }
-
-        .hero-lead {
-            font-size: 1.1rem;
-            color: rgba(244,244,247,0.62);
-            max-width: 50ch;
-            margin: 0 auto 2.5rem;
-            line-height: 1.65;
-            animation: fadeSlideDown 0.65s 0.26s ease both;
-        }
-
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            justify-content: center;
-            animation: fadeSlideDown 0.65s 0.34s ease both;
-        }
-
-        .btn-hero-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.9rem 1.8rem;
-            border-radius: 999px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            font-family: inherit;
-            border: none;
-            background: linear-gradient(135deg, #6c63ff 0%, #8b84ff 100%);
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(108,99,255,0.4);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .btn-hero-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 44px rgba(108,99,255,0.5);
-        }
-
-        .btn-hero-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.9rem 1.6rem;
-            border-radius: 999px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            font-family: inherit;
-            border: 1px solid rgba(255,255,255,0.14);
-            background: rgba(255,255,255,0.04);
-            color: #f4f4f7;
-            text-decoration: none;
-            transition: border-color 0.18s, background 0.18s, transform 0.18s;
-        }
-
-        .btn-hero-secondary:hover {
-            border-color: rgba(255,255,255,0.25);
-            background: rgba(255,255,255,0.08);
-            transform: translateY(-1px);
-        }
-
-        /* Trust chips */
-        .hero-trust {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-            justify-content: center;
-            margin-top: 2.5rem;
-            animation: fadeSlideDown 0.65s 0.42s ease both;
-        }
-
-        .trust-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.5rem 1rem;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            font-size: 0.8rem;
-            color: rgba(244,244,247,0.55);
-            backdrop-filter: blur(8px);
-            transition: border-color 0.2s, color 0.2s, transform 0.2s;
-        }
-
-        .trust-chip:hover {
-            border-color: rgba(108,99,255,0.3);
-            color: rgba(244,244,247,0.85);
-            transform: translateY(-1px);
-        }
-
-        .trust-chip__icon {
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-        }
-
-        /* ── Animated divider ─────────────────────────────────── */
-        .section-divider {
-            position: relative;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(108,99,255,0.4), rgba(45,212,191,0.3), transparent);
-            margin: 3rem 0;
-            overflow: visible;
-        }
-
-        /* ── Why section ──────────────────────────────────────── */
-        .why-section {
-            padding: 2rem 0 3rem;
-        }
-
-        .section-eyebrow {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #2dd4bf;
-            margin-bottom: 0.75rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .section-eyebrow.visible { opacity: 1; transform: translateY(0); }
-
-        .section-title-large {
-            font-family: 'Fraunces', serif;
-            font-size: clamp(1.8rem, 4vw, 2.6rem);
-            font-weight: 650;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-            color: #fff;
-            margin-bottom: 0.75rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s 0.08s ease, transform 0.5s 0.08s ease;
-        }
-
-        .section-title-large.visible { opacity: 1; transform: translateY(0); }
-
-        .section-subtitle {
-            color: rgba(244,244,247,0.55);
-            font-size: 1rem;
-            max-width: 50ch;
-            margin-bottom: 2.5rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s 0.14s ease, transform 0.5s 0.14s ease;
-        }
-
-        .section-subtitle.visible { opacity: 1; transform: translateY(0); }
-
-        /* Feature cards */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.25rem;
-        }
-
-        @media (max-width: 860px) {
-            .feature-grid { grid-template-columns: 1fr; }
-        }
-
-        .feat-card {
-            position: relative;
-            padding: 1.75rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: rgba(14,16,24,0.7);
-            backdrop-filter: blur(12px);
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.55s ease, transform 0.55s ease, border-color 0.25s, box-shadow 0.25s;
-        }
-
-        .feat-card.visible { opacity: 1; transform: translateY(0); }
-        .feat-card:nth-child(2) { transition-delay: 0.08s; }
-        .feat-card:nth-child(3) { transition-delay: 0.16s; }
-
-        .feat-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            background: linear-gradient(135deg, rgba(108,99,255,0.06), transparent 60%);
-            opacity: 0;
-            transition: opacity 0.25s;
-        }
-
-        .feat-card:hover {
-            border-color: rgba(108,99,255,0.25);
-            box-shadow: 0 8px 40px rgba(108,99,255,0.12);
-            transform: translateY(-3px);
-        }
-
-        .feat-card:hover::before { opacity: 1; }
-
-        .feat-card__glow {
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            opacity: 0.07;
-            filter: blur(40px);
-            pointer-events: none;
-        }
-
-        .feat-card--tech .feat-card__glow  { background: #6c63ff; }
-        .feat-card--comm .feat-card__glow  { background: #2dd4bf; }
-        .feat-card--pres .feat-card__glow  { background: #a78bfa; }
-
-        .feat-card__icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.25rem;
-            font-size: 1.4rem;
-            flex-shrink: 0;
-        }
-
-        .feat-card--tech .feat-card__icon { background: rgba(108,99,255,0.15); }
-        .feat-card--comm .feat-card__icon { background: rgba(45,212,191,0.12); }
-        .feat-card--pres .feat-card__icon { background: rgba(167,139,250,0.12); }
-
-        .feat-card__title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: #f4f4f7;
-            margin-bottom: 0.6rem;
-        }
-
-        .feat-card__body {
-            font-size: 0.88rem;
-            color: rgba(244,244,247,0.55);
-            line-height: 1.6;
-        }
-
-        .feat-card__tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            margin-top: 1.25rem;
-            padding: 0.3rem 0.7rem;
-            border-radius: 999px;
-            font-size: 0.72rem;
-            font-weight: 600;
-        }
-
-        .feat-card--tech .feat-card__tag { background: rgba(108,99,255,0.12); color: #a78bfa; }
-        .feat-card--comm .feat-card__tag { background: rgba(45,212,191,0.1); color: #2dd4bf; }
-        .feat-card--pres .feat-card__tag { background: rgba(167,139,250,0.1); color: #c4b5fd; }
-
-        /* ── Steps / how it works ────────────────────────────── */
-        .steps-section {
-            padding: 3rem 0;
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-top: 2.5rem;
-        }
-
-        @media (max-width: 860px) {
-            .steps-grid { grid-template-columns: 1fr; }
-        }
-
-        .step-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .step-item.visible { opacity: 1; transform: translateY(0); }
-        .step-item:nth-child(2) { transition-delay: 0.1s; }
-        .step-item:nth-child(3) { transition-delay: 0.2s; }
-
-        .step-num-badge {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(108,99,255,0.08));
-            border: 1px solid rgba(108,99,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: #a78bfa;
-        }
-
-        .step-item h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: #f4f4f7;
-        }
-
-        .step-item p {
-            font-size: 0.88rem;
-            color: rgba(244,244,247,0.55);
-            line-height: 1.6;
-        }
-
-        /* ── CTA band ────────────────────────────────────────── */
-        .cta-band {
-            position: relative;
-            margin: 2rem 0 1rem;
-            padding: 3.5rem 2rem;
-            border-radius: 24px;
-            border: 1px solid rgba(108,99,255,0.2);
-            background: linear-gradient(135deg, rgba(108,99,255,0.1) 0%, rgba(14,16,24,0.8) 60%, rgba(45,212,191,0.06) 100%);
-            text-align: center;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .cta-band.visible { opacity: 1; transform: translateY(0); }
-
-        .cta-band::before {
-            content: '';
-            position: absolute;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            height: 200px;
-            background: radial-gradient(ellipse, rgba(108,99,255,0.2), transparent 70%);
-            pointer-events: none;
-        }
-
-        .cta-band h2 {
-            font-family: 'Fraunces', serif;
-            font-size: clamp(1.6rem, 4vw, 2.4rem);
-            font-weight: 650;
-            letter-spacing: -0.03em;
-            color: #fff;
-            margin-bottom: 0.75rem;
-            position: relative;
-        }
-
-        .cta-band p {
-            color: rgba(244,244,247,0.55);
-            font-size: 0.95rem;
-            margin-bottom: 1.75rem;
-            max-width: 44ch;
-            margin-left: auto;
-            margin-right: auto;
-            position: relative;
-        }
-
-        /* ── Keyframes ───────────────────────────────────────── */
-        @keyframes fadeSlideDown {
-            from { opacity: 0; transform: translateY(-12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Mobile hero */
-        @media (max-width: 640px) {
-            .home-hero { padding: 3.5rem 0.5rem 3rem; }
-        }
-
-        /* ── Light theme text visibility & modal fixes ── */
-        html.theme-light .hero-title-line1, html.theme-light .section-title-large, html.theme-light .feat-card__title, html.theme-light .step-item h3, html.theme-light .cta-band h2 { color: var(--pl-text, #1f2937) !important; background: none !important; -webkit-text-fill-color: initial !important; }
-        html.theme-light .hero-lead, html.theme-light .section-subtitle, html.theme-light .feat-card__body, html.theme-light .step-item p, html.theme-light .cta-band p { color: var(--pl-muted, #4b5563) !important; }
-        html.theme-light .feat-card, html.theme-light .cta-band { background: var(--pl-surface, rgba(255,255,255,0.9)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
-        html.theme-light .btn-hero-secondary { color: var(--pl-text, #1f2937) !important; background: var(--pl-bg-elevated, #f3f4f6) !important; border-color: var(--pl-border-strong, #d1d5db) !important; }
-        html.theme-light .trust-chip { color: var(--pl-text, #1f2937) !important; background: var(--pl-surface, rgba(255,255,255,0.8)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
-        html.theme-light .site-nav__link { color: var(--pl-text, #1f2937) !important; }
-        html.theme-light .modal { background: var(--pl-surface, rgba(255,255,255,0.95)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
-        html.theme-light .modal__header h2, html.theme-light .modal__field label { color: var(--pl-text, #1f2937) !important; }
-        html.theme-light .modal__note, html.theme-light .modal__footer-text { color: var(--pl-muted, #4b5563) !important; }
-        
-        /* ── Dropdown Menu ── */
-        .user-dropdown-menu.show { display: flex !important; }
-        .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
-    </style>
+    <link rel="stylesheet" href="/static/css/home.css" />
 </head>
-<body class="site">
-<div class="site-wrap">
+<body class="site home-page">
+<!-- Premium Intro Loader -->
+<div id="introLoader" class="intro-loader" aria-hidden="true">
+    <div class="intro-loader__logo">
+        <div class="intro-loader__mark">PL</div>
+        <div class="intro-loader__orb"></div>
+    </div>
+    <div class="intro-loader__text">PrepLoom</div>
+    <div class="intro-loader__status">Booting simulation core...</div>
+</div>
 
+<div class="site-wrap">
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
-            <img src="/static/logo.png" alt="PrepLoom Logo" style="height: 32px; width: auto; border-radius: 6px;" />
+            <img src="/static/logo.png" alt="PrepLoom logo" />
             PrepLoom
         </a>
         <nav class="site-nav__links" aria-label="Main">
@@ -513,19 +35,31 @@
             <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
-            <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
-                <span data-theme-icon>🌙</span>
+            <button type="button" id="themeToggle" class="btn-nav-outline home-icon-button" title="Toggle theme">
+                <span data-theme-icon aria-hidden="true"></span>
             </button>
-            <a href="/settings" class="btn-nav-outline" title="Settings" style="padding: 0.45rem 0.7rem; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
-            <div style="position: relative; display: inline-block;">
-                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
-                <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
-                    <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <a href="/settings" class="btn-nav-outline home-icon-button" title="Settings" aria-label="Settings">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.36.49.83.83 1.51 1H21a2 2 0 0 1 0 4h-.09c-.67.17-1.15.52-1.51 1z"></path>
+                </svg>
+            </a>
+            <div class="nav-user-menu">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-expanded="false" aria-haspopup="true" title="Account menu"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
+                    <a href="/settings" class="user-dropdown-menu__link">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.36.49.83.83 1.51 1H21a2 2 0 0 1 0 4h-.09c-.67.17-1.15.52-1.51 1z"></path>
+                        </svg>
                         Settings
                     </a>
-                    <button type="button" id="navLogout" class="hidden" style="padding: 0.75rem 1rem; color: #ef4444; background: transparent; border: none; text-align: left; font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='transparent'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <button type="button" id="navLogout" class="user-dropdown-menu__button hidden">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
                         Log out
                     </button>
                 </div>
@@ -537,134 +71,347 @@
         </div>
     </header>
 
-    <main class="site-main">
+    <main class="site-main home-main">
+        <section class="ai-hero" aria-labelledby="hero-title">
+            <canvas id="heroParticles" class="ai-hero__particles" aria-hidden="true"></canvas>
+            <div class="ai-hero__mesh" aria-hidden="true"></div>
 
-        <!-- ═══ HERO ═══ -->
-        <section class="home-hero" aria-labelledby="hero-title">
-            <div class="home-hero__bg" aria-hidden="true"></div>
-            <div class="home-hero__noise" aria-hidden="true"></div>
-            <div class="home-hero__inner">
-                <span class="hero-eyebrow-pill">AI Interview Coach</span>
-                <h1 id="hero-title">
-                    <span class="hero-title-line1">Prepare smarter.</span>
-                    <span class="hero-title-line2">Ace the room.</span>
-                </h1>
-                <p class="hero-lead">Everything you need before your next interview — technical depth, communication signals, and real-time presence feedback, all in one place.</p>
-                <div class="hero-actions">
-                    <a class="btn-hero-primary" href="/app">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        Start practicing
-                    </a>
-                    <a class="btn-hero-secondary" href="/features">
-                        Explore features
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                    </a>
+            <div class="ai-hero__grid">
+                <div class="ai-hero__copy">
+                    <p class="hero-kicker" data-animate="down">Adaptive interview simulation</p>
+                    <h1 id="hero-title" class="hero-title" data-animate="up" data-delay="100">
+                        <span>Train with the AI coach</span>
+                        <span class="hero-title__glow">that sees the full interview.</span>
+                    </h1>
+                    <p class="hero-lead" data-animate="up" data-delay="200">
+                        PrepLoom combines role-aware questioning, live voice analysis, and on-camera presence feedback so every practice run feels more like the real room and less like a static quiz.
+                    </p>
+                    <div class="hero-actions" data-animate="up" data-delay="300">
+                        <a class="btn-hero-primary" href="/app">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Start the simulation
+                        </a>
+                        <a class="btn-hero-secondary" href="/features">
+                            Explore the stack
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="hero-chip-row" aria-label="Signal highlights" data-animate="up" data-delay="400">
+                        <span class="hero-chip"><span class="hero-chip__dot"></span> Voice cadence scoring</span>
+                        <span class="hero-chip"><span class="hero-chip__dot"></span> Technical reasoning checks</span>
+                        <span class="hero-chip"><span class="hero-chip__dot"></span> Camera-based presence cues</span>
+                    </div>
+
+                    <div class="hero-metrics" aria-label="Platform metrics" data-animate="up" data-delay="500">
+                        <div class="hero-metric">
+                            <span class="hero-metric__value">3</span>
+                            <span class="hero-metric__label">analysis engines in every session</span>
+                        </div>
+                        <div class="hero-metric">
+                            <span class="hero-metric__value">10Q</span>
+                            <span class="hero-metric__label">mock flow with technical and behavioral prompts</span>
+                        </div>
+                        <div class="hero-metric">
+                            <span class="hero-metric__value">Live</span>
+                            <span class="hero-metric__label">voice, text, and posture feedback loop</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="hero-trust" aria-label="Feature highlights">
-                    <span class="trust-chip">
-                        <span class="trust-chip__icon" style="background:rgba(108,99,255,0.15)">📚</span>
-                        Technical scoring
-                    </span>
-                    <span class="trust-chip">
-                        <span class="trust-chip__icon" style="background:rgba(45,212,191,0.12)">🗣️</span>
-                        Communication analysis
-                    </span>
-                    <span class="trust-chip">
-                        <span class="trust-chip__icon" style="background:rgba(167,139,250,0.12)">📹</span>
-                        Presence &amp; posture
-                    </span>
-                    <span class="trust-chip">
-                        <span class="trust-chip__icon" style="background:rgba(34,197,94,0.1)">⚡</span>
-                        Instant feedback
-                    </span>
+                <div class="ai-hero__visual">
+                    <div class="visual-stage" id="visualStage" aria-hidden="true">
+                        <div class="stage-status" data-parallax="8">
+                            <span class="stage-status__dot"></span>
+                            Interview engine online
+                        </div>
+                        <div class="visual-stage__beam" data-parallax="12"></div>
+                        <div class="visual-stage__rings"></div>
+                        <div class="visual-stage__scan"></div>
+                        <div class="visual-stage__grid"></div>
+
+                        <svg class="robot-figure" viewBox="0 0 520 620" role="presentation">
+                            <defs>
+                                <linearGradient id="robotGradient" x1="80" y1="80" x2="420" y2="520" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#6c63ff"></stop>
+                                    <stop offset="55%" stop-color="#b3b7ff"></stop>
+                                    <stop offset="100%" stop-color="#63f0da"></stop>
+                                </linearGradient>
+                                <radialGradient id="robotCore" cx="50%" cy="50%" r="60%">
+                                    <stop offset="0%" stop-color="#ecfeff"></stop>
+                                    <stop offset="38%" stop-color="#63f0da"></stop>
+                                    <stop offset="100%" stop-color="#6c63ff"></stop>
+                                </radialGradient>
+                                <filter id="robotGlow" x="-40%" y="-40%" width="180%" height="180%">
+                                    <feGaussianBlur stdDeviation="6" result="blur"></feGaussianBlur>
+                                    <feMerge>
+                                        <feMergeNode in="blur"></feMergeNode>
+                                        <feMergeNode in="SourceGraphic"></feMergeNode>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+
+                            <circle class="robot-figure__glow" cx="260" cy="220" r="160"></circle>
+                            <circle class="robot-figure__orbit" cx="260" cy="210" r="170"></circle>
+                            <circle class="robot-figure__orbit" cx="260" cy="210" r="132"></circle>
+                            <path class="robot-figure__trace" d="M82 264c48-38 108-57 178-57 70 0 130 19 178 57"></path>
+                            <path class="robot-figure__trace" d="M130 465c44 27 88 40 130 40 42 0 86-13 130-40"></path>
+
+                            <path class="robot-figure__line" d="M260 52v34"></path>
+                            <circle class="robot-figure__core" cx="260" cy="40" r="14"></circle>
+
+                            <rect class="robot-figure__panel" x="160" y="92" width="200" height="164" rx="40"></rect>
+                            <rect class="robot-figure__visor" x="198" y="136" width="124" height="46" rx="22"></rect>
+                            <circle class="robot-figure__eye" cx="224" cy="159" r="9"></circle>
+                            <circle class="robot-figure__eye" cx="260" cy="159" r="9"></circle>
+                            <circle class="robot-figure__eye" cx="296" cy="159" r="9"></circle>
+                            <path class="robot-figure__line" d="M208 210c28 20 76 20 104 0"></path>
+
+                            <rect class="robot-figure__panel robot-figure__panel--soft" x="198" y="284" width="124" height="164" rx="32"></rect>
+                            <circle class="robot-figure__core" cx="260" cy="336" r="30"></circle>
+                            <path class="robot-figure__line" d="M260 256v42"></path>
+                            <path class="robot-figure__line" d="M198 324H120v88"></path>
+                            <path class="robot-figure__line" d="M322 324h78v88"></path>
+                            <path class="robot-figure__line" d="M228 448l-34 88"></path>
+                            <path class="robot-figure__line" d="M292 448l34 88"></path>
+                            <path class="robot-figure__line" d="M120 412l-32 34"></path>
+                            <path class="robot-figure__line" d="M400 412l32 34"></path>
+
+                            <circle class="robot-figure__dot" cx="120" cy="412" r="8"></circle>
+                            <circle class="robot-figure__dot" cx="400" cy="412" r="8"></circle>
+                            <circle class="robot-figure__dot" cx="194" cy="536" r="8"></circle>
+                            <circle class="robot-figure__dot" cx="326" cy="536" r="8"></circle>
+                        </svg>
+
+                        <div class="telemetry-card telemetry-card--north" data-parallax="26">
+                            <span class="telemetry-card__label">Live signal map</span>
+                            <strong>Speech + posture + technical</strong>
+                            <div class="telemetry-card__bars">
+                                <div class="telemetry-card__bar">
+                                    <div class="telemetry-card__bar-label">
+                                        <span>Reasoning depth</span>
+                                        <span>92%</span>
+                                    </div>
+                                    <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 92%"></span></div>
+                                </div>
+                                <div class="telemetry-card__bar">
+                                    <div class="telemetry-card__bar-label">
+                                        <span>Answer structure</span>
+                                        <span>84%</span>
+                                    </div>
+                                    <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 84%"></span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="telemetry-card telemetry-card--east" data-parallax="14">
+                            <span class="telemetry-card__label">Role model</span>
+                            <strong>AI/ML interview loop</strong>
+                            <p class="telemetry-card__meta">Behavioral prompts are blended with role-specific technical questions so practice stays realistic instead of generic.</p>
+                        </div>
+
+                        <div class="telemetry-card telemetry-card--south" data-parallax="18">
+                            <span class="telemetry-card__label">Session status</span>
+                            <div class="telemetry-card__grid">
+                                <div class="telemetry-card__stat">
+                                    <strong>10</strong>
+                                    <span>questions</span>
+                                </div>
+                                <div class="telemetry-card__stat">
+                                    <strong>3</strong>
+                                    <span>signal layers</span>
+                                </div>
+                                <div class="telemetry-card__stat">
+                                    <strong>1</strong>
+                                    <span>final report</span>
+                                </div>
+                                <div class="telemetry-card__stat">
+                                    <strong>Live</strong>
+                                    <span>feedback</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <div class="section-divider" aria-hidden="true"></div>
+        <section class="section-shell">
+            <p class="section-kicker" data-animate="up">Signal stack</p>
+            <h2 class="section-title" data-animate="up" data-delay="100">Three systems. One interview coach.</h2>
+            <p class="section-copy" data-animate="up" data-delay="200">
+                PrepLoom is most useful when it acts like a sharp interviewer, a communication coach, and a presence monitor at the same time. The experience below is designed around that full loop.
+            </p>
 
-        <!-- ═══ WHY PREPLOOM ═══ -->
-        <section class="why-section">
-            <p class="section-eyebrow js-reveal">Why PrepLoom</p>
-            <h2 class="section-title-large js-reveal">Built around how interviews are actually scored.</h2>
-            <p class="section-subtitle js-reveal">One focused workspace for the three dimensions that hiring decisions actually hinge on — not a generic question bank.</p>
+            <div class="system-grid">
+                <article class="system-card" data-animate="up" data-delay="300">
+                    <div class="system-card__top">
+                        <span class="system-card__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"></path>
+                                <path d="M10 22h4"></path>
+                                <path d="M12 2a7 7 0 0 0-4 12.7c.7.48 1 1.02 1.16 1.6h5.68c.16-.58.46-1.12 1.16-1.6A7 7 0 0 0 12 2Z"></path>
+                            </svg>
+                        </span>
+                        <span class="system-card__index">01</span>
+                    </div>
+                    <h3>Technical depth scoring</h3>
+                    <p>Answers are evaluated for reasoning, accuracy, and completeness so candidates can improve how they think through a problem, not just memorize keywords.</p>
+                    <span class="system-card__tag">LLM evaluation flow</span>
+                </article>
 
-            <div class="feature-grid">
-                <article class="feat-card feat-card--tech js-reveal-card">
-                    <div class="feat-card__glow" aria-hidden="true"></div>
-                    <div class="feat-card__icon" aria-hidden="true">📚</div>
-                    <h3 class="feat-card__title">Technical depth</h3>
-                    <p class="feat-card__body">Role-aware questions mixed from behavioural and technical prompts. Get scored on reasoning, accuracy, and completeness — not just right/wrong.</p>
-                    <span class="feat-card__tag">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        LLM evaluation
-                    </span>
+                <article class="system-card" data-animate="up" data-delay="400">
+                    <div class="system-card__top">
+                        <span class="system-card__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 7h16"></path>
+                                <path d="M4 12h10"></path>
+                                <path d="M4 17h6"></path>
+                                <path d="m18 14 3 3-3 3"></path>
+                            </svg>
+                        </span>
+                        <span class="system-card__index">02</span>
+                    </div>
+                    <h3>Communication analysis</h3>
+                    <p>Speaking rate, clarity, filler usage, and answer structure are surfaced in a way that helps candidates sound sharper and calmer under pressure.</p>
+                    <span class="system-card__tag">NLP and speech rhythm</span>
                 </article>
-                <article class="feat-card feat-card--comm js-reveal-card">
-                    <div class="feat-card__glow" aria-hidden="true"></div>
-                    <div class="feat-card__icon" aria-hidden="true">🗣️</div>
-                    <h3 class="feat-card__title">Communication</h3>
-                    <p class="feat-card__body">Clarity, pacing, and structure matter as much as correctness. PrepLoom surfaces filler words, speaking rate, and answer structure in real time.</p>
-                    <span class="feat-card__tag">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        NLP analysis
-                    </span>
-                </article>
-                <article class="feat-card feat-card--pres js-reveal-card">
-                    <div class="feat-card__glow" aria-hidden="true"></div>
-                    <div class="feat-card__icon" aria-hidden="true">📹</div>
-                    <h3 class="feat-card__title">Presence</h3>
-                    <p class="feat-card__body">Enable camera for live cues on openness, engagement, and posture. Notice habits before a hiring manager does — in a low-stakes practice room.</p>
-                    <span class="feat-card__tag">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        MediaPipe signals
-                    </span>
+
+                <article class="system-card" data-animate="up" data-delay="500">
+                    <div class="system-card__top">
+                        <span class="system-card__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 7l-7 5 7 5V7Z"></path>
+                                <rect x="1" y="5" width="15" height="14" rx="2"></rect>
+                            </svg>
+                        </span>
+                        <span class="system-card__index">03</span>
+                    </div>
+                    <h3>Presence and posture cues</h3>
+                    <p>The camera loop highlights posture and on-screen presence signals so confidence is trained as a visible behavior, not just an abstract feeling.</p>
+                    <span class="system-card__tag">Camera signal tracking</span>
                 </article>
             </div>
         </section>
 
-        <div class="section-divider" aria-hidden="true"></div>
+        <section class="section-shell">
+            <p class="section-kicker" data-animate="up">Control room</p>
+            <h2 class="section-title" data-animate="up" data-delay="100">Built to feel like a live AI system, not a static landing page.</h2>
+            <p class="section-copy" data-animate="up" data-delay="200">
+                The new experience leans into the product story: an intelligent practice room that observes multiple signals, merges them into one coaching loop, and turns that into specific next-step feedback.
+            </p>
 
-        <!-- ═══ HOW IT WORKS ═══ -->
-        <section class="steps-section">
-            <p class="section-eyebrow js-reveal">How it works</p>
-            <h2 class="section-title-large js-reveal">Three steps to a full mock session.</h2>
+            <div class="control-room">
+                <div class="control-room__copy">
+                    <article class="control-node" data-animate="up" data-delay="300">
+                        <strong>Role-aware question orchestration</strong>
+                        <p>Each session starts with the role you are targeting, then mixes behavioral and technical prompts into a flow that resembles what hiring teams actually use.</p>
+                    </article>
+                    <article class="control-node" data-animate="up" data-delay="400">
+                        <strong>Multi-modal feedback capture</strong>
+                        <p>Voice transcription, language analysis, and posture signals run together so you can improve what you say and how you deliver it in the same pass.</p>
+                    </article>
+                    <article class="control-node" data-animate="up" data-delay="500">
+                        <strong>Actionable post-session reports</strong>
+                        <p>The goal is not flashy scoring for its own sake. It is clear feedback that tells you exactly what to tighten before the next interview.</p>
+                    </article>
+                </div>
 
-            <div class="steps-grid">
-                <div class="step-item js-reveal-card">
-                    <div class="step-num-badge" aria-hidden="true">1</div>
-                    <h3>Choose a role</h3>
-                    <p>Select your target role from the sidebar. PrepLoom tailors the question mix — behavioural and technical — to what that role actually tests.</p>
-                </div>
-                <div class="step-item js-reveal-card">
-                    <div class="step-num-badge" aria-hidden="true">2</div>
-                    <h3>Answer via voice or text</h3>
-                    <p>Speak naturally or type your answer. Whisper transcribes speech, your webcam tracks presence, and the question is read aloud if you want.</p>
-                </div>
-                <div class="step-item js-reveal-card">
-                    <div class="step-num-badge" aria-hidden="true">3</div>
-                    <h3>Get your report</h3>
-                    <p>After the session you get per-question scores across technical, communication, and confidence dimensions — with actionable improvement tips.</p>
+                <div class="console" data-animate="up" data-delay="300">
+                    <div class="console__header">
+                        <span class="console__title">Simulation pipeline</span>
+                        <span class="console__status">
+                            <span class="stage-status__dot"></span>
+                            ready
+                        </span>
+                    </div>
+                    <div class="console__rows">
+                        <div class="console__row">
+                            <span class="console__row-index">01</span>
+                            <code>select role-aware prompt mix</code>
+                            <span>live</span>
+                        </div>
+                        <div class="console__row">
+                            <span class="console__row-index">02</span>
+                            <code>capture voice or typed response</code>
+                            <span>sync</span>
+                        </div>
+                        <div class="console__row">
+                            <span class="console__row-index">03</span>
+                            <code>analyze technical reasoning</code>
+                            <span>score</span>
+                        </div>
+                        <div class="console__row">
+                            <span class="console__row-index">04</span>
+                            <code>measure clarity, pacing, fillers</code>
+                            <span>parse</span>
+                        </div>
+                        <div class="console__row">
+                            <span class="console__row-index">05</span>
+                            <code>surface posture and presence cues</code>
+                            <span>watch</span>
+                        </div>
+                        <div class="console__row">
+                            <span class="console__row-index">06</span>
+                            <code>compile one coaching report</code>
+                            <span>report</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ═══ CTA ═══ -->
-        <div class="cta-band js-reveal-card" role="complementary">
-            <h2>Ready when you are.</h2>
-            <p>No subscription required. Open the practice room, pick a role, and run a full mock session right in your browser.</p>
-            <a class="btn-hero-primary" href="/app">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                Go to practice room
-            </a>
-        </div>
+        <section class="section-shell">
+            <p class="section-kicker" data-animate="up">Session flow</p>
+            <h2 class="section-title" data-animate="up" data-delay="100">From cold start to final report in three moves.</h2>
+            <p class="section-copy" data-animate="up" data-delay="200">
+                The flow stays simple even though the system behind it is rich: pick a role, answer naturally, and review exactly where your next improvement should happen.
+            </p>
 
+            <div class="step-grid">
+                <article class="step-card" data-animate="up" data-delay="300">
+                    <div class="step-number">01</div>
+                    <h3>Choose your target role</h3>
+                    <p>Start from the role you care about so the question set reflects the technical depth and decision patterns expected in that interview lane.</p>
+                </article>
+                <article class="step-card" data-animate="up" data-delay="400">
+                    <div class="step-number">02</div>
+                    <h3>Respond the way you would in the room</h3>
+                    <p>Speak or type. PrepLoom captures your answer, listens to your structure, and watches for confidence signals while the question flow continues.</p>
+                </article>
+                <article class="step-card" data-animate="up" data-delay="500">
+                    <div class="step-number">03</div>
+                    <h3>Review your coaching output</h3>
+                    <p>Finish the session with a report that connects the dots across technical accuracy, communication quality, and presence so practice becomes measurable.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="launch-band" data-animate="up" aria-labelledby="launch-title">
+            <div>
+                <p class="section-kicker">Launch practice room</p>
+                <h2 id="launch-title">Step into the simulation when you are ready.</h2>
+                <p>Open the practice room, choose a role, and run the full PrepLoom loop directly in your browser.</p>
+            </div>
+            <div class="launch-band__actions">
+                <a class="btn-hero-primary" href="/app">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Enter practice room
+                </a>
+                <a class="btn-hero-secondary" href="/features">See all features</a>
+            </div>
+        </section>
     </main>
 
     <footer class="site-footer">
         <div class="site-footer__inner">
-            <span>© 2026 PrepLoom. All rights reserved.</span>
+            <span>&copy; 2026 PrepLoom. All rights reserved.</span>
             <div class="site-footer__links">
                 <a href="/features">Features</a>
                 <a href="/revision">Revision</a>
@@ -675,12 +422,11 @@
     </footer>
 </div>
 
-<!-- Sign in modal -->
 <div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
     <div class="modal">
         <div class="modal__header">
             <h2 id="signin-title">Sign in</h2>
-            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">&times;</button>
         </div>
         <p class="modal__note">Sign in with Supabase to manage your settings and preferences.</p>
         <p id="signinError" class="modal-error" hidden></p>
@@ -691,21 +437,20 @@
             </div>
             <div class="modal__field">
                 <label for="signin-password">Password</label>
-                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" />
+                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="At least 8 characters" required minlength="8" />
             </div>
             <button type="submit" class="btn-modal-primary">Sign in</button>
         </form>
-        <button type="button" data-auth-provider="google" data-error-target="signinError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" class="btn-modal-primary" style="width: 100%; margin-top: 0.75rem; background: transparent; color: inherit; border: 1px solid rgba(255, 255, 255, 0.18);">Continue with Google</button>
         <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
     </div>
 </div>
 
-<!-- Sign up modal -->
 <div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
     <div class="modal">
         <div class="modal__header">
             <h2 id="signup-title">Create account</h2>
-            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">&times;</button>
         </div>
         <p class="modal__note">Create an account to save your progress and settings.</p>
         <p id="signupError" class="modal-error" hidden></p>
@@ -720,11 +465,11 @@
             </div>
             <div class="modal__field">
                 <label for="signup-password">Password</label>
-                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required minlength="8" />
+                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required minlength="8" />
             </div>
             <button type="submit" class="btn-modal-primary">Create account</button>
         </form>
-        <button type="button" data-auth-provider="google" data-error-target="signupError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" class="btn-modal-primary" style="width: 100%; margin-top: 0.75rem; background: transparent; color: inherit; border: 1px solid rgba(255, 255, 255, 0.18);">Continue with Google</button>
         <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
     </div>
 </div>
@@ -733,23 +478,5 @@
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
-<script>
-    // Theme toggle
-    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
-    
-    // Scroll-reveal observer
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.js-reveal, .js-reveal-card').forEach(el => {
-        revealObserver.observe(el);
-    });
-</script>
 </body>
 </html>

@@ -6,7 +6,7 @@
     <meta name="description" content="Revision Hub — Flashcards, cheat sheets, and deep dives for technical interviews. Powered by PrepLoom." />
     <title>Revision Hub — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <style>
         /* ── Revision-specific styles ── */
@@ -102,8 +102,8 @@
         .rev-tab.active { background: var(--pl-accent); border-color: var(--pl-accent); color: #fff; box-shadow: 0 4px 18px rgba(108,99,255,0.35); }
 
         /* Sections */
-        .rev-section { display: none; animation: revIn 0.4s cubic-bezier(0.4,0,0.2,1); }
-        .rev-section.active { display: block; }
+        .rev-section { display: none; }
+        .rev-section.active { display: block; animation: revIn 0.4s cubic-bezier(0.4,0,0.2,1); }
         @keyframes revIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
         /* Section headings */
@@ -197,7 +197,7 @@
         }
         .pattern-card__icon {
             width: 34px; height: 34px;
-            border-radius: 9px;
+            border-radius: 99px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -542,17 +542,6 @@
         }
         .rev-cta p { color: var(--pl-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
 
-        /* Animated entrance */
-        [data-animate] {
-            opacity: 0;
-            transform: translateY(18px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        [data-animate].visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
         /* Accent glow titles */
         .accent-gradient-text {
             background: linear-gradient(135deg, var(--pl-accent) 0%, #a78bfa 50%, var(--pl-teal) 100%);
@@ -585,8 +574,9 @@
         .user-dropdown-menu.show { display: flex !important; }
         .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
     </style>
+    <link rel="stylesheet" href="/static/css/future-pages.css" />
 </head>
-<body class="site">
+<body class="site future-page future-page--revision">
 <div class="site-wrap">
     <!-- ── NAV ── -->
     <header class="site-nav" role="navigation" aria-label="Primary">
@@ -603,11 +593,11 @@
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
             <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
-                <span data-theme-icon>🌙</span>
+                <span data-theme-icon aria-hidden="true"></span>
             </button>
             <div style="position: relative; display: inline-block;">
-                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;" onmouseover="this.style.color='#8b84ff'" onmouseout="this.style.color='inherit'" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')"></button>
-                <div id="userDropdownMenu" class="user-dropdown-menu" style="position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--pl-surface, #12141e); border: 1px solid var(--pl-border, rgba(255,255,255,0.1)); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); min-width: 150px; z-index: 100; display: none; flex-direction: column; overflow: hidden; backdrop-filter: blur(12px);">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
                     <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         Settings
@@ -628,19 +618,41 @@
     <main class="site-main">
 
         <!-- ── HERO ── -->
-        <div class="rev-hero">
+        <div class="rev-hero hero-parallax-container">
+            <canvas id="heroParticles" class="hero-particles" aria-hidden="true"></canvas>
+            <div class="hero-mesh" aria-hidden="true"></div>
             <div class="rev-hero__bg" aria-hidden="true"></div>
             <div class="rev-hero__noise" aria-hidden="true"></div>
+
+            <!-- Telemetry-style status elements -->
+            <div class="telemetry-card telemetry-card--north" data-parallax="18" style="top: 15%; left: 12%;">
+                <span class="telemetry-card__label">Mastery Progress</span>
+                <div class="telemetry-card__bars">
+                    <div class="telemetry-card__bar">
+                        <div class="telemetry-card__bar-label"><span>Big-O</span><span>85%</span></div>
+                        <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 85%"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="telemetry-card telemetry-card--south" data-parallax="22" style="bottom: 25%; right: 10%;">
+                <span class="telemetry-card__label">Review Stats</span>
+                <div class="telemetry-card__grid">
+                    <div class="telemetry-card__stat"><strong>12</strong><span>Cards</span></div>
+                    <div class="telemetry-card__stat"><strong>4</strong><span>Topics</span></div>
+                </div>
+            </div>
+
             <div class="rev-hero__inner">
-            <div class="rev-hero__eyebrow">
+            <div class="rev-hero__eyebrow" data-animate="down">
                 <span class="dot"></span>
                 Interview Revision Hub
             </div>
-            <h1>Study smarter.<br><span class="accent-gradient-text">Ace the room.</span></h1>
-            <p>Everything you need to review before your next session — complexities, patterns, flashcards, behavioral frameworks, and system design.</p>
+            <h1 data-animate="up" data-delay="100">Study smarter.<br><span class="accent-gradient-text">Ace the room.</span></h1>
+            <p data-animate="up" data-delay="200">Everything you need to review before your next session — complexities, patterns, flashcards, behavioral frameworks, and system design.</p>
 
             <!-- Tab navigation -->
-            <div class="rev-tabs" role="tablist" aria-label="Revision topics">
+            <div class="rev-tabs" role="tablist" aria-label="Revision topics" data-animate="up" data-delay="300">
                 <button class="rev-tab active" data-tab="complexity" role="tab">⏱ Complexity</button>
                 <button class="rev-tab" data-tab="patterns" role="tab">🔗 DS Patterns</button>
                 <button class="rev-tab" data-tab="flashcards" role="tab">🃏 Flashcards</button>
@@ -658,7 +670,7 @@
             <h2 class="rev-section-title">Big-O Complexity Reference</h2>
             <p class="rev-section-sub">Hover any card to see the relative cost. Master the shape of each curve before your interview.</p>
 
-            <div class="bigo-grid" data-animate>
+            <div class="bigo-grid" data-animate="up">
                 <div class="bigo-card o1">
                     <div class="bigo-notation">O(1)</div>
                     <div class="bigo-name">Constant</div>
@@ -697,13 +709,13 @@
                 </div>
             </div>
 
-            <div class="bigo-tip" data-animate>
+            <div class="bigo-tip" data-animate="up">
                 <strong>Interview tip:</strong> Always lead with your intuition <em>before</em> optimising. Interviewers score your reasoning process as heavily as the final answer. Say: <em>"My initial approach is O(n²) — I see a hashmap optimisation that brings this to O(n) time and O(n) space."</em>
             </div>
 
             <!-- Common operations table -->
-            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Common operation complexities</h3>
-            <div style="overflow-x:auto;" data-animate>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate="up">Common operation complexities</h3>
+            <div style="overflow-x:auto;" data-animate="up">
                 <table class="cap-table">
                     <thead>
                         <tr>
@@ -728,8 +740,8 @@
             </div>
 
             <!-- Progress tracker -->
-            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Self-assessment — Complexity topics</h3>
-            <div class="progress-bar-section" data-animate>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate="up">Self-assessment — Complexity topics</h3>
+            <div class="progress-bar-section" data-animate="up">
                 <div class="progress-item">
                     <div class="progress-item__top"><span class="progress-item__label">Big-O notation & analysis</span><span class="progress-item__val">Advanced</span></div>
                     <div class="progress-bar"><div class="progress-bar__fill" style="width:85%;background:linear-gradient(90deg,#22c55e,#2dd4bf)"></div></div>
@@ -752,7 +764,7 @@
             <h2 class="rev-section-title">Data Structure Patterns</h2>
             <p class="rev-section-sub">Recognise the pattern within the first 60 seconds. Each card maps a technique to its canonical LeetCode examples.</p>
 
-            <div class="pattern-grid" data-animate>
+            <div class="pattern-grid" data-animate="up">
                 <div class="pattern-card">
                     <div class="pattern-card__head">
                         <div class="pattern-card__icon" style="background:rgba(108,99,255,0.12);color:#a78bfa;">👆</div>
@@ -882,7 +894,7 @@
                 </div>
             </div>
 
-            <div class="bigo-tip" data-animate>
+            <div class="bigo-tip" data-animate="up">
                 <strong>Pattern recognition tip:</strong> Before writing code, say aloud: <em>"This looks like a [pattern] problem because [reasoning]. I'll use [data structure] which gives me [complexity]."</em> Interviewers love this narration — it signals experience even if your code has minor bugs.
             </div>
         </section>
@@ -897,7 +909,7 @@
             <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">12</span> &nbsp;·&nbsp; <span id="fc-flipped-count">0</span> revealed</div>
             <div class="fc-progress"><div class="fc-progress__bar" id="fc-progress-bar" style="width:0%"></div></div>
 
-            <div class="flashcard-grid" id="flashcard-container" data-animate></div>
+            <div class="flashcard-grid" id="flashcard-container" data-animate="up"></div>
 
             <div class="fc-controls">
                 <button class="fc-btn" id="fc-reset">↺ Reset all</button>
@@ -912,7 +924,7 @@
             <h2 class="rev-section-title">Behavioral — STAR Framework</h2>
             <p class="rev-section-sub">Every behavioral answer must hit all four stages. Practice 2–3 polished stories per category. Aim for under 2 minutes each.</p>
 
-            <div class="star-grid" data-animate>
+            <div class="star-grid" data-animate="up">
                 <div class="star-card">
                     <div class="star-letter">S</div>
                     <div class="star-word">Situation</div>
@@ -935,8 +947,8 @@
                 </div>
             </div>
 
-            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Common scenarios &amp; story starters</h3>
-            <div class="star-scenarios" data-animate>
+            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate="up">Common scenarios &amp; story starters</h3>
+            <div class="star-scenarios" data-animate="up">
                 <div class="star-scenario">
                     <div class="star-scenario__label">Conflict / disagreement</div>
                     <div class="star-scenario__text">"I disagreed with [X] because [concrete technical or strategic reason]. I prepared [evidence/data] and proposed [alternative]. We landed on [compromise] and I committed fully to the agreed direction."</div>
@@ -959,7 +971,7 @@
                 </div>
             </div>
 
-            <div class="bigo-tip" data-animate>
+            <div class="bigo-tip" data-animate="up">
                 <strong>Practice drill:</strong> Record yourself on your phone answering one question. Play it back and note every "um", "like", or filler. Then answer again — time yourself. Under 90 seconds is the sweet spot for most behavioral questions in an hour-long loop.
             </div>
         </section>
@@ -971,7 +983,7 @@
             <h2 class="rev-section-title">Communication &amp; Presence</h2>
             <p class="rev-section-sub">PrepLoom scores you on these dimensions. Internalise these habits before your session so they become automatic.</p>
 
-            <div class="comm-grid" data-animate>
+            <div class="comm-grid" data-animate="up">
                 <div class="comm-card">
                     <div class="comm-card__icon" style="background:rgba(108,99,255,0.1);">🧱</div>
                     <div class="comm-card__title">Structure your answer</div>
@@ -1010,8 +1022,8 @@
                 </div>
             </div>
 
-            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.75rem;color:var(--pl-text);" data-animate>Filler words to eliminate</h3>
-            <div class="filler-grid" data-animate>
+            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.75rem;color:var(--pl-text);" data-animate="up">Filler words to eliminate</h3>
+            <div class="filler-grid" data-animate="up">
                 <span class="filler-pill">um</span>
                 <span class="filler-pill">uh</span>
                 <span class="filler-pill">like</span>
@@ -1024,9 +1036,9 @@
                 <span class="filler-pill">just</span>
                 <span class="filler-pill">actually</span>
             </div>
-            <p style="font-size:0.8rem;color:var(--pl-muted);margin-bottom:2rem;" data-animate>Replace every filler with a half-second of deliberate silence. Silence sounds confident on a call — fillers sound nervous.</p>
+            <p style="font-size:0.8rem;color:var(--pl-muted);margin-bottom:2rem;" data-animate="up">Replace every filler with a half-second of deliberate silence. Silence sounds confident on a call — fillers sound nervous.</p>
 
-            <div class="bigo-tip" data-animate>
+            <div class="bigo-tip" data-animate="up">
                 <strong>WPM target:</strong> Aim for <strong style="color:var(--pl-text)">140–170 words per minute</strong> for technical explanations. Slower is fine for complex reasoning. PrepLoom's communication score flags if you're going over 200 WPM (hard to follow) or under 100 WPM (sounds uncertain).
             </div>
         </section>
@@ -1038,8 +1050,8 @@
             <h2 class="rev-section-title">System Design Foundations</h2>
             <p class="rev-section-sub">For senior and mid-level roles. Know the tradeoffs cold — interviewers want to see you reason about scale, not just name buzzwords.</p>
 
-            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>Core concepts</h3>
-            <div class="sysdesign-grid" data-animate>
+            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate="up">Core concepts</h3>
+            <div class="sysdesign-grid" data-animate="up">
                 <div class="sysdesign-card">
                     <div class="sysdesign-card__head">
                         <div class="sysdesign-card__dot" style="background:#6C63FF;"></div>
@@ -1114,8 +1126,8 @@
                 </div>
             </div>
 
-            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>CAP theorem database guide</h3>
-            <div style="overflow-x:auto;" data-animate>
+            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate="up">CAP theorem database guide</h3>
+            <div style="overflow-x:auto;" data-animate="up">
                 <table class="cap-table">
                     <thead>
                         <tr><th>Database</th><th>Type</th><th>Guarantees</th><th>Use for</th></tr>
@@ -1131,8 +1143,8 @@
                 </table>
             </div>
 
-            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate>System design interview checklist</h3>
-            <div class="sysdesign-grid" data-animate style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+            <h3 style="font-size:0.92rem;font-weight:700;margin-bottom:1rem;color:var(--pl-text);" data-animate="up">System design interview checklist</h3>
+            <div class="sysdesign-grid" data-animate="up" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
                 <div class="sysdesign-card" style="border-color:rgba(108,99,255,0.15);">
                     <div class="sysdesign-card__head">
                         <div class="sysdesign-card__dot" style="background:#6C63FF;"></div>
@@ -1165,12 +1177,11 @@
         </section>
 
         <!-- ── CTA ── -->
-        <div class="rev-cta" data-animate>
+        <div class="rev-cta" data-animate="up">
             <h2>Now put it into practice.</h2>
             <p>Open the practice room and run a timed mock with an AI interviewer using what you've just reviewed.</p>
             <a class="btn-hero-primary" href="/app">Start a practice session →</a>
         </div>
-
     </main>
 
     <footer class="site-footer">
@@ -1259,27 +1270,9 @@
             var section = document.getElementById('tab-' + id);
             if (section) {
                 section.classList.add('active');
-                animateSection(section);
             }
         });
     });
-
-    /* ── Intersection observer for entrance animations ── */
-    function animateSection(root) {
-        var els = (root || document).querySelectorAll('[data-animate]');
-        var io = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    var el = entry.target;
-                    var delay = el.getAttribute('data-delay') || 0;
-                    setTimeout(function() { el.classList.add('visible'); }, delay);
-                    io.unobserve(el);
-                }
-            });
-        }, { threshold: 0.08 });
-        els.forEach(function(el) { io.observe(el); });
-    }
-    animateSection(document);
 
     /* ── Flashcards ── */
     var flashcardsData = [
@@ -1353,16 +1346,6 @@
             if (!container) return;
             container.querySelectorAll('.flashcard').forEach(function(card, i) {
                 card.classList.add('flipped');
-                flippedCards[i] = true;
-            });
-            updateFCStats();
-        });
-    }
-})();
-</script>
-</body>
-</html>
-               card.classList.add('flipped');
                 flippedCards[i] = true;
             });
             updateFCStats();

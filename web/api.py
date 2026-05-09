@@ -243,22 +243,10 @@ async def submit_answer(payload: dict):
 
     q = questions[idx]
 
-    # 1. Technical score (LLM / heuristic)
-    tech_eval = evaluate_technical_answer(
-        question_text=q.question_text,
-        ideal_answer=q.ideal_answer or "",
-        user_answer=answer,
-        code_submission=code_submission,
-        role_tag=q.role_tag,
-        difficulty_level=q.difficulty_level,
-    )
-
-    # 2. Communication score (NLP)
-    comm_eval = analyze_communication(answer, duration)
-
-    # 3. Confidence score (body language)
+    # 1. Confidence score (body language) - Calculated first for use in technical evaluation
     confidence_score = None
     bl_summary = "No body language data captured for this question."
+    bl_obs = []
     if bl_data and not bl_data.get("error") and bl_data.get("pose_visible_fraction", 0) > 0:
         o = float(bl_data.get("openness", 0.5))
         e = float(bl_data.get("engagement", 0.5))
@@ -266,6 +254,21 @@ async def submit_answer(payload: dict):
         f = float(bl_data.get("fidgeting", 0.5))
         confidence_score = int(round(np.clip((o + e + p + (1.0 - f)) / 4.0, 0.0, 1.0) * 100))
         bl_summary = bl_data.get("summary", "")
+        bl_obs = bl_data.get("observations", [])
+
+    # 2. Technical score (LLM / heuristic)
+    tech_eval = evaluate_technical_answer(
+        question_text=q.question_text,
+        ideal_answer=q.ideal_answer or "",
+        user_answer=answer,
+        code_submission=code_submission,
+        role_tag=q.role_tag,
+        difficulty_level=q.difficulty_level,
+        body_language_summary=bl_summary,
+    )
+
+    # 3. Communication score (NLP)
+    comm_eval = analyze_communication(answer, duration)
 
     combined = {
         "question_text": q.question_text,
@@ -282,6 +285,7 @@ async def submit_answer(payload: dict):
         "comm_details": comm_eval.get("comm_details", ""),
         "confidence_score": confidence_score,
         "bl_summary": bl_summary,
+        "bl_observations": bl_obs,
     }
 
     session["evaluations"].append(combined)
