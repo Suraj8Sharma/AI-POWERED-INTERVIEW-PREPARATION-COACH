@@ -52,7 +52,13 @@ if str(APP_ROOT) not in sys.path:
 load_dotenv(APP_ROOT / ".ENV")
 load_dotenv(APP_ROOT / ".env")
 
-from web.auth_routes import get_optional_user, router as auth_router
+from web.auth_routes import get_optional_user, get_supabase_user_from_token, security, router as auth_router
+
+# Supabase and PDF imports
+from supabase import create_client, Client
+from web.pdf_generator import generate_interview_report_pdf
+import base64
+from datetime import datetime
 
 
 
@@ -67,6 +73,30 @@ from AI_BACKEND.nlp_analysis import analyze_communication
 # ── Constants ──────────────────────────────────────────────────────────────
 CHROMA_DIR = APP_ROOT / "AI_BACKEND" / "chroma_db"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+# ── Supabase client ───────────────────────────────────────────────────────
+_supabase: Client | None = None
+
+def get_supabase() -> Client:
+    global _supabase
+    if _supabase is None:
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")  # Use service role for server-side operations
+        if not url or not key:
+            raise HTTPException(500, "Supabase not configured")
+        _supabase = create_client(url, key)
+    return _supabase
+
+
+async def get_current_user(token: str = Depends(security)):
+    """Dependency to get the current authenticated user."""
+    if not token:
+        raise HTTPException(401, "Authentication required")
+
+    user = await get_supabase_user_from_token(token.credentials)
+    if not user:
+        raise HTTPException(401, "Invalid or expired token")
+    return user
 
 # ── In-memory session store ────────────────────────────────────────────────
 _sessions: dict[str, dict[str, Any]] = {}
@@ -529,8 +559,8 @@ async def get_user_stats(user: dict | None = Depends(get_optional_user)):
 
 
 @app.get("/api/report/{session_id}")
-async def get_report(session_id: str):
-    """Return aggregate report for a finished interview."""
+async def get_report(session_id: str, user: dict | None = Depends(get_optional_user)):
+    """Return aggregate report for a finished interview and save to database if user is authenticated."""
     session = _sessions.get(session_id)
     if not session:
         raise HTTPException(404, "Session not found")
@@ -552,13 +582,13 @@ async def get_report(session_id: str):
     if avg_tech < 60:
         tips.append("📚 Technical knowledge: Review core concepts, practice explaining them out loud.")
     if avg_comm < 60:
-        tips.append("🗣️ Communication: Reduce filler words, aim for 130-160 WPM, use structured answers (STAR method).") 
+        tips.append("🗣️ Communication: Reduce filler words, aim for 130-160 WPM, use structured answers (STAR method).")
     if avg_conf < 60:
         tips.append("📹 Body language: Maintain eye contact, sit upright, keep hands visible and relaxed.")
     if not tips:
         tips.append("🌟 Great performance! Keep practicing to maintain consistency.")
 
-    return {
+    report_data = {
         "name": session.get("name", ""),
         "role": session.get("role", ""),
         "user_id": session.get("user_id"),
@@ -569,4 +599,103 @@ async def get_report(session_id: str):
         "avg_confidence": avg_conf,
         "evaluations": evals,
         "tips": tips,
+        "created_at": datetime.now().isoformat(),
+        "pdf_available": False,
     }
+
+    if user and user.get("id"):
+        try:
+            supabase = get_supabase()
+            user_id = user["id"]
+            existing = supabase.table("interview_reports").select("id, pdf_path").eq("session_id", session_id).eq("user_id", user_id).limit(1).execute()
+            existing_record = (existing.data or [])[0] if existing.data else None
+            pdf_path = None
+            report_id = None
+
+            if existing_record:
+                report_id = existing_record.get("id")
+                pdf_path = existing_record.get("pdf_path")
+            else:
+                pdf_content = generate_interview_report_pdf(report_data)
+                pdf_path = f"{user_id}/{session_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                supabase.storage.from_("interview-reports").upload(pdf_path, pdf_content, content_type="application/pdf")
+                db_record = {
+                    "user_id": user_id,
+                    "session_id": session_id,
+                    "candidate_name": session.get("name", ""),
+                    "role": session.get("role", ""),
+                    "total_questions": len(evals),
+                    "overall_score": overall,
+                    "avg_technical": avg_tech,
+                    "avg_communication": avg_comm,
+                    "avg_confidence": avg_conf,
+                    "evaluations": evals,
+                    "tips": tips,
+                    "pdf_path": pdf_path,
+                }
+                insert_response = supabase.table("interview_reports").insert(db_record).select("id").execute()
+                new_record = (insert_response.data or [])[0] if insert_response.data else None
+                if new_record:
+                    report_id = new_record.get("id")
+
+            report_data["pdf_available"] = bool(pdf_path)
+            if report_id:
+                report_data["report_id"] = report_id
+        except Exception as e:
+            print(f"Failed to save report to Supabase: {e}")
+
+    return report_data
+
+
+@app.get("/api/user/reports")
+async def get_user_reports(user: dict | None = Depends(get_optional_user)):
+    """Get all interview reports for the authenticated user."""
+    if not user or not user.get("id"):
+        raise HTTPException(401, "Authentication required")
+
+    try:
+        supabase = get_supabase()
+        response = supabase.table("interview_reports").select("id, session_id, candidate_name, role, overall_score, avg_technical, avg_communication, avg_confidence, created_at, pdf_path").eq("user_id", user["id"]).order("created_at", desc=True).execute()
+        reports = response.data or []
+        for item in reports:
+            item["pdf_available"] = bool(item.get("pdf_path"))
+        return {"reports": reports}
+    except Exception as e:
+        raise HTTPException(500, f"Failed to retrieve reports: {str(e)}")
+
+
+@app.get("/api/user/reports/{report_id}/download")
+async def download_report_pdf(report_id: str, user: dict | None = Depends(get_optional_user)):
+    """Download a specific report PDF for the authenticated user."""
+    if not user or not user.get("id"):
+        raise HTTPException(401, "Authentication required")
+
+    try:
+        supabase = get_supabase()
+        report_response = supabase.table("interview_reports").select("pdf_path").eq("id", report_id).eq("user_id", user["id"]).limit(1).execute()
+        report_row = (report_response.data or [])[0] if report_response.data else None
+        if not report_row:
+            raise HTTPException(404, "Report not found")
+
+        pdf_path = report_row.get("pdf_path")
+        if not pdf_path:
+            raise HTTPException(404, "PDF not available for this report")
+
+        download_result = supabase.storage.from_("interview-reports").download(pdf_path)
+        if isinstance(download_result, dict):
+            pdf_bytes = download_result.get("data") or None
+        else:
+            pdf_bytes = getattr(download_result, "data", None) or download_result
+
+        if not pdf_bytes:
+            raise HTTPException(500, "Failed to download report PDF from storage")
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=interview_report_{report_id}.pdf"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Failed to download PDF: {str(e)}")
