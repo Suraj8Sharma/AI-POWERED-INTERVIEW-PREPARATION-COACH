@@ -269,6 +269,7 @@ initTts();
 //  Webcam
 // ═══════════════════════════════════════════════════════════════════════════
 async function startWebcam() {
+    const mediaError = document.getElementById('mediaError');
     try {
         let videoConstraints = { facingMode: "user" };
         // Apply saved resolution preference
@@ -286,11 +287,25 @@ async function startWebcam() {
             audio: true,
         });
         videoPreview.srcObject = mediaStream;
-        
+        if (mediaError) hide(mediaError);
+        videoPreview.style.display = 'block';
         // Ensure video plays
         videoPreview.play().catch(err => console.warn("Video play failed:", err));
     } catch (e) {
         console.warn("Webcam/mic access denied:", e);
+        if (mediaError) {
+            show(mediaError);
+            videoPreview.style.display = 'none';
+            const errTitle = mediaError.querySelector('.media-error__title');
+            const errText = mediaError.querySelector('.media-error__text');
+            if (e.name === 'NotAllowedError') {
+                if (errTitle) errTitle.textContent = 'Camera Access Denied';
+                if (errText) errText.textContent = 'You denied camera/microphone access. Please allow it in your browser settings and reload.';
+            } else if (e.name === 'NotFoundError') {
+                if (errTitle) errTitle.textContent = 'No Camera Found';
+                if (errText) errText.textContent = 'No camera or microphone detected. Please connect one and reload.';
+            }
+        }
     }
 }
 
@@ -455,11 +470,12 @@ if (endBtn) {
 //  Render question
 // ═══════════════════════════════════════════════════════════════════════════
 function renderQuestion(q) {
-    const bubbleText = questionBubble.querySelector(".q-bubble-text");
-    if (bubbleText) {
+    // Support both old (.q-bubble-text child) and new (direct #questionBubble) DOM
+    const bubbleText = questionBubble.querySelector(".q-bubble-text") || questionBubble.querySelector(".q-card__text");
+    if (bubbleText && bubbleText !== questionBubble) {
         bubbleText.textContent = q.question_text;
     } else {
-        questionBubble.textContent = "🤖 " + q.question_text;
+        questionBubble.textContent = q.question_text;
     }
     kpiRole.textContent  = q.role_tag;
     kpiQ.textContent     = (q.index + 1) + "/" + totalQuestions;
@@ -476,8 +492,9 @@ function resetInterviewUI() {
     hide(transcriptArea);
     hide(sttStatus);
     hide(feedbackScores);
+    nextBtn.disabled = true;
     show(feedbackContent);
-    feedbackContent.innerHTML = '<p class="caption">Speak or type your answer, then Submit for evaluation.</p>';
+    feedbackContent.innerHTML = '<p class="eval-panel__prompt">Speak or type your answer, then Submit for evaluation.</p>';
     hide(idealAnswer);
     hide(bodyMetrics);
     hide(blSummary);
@@ -499,7 +516,7 @@ function enableControls(on) {
     typeInput.disabled   = !on;
     sendTypedBtn.disabled = !on;
     submitBtn.disabled  = true;
-    nextBtn.disabled    = !on;
+    nextBtn.disabled    = true;  // Enabled only after feedback is received
     repeatBtn.disabled  = !on;
     setSpeakButtonState(false);
     setLiveAnalysisState(isAnalyzingContinuous);
@@ -612,13 +629,19 @@ async function startAnswerRecording() {
         startContinuousAnalysis();
     }
 
-    sttStatus.className = "stt-status recording";
-    sttStatus.textContent = "Recording now. Speak naturally and click again to stop.";
+    sttStatus.className = "stt-pill";
+    sttStatus.textContent = "🎙️ Recording now. Speak naturally and click again to stop.";
     show(sttStatus);
+
+    // Visual feedback: glow the video container
+    const vc = document.getElementById('videoContainer');
+    const recBadge = document.getElementById('recBadge');
+    if (vc) vc.classList.add('recording-active');
+    if (recBadge) show(recBadge);
 
     const liveTranscriptStarted = startLiveTranscript();
     if (!liveTranscriptStarted) {
-        sttStatus.textContent = "Recording now. Live transcript preview is unavailable, but final transcription will still appear after you stop.";
+        sttStatus.textContent = "🎙️ Recording now. Final transcription will appear after you stop.";
     }
 
     const audioStream = new MediaStream([audioTrack]);
@@ -651,12 +674,18 @@ async function stopAnswerRecording() {
     stopRecordingTimer();
     await recordingDone;
 
+    // Remove visual feedback
+    const vc = document.getElementById('videoContainer');
+    const recBadge = document.getElementById('recBadge');
+    if (vc) vc.classList.remove('recording-active');
+    if (recBadge) hide(recBadge);
+
     answerDuration = Math.max(1, (Date.now() - recordingStartTime) / 1000);
     recordingStartTime = 0;
     setRecordingUI(false);
 
-    sttStatus.className = "stt-status transcribing";
-    sttStatus.textContent = "Transcribing with Whisper…";
+    sttStatus.className = "stt-pill";
+    sttStatus.textContent = "🔄 Transcribing with Whisper…";
     show(sttStatus);
 
     try {
@@ -672,18 +701,18 @@ async function stopAnswerRecording() {
         if (transcript) {
             lastAnswer = transcript;
             updateTranscript(transcript);
-            sttStatus.className = "stt-status done";
-            sttStatus.textContent = "Transcription complete.";
+            sttStatus.className = "stt-pill";
+            sttStatus.textContent = "✅ Transcription complete.";
         } else if (lastAnswer.trim()) {
-            sttStatus.className = "stt-status done";
-            sttStatus.textContent = "Live transcript captured. Final transcription returned empty.";
+            sttStatus.className = "stt-pill";
+            sttStatus.textContent = "✅ Live transcript captured.";
         } else {
-            sttStatus.className = "stt-status recording";
-            sttStatus.textContent = "No speech detected. Try again and speak a bit louder.";
+            sttStatus.className = "stt-pill";
+            sttStatus.textContent = "⚠️ No speech detected. Try again and speak louder.";
         }
     } catch (e) {
-        sttStatus.className = "stt-status recording";
-        sttStatus.textContent = "Transcription failed: " + e.message;
+        sttStatus.className = "stt-pill";
+        sttStatus.textContent = "❌ Transcription failed: " + e.message;
     } finally {
         mediaRecorder = null;
         updateSubmitState();
@@ -695,6 +724,7 @@ async function stopAnswerRecording() {
 // ═══════════════════════════════════════════════════════════════════════════
 if (speakBtn) {
     speakBtn.addEventListener("click", async () => {
+    // Toggle: if already recording, stop. Otherwise start.
     if (isRecording) {
         await stopAnswerRecording();
         return;
@@ -705,70 +735,8 @@ if (speakBtn) {
         return;
     }
 
-    const seconds = 7;
-    speakBtn.disabled = true;
-
-    // Show recording status
-    sttStatus.className = "stt-status recording";
-    sttStatus.textContent = `🎙️ Recording for ${seconds}s — speak now!`;
-    show(sttStatus);
-
-    // Record audio
-    audioChunks = [];
-    const audioTrack = mediaStream.getAudioTracks()[0];
-    const audioStream = new MediaStream([audioTrack]);
-
-    try {
-        mediaRecorder = new MediaRecorder(audioStream, { mimeType: "audio/webm" });
-    } catch (e) {
-        mediaRecorder = new MediaRecorder(audioStream);
-    }
-
-    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
-
-    const recordingStartTime = Date.now();
-
-    const recordingDone = new Promise((resolve) => {
-        mediaRecorder.onstop = resolve;
-    });
-
-    mediaRecorder.start();
-    setTimeout(() => { if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop(); }, seconds * 1000);
-    await recordingDone;
-
-    answerDuration = (Date.now() - recordingStartTime) / 1000;
-
-    // Convert to WAV and send
-    sttStatus.className = "stt-status transcribing";
-    sttStatus.textContent = "🔄 Transcribing with Whisper…";
-
-    try {
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        const wavBlob = await convertToWav(audioBlob);
-
-        const formData = new FormData();
-        formData.append("audio", wavBlob, "recording.wav");
-
-        const data = await api("/api/transcribe", { method: "POST", body: formData });
-        const transcript = data.transcript || "";
-
-        if (transcript) {
-            lastAnswer = transcript;
-            transcriptArea.value = transcript;
-            show(transcriptArea);
-            sttStatus.className = "stt-status done";
-            sttStatus.textContent = "✅ Transcription complete";
-            updateSubmitState();
-        } else {
-            sttStatus.className = "stt-status recording";
-            sttStatus.textContent = "⚠️ No speech detected. Try speaking louder.";
-        }
-    } catch (e) {
-        sttStatus.className = "stt-status recording";
-        sttStatus.textContent = "❌ Transcription failed: " + e.message;
-    }
-
-    speakBtn.disabled = false;
+    // Start open-ended recording (no fixed duration — like a real interview)
+    await startAnswerRecording();
 });
 }
 
@@ -863,9 +831,10 @@ if (showIdealCheck) {
     showIdealCheck.addEventListener("change", () => {
     if (showIdealCheck.checked && currentQuestion && currentQuestion.ideal_answer) {
         idealText.textContent = currentQuestion.ideal_answer;
+        idealText.classList.add("open");
         show(idealAnswer);
     } else {
-        hide(idealAnswer);
+        idealText.classList.remove("open");
     }
 });
 }
@@ -1331,6 +1300,10 @@ function renderFeedback(ev) {
     `;
 
     feedbackDetails.innerHTML = tableHTML;
+
+    // Show the "Next" button so the user can advance to the next question
+    // Enable the Next button now that feedback is visible
+    nextBtn.disabled = false;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
