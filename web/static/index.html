@@ -9,19 +9,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <link rel="stylesheet" href="/static/css/home.css" />
+    <script>
+        (function() {
+            if (sessionStorage.getItem("pl-intro-seen")) {
+                document.documentElement.classList.add("pl-intro-skip");
+            }
+        })();
+    </script>
+    <style>
+        .pl-intro-skip .intro-loader { display: none !important; }
+    </style>
 </head>
 <body class="site home-page">
 <!-- Premium Intro Loader -->
 <div id="introLoader" class="intro-loader" aria-hidden="true">
-    <div class="intro-loader__logo">
-        <div class="intro-loader__mark">PL</div>
-        <div class="intro-loader__orb"></div>
+    <div class="intro-loader__vortex">
+        <div class="vortex-shard vortex-shard--top"></div>
+        <div class="vortex-shard vortex-shard--bottom"></div>
+        <div class="vortex-shard vortex-shard--left"></div>
+        <div class="vortex-shard vortex-shard--right"></div>
+        <div class="vortex-center"></div>
     </div>
     <div class="intro-loader__text">PrepLoom</div>
     <div class="intro-loader__status">Booting simulation core...</div>
 </div>
 
-<div class="site-wrap">
+<div class="site-wrap" id="siteWrap">
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
             <img src="/static/logo.png" alt="PrepLoom logo" />
