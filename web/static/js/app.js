@@ -69,6 +69,11 @@ const reportSub       = $("reportSub");
 const reportScores    = $("reportScores");
 const reportBreakdown = $("reportBreakdown");
 const reportTips      = $("reportTips");
+const downloadReportBtn = $("downloadReportBtn");
+const openReportsBtn  = $("openReportsBtn");
+const reportsHistoryView = $("reportsHistoryView");
+const reportsList     = $("reportsList");
+const backToReportsBtn = $("backToReportsBtn");
 const newInterviewBtn = $("newInterviewBtn");
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -89,6 +94,7 @@ let recordingTimerInterval = null;
 let liveRecognition = null;
 let recognitionRestartRequested = false;
 let liveTranscriptFinal = "";
+let currentReportId = null;
 
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -136,13 +142,25 @@ async function api(endpoint, options = {}) {
     return res.json();
 }
 
+async function apiDownload(endpoint, options = {}) {
+    const headers = new Headers(options.headers || {});
+    const tok = getPreploomToken();
+    if (tok) headers.set("Authorization", `Bearer ${tok}`);
+    const res = await fetch(endpoint, { ...options, headers });
+    if (!res.ok) {
+        const errText = await res.text().catch(() => res.statusText);
+        throw new Error(errText || res.statusText);
+    }
+    return res.blob();
+}
+
 function setStatus(live) {
     statusDot.className = "status-dot" + (live ? " live" : "");
     statusLabel.textContent = live ? "🟢 Live" : "⚪ Idle";
 }
 
 function switchView(view) {
-    [welcomeView, interviewView, reportView].forEach(v => hide(v));
+    [welcomeView, interviewView, reportView, reportsHistoryView].forEach(v => hide(v));
     show(view);
 }
 
@@ -268,6 +286,9 @@ async function startWebcam() {
             audio: true,
         });
         videoPreview.srcObject = mediaStream;
+        
+        // Ensure video plays
+        videoPreview.play().catch(err => console.warn("Video play failed:", err));
     } catch (e) {
         console.warn("Webcam/mic access denied:", e);
     }
@@ -679,9 +700,6 @@ if (speakBtn) {
         return;
     }
 
-    await startAnswerRecording();
-    return;
-
     if (!mediaStream) {
         alert("Microphone not available. Please allow mic access.");
         return;
@@ -832,6 +850,10 @@ if (typeInput) {
     typeInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") { e.preventDefault(); submitTypedAnswer(); }
     });
+    typeInput.addEventListener("input", (e) => {
+        lastAnswer = e.target.value;
+        updateSubmitState();
+    });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -912,6 +934,24 @@ let isProcessingFrame = false;
 
 async function startContinuousAnalysis() {
     if (isAnalyzingContinuous || !mediaStream) return;
+    
+    // Wait for video to be ready
+    const video = videoPreview;
+    if (video.readyState !== HTMLMediaElement.HAVE_ENOUGH_DATA) {
+        blSummary.textContent = "⏳ Waiting for video feed…";
+        show(blSummary);
+        
+        let retries = 0;
+        while (video.readyState !== HTMLMediaElement.HAVE_ENOUGH_DATA && retries < 30) {
+            await new Promise(r => setTimeout(r, 100));
+            retries++;
+        }
+        
+        if (video.readyState !== HTMLMediaElement.HAVE_ENOUGH_DATA) {
+            blSummary.textContent = "❌ Video feed not ready";
+            return;
+        }
+    }
     
     isAnalyzingContinuous = true;
     setLiveAnalysisState(true);
@@ -1027,7 +1067,7 @@ function startFrameCapture() {
         
         try {
             const video = videoPreview;
-            if (video.videoWidth === 0 || video.videoHeight === 0) {
+            if (!video || video.readyState !== HTMLMediaElement.HAVE_ENOUGH_DATA || video.videoWidth === 0 || video.videoHeight === 0) {
                 isProcessingFrame = false;
                 return;
             }
@@ -1308,8 +1348,12 @@ async function showReport() {
 
 
 function renderReport(r) {
+    currentReportId = r.report_id || null;
     reportSub.textContent = `Candidate: ${r.name || "—"} | Role: ${r.role} | Questions answered: ${r.total_answered}`;
-
+    if (downloadReportBtn) {
+        downloadReportBtn.classList.toggle("hidden", !r.pdf_available);
+        downloadReportBtn.dataset.reportId = r.report_id || "";
+    }
     reportScores.innerHTML = `
         <div class="score-card">
             <div class="value" style="color:var(--accent)">${r.overall}</div>
@@ -1364,6 +1408,67 @@ function toggleBreakdown(header) {
     body.classList.toggle("open");
 }
 
+async function downloadReportPdf(reportId) {
+    if (!reportId) {
+        return alert("Report download is not available.");
+    }
+    try {
+        const blob = await apiDownload(`/api/user/reports/${reportId}/download`);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `interview_report_${reportId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        alert("Could not download PDF: " + e.message);
+    }
+}
+
+function renderReportsHistory(reports) {
+    if (!reports || !reports.length) {
+        reportsList.innerHTML = `<div class="panel" style="padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);">No saved reports were found. Complete an interview while signed in and return to see your reports here.</div>`;
+        return;
+    }
+
+    reportsList.innerHTML = reports
+        .map((report) => {
+            const date = report.created_at ? new Date(report.created_at).toLocaleString() : "Unknown date";
+            return `
+            <div class="panel" style="padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);">
+                <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; flex-wrap:wrap;">
+                    <div>
+                        <div style="font-weight:700; margin-bottom:0.25rem;">${report.role || "Interview Report"}</div>
+                        <div style="font-size:0.9rem; color:var(--muted);">${report.candidate_name || "Candidate"} · ${date}</div>
+                    </div>
+                    <div style="text-align:right; min-width:150px;">
+                        <div style="font-size:1.4rem; font-weight:700; color:var(--accent);">${report.overall_score ?? "—"}</div>
+                        <div style="font-size:0.85rem; color:var(--muted);">Overall Score</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1rem;">
+                    <button class="act-btn act-btn--submit download-saved-report" data-report-id="${report.id}" style="min-width:150px;">Download PDF</button>
+                    <div style="padding:0.75rem 1rem; background: rgba(255,255,255,0.04); border-radius: var(--r-sm); flex:1; min-width:220px;">
+                        <div style="font-size:0.85rem; color:var(--muted);">Tech ${report.avg_technical ?? "—"} · Comm ${report.avg_communication ?? "—"} · Conf ${report.avg_confidence ?? "—"}</div>
+                    </div>
+                </div>
+            </div>`;
+        })
+        .join("");
+}
+
+async function showSavedReports() {
+    try {
+        const data = await api("/api/user/reports");
+        renderReportsHistory(data.reports || []);
+        switchView(reportsHistoryView);
+    } catch (e) {
+        alert("Could not load saved reports: " + e.message);
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  NEW INTERVIEW
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1375,5 +1480,31 @@ if (newInterviewBtn) {
         bodyLanguageData = null;
         switchView(welcomeView);
         setStatus(false);
+    });
+}
+
+if (downloadReportBtn) {
+    downloadReportBtn.addEventListener("click", () => {
+        const reportId = downloadReportBtn.dataset.reportId;
+        downloadReportPdf(reportId);
+    });
+}
+
+if (openReportsBtn) {
+    openReportsBtn.addEventListener("click", showSavedReports);
+}
+
+if (backToReportsBtn) {
+    backToReportsBtn.addEventListener("click", () => {
+        switchView(reportView);
+    });
+}
+
+if (reportsList) {
+    reportsList.addEventListener("click", (event) => {
+        const button = event.target.closest(".download-saved-report");
+        if (!button) return;
+        const reportId = button.dataset.reportId;
+        downloadReportPdf(reportId);
     });
 }
