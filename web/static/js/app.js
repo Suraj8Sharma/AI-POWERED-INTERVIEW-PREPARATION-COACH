@@ -57,6 +57,11 @@ const sendTypedBtn    = $("sendTypedBtn");
 const submitBtn       = $("submitBtn");
 const nextBtn         = $("nextBtn");
 const repeatBtn       = $("repeatBtn");
+const codeToggleBtn   = $("codeToggleBtn");
+const codingWorkspace = $("codingWorkspace");
+const codeLangSelect  = $("codeLangSelect");
+const resetCodeBtn    = $("resetCodeBtn");
+const monacoContainer = $("monacoEditorContainer");
 
 // Feedback
 const feedbackContent = $("feedbackContent");
@@ -96,19 +101,190 @@ let recognitionRestartRequested = false;
 let liveTranscriptFinal = "";
 let currentReportId = null;
 
+// Monaco Editor state
+let preploomCodeEditor = null;
+let monacoEditorReady = false;
+let isCodeEditorVisible = false;
+
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Helpers
 // ═══════════════════════════════════════════════════════════════════════════
-function show(el)   { el.classList.remove("hidden"); }
-function hide(el)   { el.classList.add("hidden"); }
+function show(el)   { if (el) el.classList.remove("hidden"); }
+function hide(el)   { if (el) el.classList.add("hidden"); }
 function scoreColor(s) { return s >= 70 ? "green" : s >= 45 ? "amber" : "red"; }
 function formatClock(totalSeconds) {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Coding Question Detection (mirrors backend _is_coding logic)
+// ═══════════════════════════════════════════════════════════════════════════
+function isCodingQuestion(q) {
+    if (!q) return false;
+    const text = (q.question_text || "").toLowerCase();
+    const topic = (q.subtopic || "").toLowerCase();
+
+    const codingTopics = [
+        "arrays & hashing", "two pointers", "linked lists", "stacks",
+        "dynamic programming", "binary search", "trees"
+    ];
+    if (codingTopics.some(ct => topic.includes(ct))) return true;
+
+    const phrases = [
+        "write a function", "given an array", "singly linked list",
+        "given the root", "linked list", "integer array", "return an array",
+        "implement a", "write code", "write a program", "write a method",
+        "coding question", "algorithm"
+    ];
+    return phrases.some(p => text.includes(p));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Monaco Editor Initialization & Controls
+// ═══════════════════════════════════════════════════════════════════════════
+const CODE_TEMPLATES = {
+    python: '# Write your solution here\ndef solution():\n    pass\n',
+    javascript: '// Write your solution here\nfunction solution() {\n    \n}\n',
+    java: '// Write your solution here\npublic class Solution {\n    public static void main(String[] args) {\n        \n    }\n}\n',
+    cpp: '// Write your solution here\n#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}\n',
+    c: '// Write your solution here\n#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}\n',
+    typescript: '// Write your solution here\nfunction solution(): void {\n    \n}\n',
+    go: '// Write your solution here\npackage main\n\nfunc main() {\n    \n}\n',
+    rust: '// Write your solution here\nfn main() {\n    \n}\n',
+};
+
+function getMonacoLang(value) {
+    const map = { python: 'python', javascript: 'javascript', java: 'java', cpp: 'cpp', c: 'c', typescript: 'typescript', go: 'go', rust: 'rust' };
+    return map[value] || 'python';
+}
+
+function initMonacoEditor(lang = 'python') {
+    if (!monacoContainer) return;
+    if (typeof monaco === 'undefined') {
+        console.warn('Monaco editor not loaded yet');
+        return;
+    }
+
+    if (preploomCodeEditor) {
+        // Editor already exists, just update language
+        const model = preploomCodeEditor.getModel();
+        if (model) monaco.editor.setModelLanguage(model, getMonacoLang(lang));
+        return;
+    }
+
+    const isDark = document.documentElement.classList.contains('theme-dark') ||
+                   !document.documentElement.classList.contains('theme-light');
+
+    preploomCodeEditor = monaco.editor.create(monacoContainer, {
+        value: CODE_TEMPLATES[lang] || CODE_TEMPLATES.python,
+        language: getMonacoLang(lang),
+        theme: isDark ? 'vs-dark' : 'vs',
+        fontSize: 14,
+        fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        lineNumbers: 'on',
+        roundedSelection: true,
+        automaticLayout: true,
+        padding: { top: 12, bottom: 12 },
+        wordWrap: 'on',
+        tabSize: 4,
+        insertSpaces: true,
+        suggestOnTriggerCharacters: true,
+        quickSuggestions: true,
+    });
+
+    monacoEditorReady = true;
+
+    // Update submit state when code changes
+    preploomCodeEditor.onDidChangeModelContent(() => {
+        updateSubmitState();
+    });
+}
+
+function showCodeEditor() {
+    if (!codingWorkspace) return;
+    codingWorkspace.classList.remove('hidden');
+    codingWorkspace.classList.add('slide-in');
+    isCodeEditorVisible = true;
+    if (codeToggleBtn) codeToggleBtn.classList.add('code-editor-active');
+
+    const lang = codeLangSelect ? codeLangSelect.value : 'python';
+    // Initialize Monaco after a brief delay to let the container become visible
+    setTimeout(() => {
+        initMonacoEditor(lang);
+        if (preploomCodeEditor) preploomCodeEditor.layout();
+    }, 100);
+}
+
+function hideCodeEditor() {
+    if (!codingWorkspace) return;
+    codingWorkspace.classList.add('hidden');
+    codingWorkspace.classList.remove('slide-in');
+    isCodeEditorVisible = false;
+    if (codeToggleBtn) codeToggleBtn.classList.remove('code-editor-active');
+}
+
+function resetCodeEditor() {
+    if (!preploomCodeEditor) return;
+    const lang = codeLangSelect ? codeLangSelect.value : 'python';
+    preploomCodeEditor.setValue(CODE_TEMPLATES[lang] || CODE_TEMPLATES.python);
+}
+
+// Language selector change
+if (codeLangSelect) {
+    codeLangSelect.addEventListener('change', () => {
+        const lang = codeLangSelect.value;
+        if (preploomCodeEditor) {
+            const model = preploomCodeEditor.getModel();
+            if (model && typeof monaco !== 'undefined') {
+                monaco.editor.setModelLanguage(model, getMonacoLang(lang));
+            }
+            // Only reset if the editor has default/template content
+            const currentVal = preploomCodeEditor.getValue().trim();
+            const isTemplate = Object.values(CODE_TEMPLATES).some(t => t.trim() === currentVal);
+            if (!currentVal || isTemplate) {
+                preploomCodeEditor.setValue(CODE_TEMPLATES[lang] || CODE_TEMPLATES.python);
+            }
+        }
+    });
+}
+
+// Reset button
+if (resetCodeBtn) {
+    resetCodeBtn.addEventListener('click', () => {
+        if (confirm('Reset editor to template code?')) {
+            resetCodeEditor();
+        }
+    });
+}
+
+// Code editor toggle button
+if (codeToggleBtn) {
+    codeToggleBtn.addEventListener('click', () => {
+        if (isCodeEditorVisible) {
+            hideCodeEditor();
+        } else {
+            showCodeEditor();
+        }
+    });
+}
+
+// Theme sync for Monaco
+function syncMonacoTheme() {
+    if (!preploomCodeEditor || typeof monaco === 'undefined') return;
+    const isDark = document.documentElement.classList.contains('theme-dark') ||
+                   !document.documentElement.classList.contains('theme-light');
+    monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs');
+}
+
+// Watch for theme changes
+const themeObserver = new MutationObserver(() => syncMonacoTheme());
+themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
 const PREPLOOM_TOKEN_KEY = "preploom_token";
 
@@ -365,12 +541,9 @@ function applyAppSettings() {
             showIdealCheck.checked = prefs.prefIdeal;
         }
 
-        // 4. Code editor
+        // 4. Code editor preference (stored for use when coding questions appear)
         if (prefs.prefCode !== undefined) {
-            const editorCheck = $("showEditorCheck");
-            if (editorCheck) editorCheck.checked = prefs.prefCode;
-            const codingWorkspace = $("codingWorkspace");
-            if (codingWorkspace) codingWorkspace.classList.toggle('hidden', !prefs.prefCode);
+            window.__prefCodeEditor = prefs.prefCode;
         }
 
         // 5. Live transcript preview
@@ -481,6 +654,19 @@ function renderQuestion(q) {
     kpiQ.textContent     = (q.index + 1) + "/" + totalQuestions;
     kpiLevel.textContent = q.difficulty_level;
     kpiTopic.textContent = q.subtopic;
+
+    // Always show the code editor toggle button so users can open it on any question
+    if (codeToggleBtn) {
+        show(codeToggleBtn);
+        codeToggleBtn.textContent = '💻 Code Editor';
+    }
+
+    // Auto-detect coding questions and open the editor automatically
+    if (isCodingQuestion(q)) {
+        showCodeEditor();
+    } else {
+        hideCodeEditor();
+    }
 }
 
 function resetInterviewUI() {
@@ -504,6 +690,10 @@ function resetInterviewUI() {
     stopRecordingTimer();
     setRecordingUI(false);
 
+    // Reset code editor content but keep the toggle button visible
+    hideCodeEditor();
+    resetCodeEditor();
+
     if (isAnalyzingContinuous) {
         stopContinuousAnalysis();
     }
@@ -520,13 +710,19 @@ function enableControls(on) {
     repeatBtn.disabled  = !on;
     setSpeakButtonState(false);
     setLiveAnalysisState(isAnalyzingContinuous);
+
+    // Always show the code editor toggle when interview is active
+    if (on && codeToggleBtn) show(codeToggleBtn);
+    if (!on && codeToggleBtn) hide(codeToggleBtn);
 }
 
 function updateSubmitState() {
     let codeSubmission = "";
-    const codingWorkspace = document.getElementById('codingWorkspace');
-    if (codingWorkspace && !codingWorkspace.classList.contains('hidden') && typeof preploomCodeEditor !== 'undefined') {
+    if (isCodeEditorVisible && preploomCodeEditor) {
         codeSubmission = preploomCodeEditor.getValue();
+        // Don't count template code as a valid submission
+        const isTemplate = Object.values(CODE_TEMPLATES).some(t => t.trim() === codeSubmission.trim());
+        if (isTemplate) codeSubmission = "";
     }
     submitBtn.disabled = isRecording || (!lastAnswer.trim() && !codeSubmission.trim());
 }
@@ -1084,9 +1280,11 @@ if (continuousAnalysisBtn) {
 if (submitBtn) {
     submitBtn.addEventListener("click", async () => {
     let codeSubmission = "";
-    const codingWorkspace = document.getElementById('codingWorkspace');
-    if (codingWorkspace && !codingWorkspace.classList.contains('hidden') && typeof preploomCodeEditor !== 'undefined') {
+    if (isCodeEditorVisible && preploomCodeEditor) {
         codeSubmission = preploomCodeEditor.getValue();
+        // Don't count template code as actual submission
+        const isTemplate = Object.values(CODE_TEMPLATES).some(t => t.trim() === codeSubmission.trim());
+        if (isTemplate) codeSubmission = "";
     }
 
     if ((!lastAnswer.trim() && !codeSubmission.trim()) || !sessionId) return;

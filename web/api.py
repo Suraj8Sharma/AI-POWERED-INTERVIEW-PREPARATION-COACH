@@ -222,9 +222,10 @@ async def start_interview(
         questions = fetch_questions_for_role_random_mix(
             vectordb=vectordb,
             role_tag=role,
-            technical_min=6,
+            technical_min=7,
             technical_max=7,
             behavioural_count=3,
+            coding_count=2,
             seed=None,
         )
     except Exception as e:

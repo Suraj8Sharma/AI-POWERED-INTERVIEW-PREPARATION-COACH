@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="About PrepLoom — Our mission is to make rigorous, calm interview practice accessible before the high-stakes moment." />
+    <meta name="description"
+        content="About PrepLoom — Our mission is to make rigorous, calm interview practice accessible before the high-stakes moment." />
     <title>About — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <link rel="stylesheet" href="/static/css/layout.css" />
     <style>
@@ -17,16 +21,18 @@
             padding: 3.5rem 0 3rem;
             overflow: hidden;
         }
+
         .about-hero__bg {
             position: absolute;
             inset: 0;
             pointer-events: none;
             z-index: 0;
             background:
-                radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108,99,255,0.28), transparent),
-                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(45,212,191,0.1), transparent),
-                radial-gradient(ellipse 40% 30% at 10% 60%, rgba(108,99,255,0.08), transparent);
+                radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108, 99, 255, 0.28), transparent),
+                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(45, 212, 191, 0.1), transparent),
+                radial-gradient(ellipse 40% 30% at 10% 60%, rgba(108, 99, 255, 0.08), transparent);
         }
+
         .about-hero__noise {
             position: absolute;
             inset: 0;
@@ -36,10 +42,12 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 200px 200px;
         }
+
         .about-hero__inner {
             position: relative;
             z-index: 1;
         }
+
         .about-hero__eyebrow {
             display: inline-flex;
             align-items: center;
@@ -51,29 +59,44 @@
             color: var(--pl-teal);
             margin-bottom: 1rem;
             padding: 0.35rem 0.9rem;
-            border: 1px solid rgba(45,212,191,0.2);
+            border: 1px solid rgba(45, 212, 191, 0.2);
             border-radius: 999px;
-            background: rgba(45,212,191,0.07);
+            background: rgba(45, 212, 191, 0.07);
             animation: fadeDown 0.6s ease both;
         }
+
         .about-hero__eyebrow .dot {
-            width: 6px; height: 6px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: var(--pl-teal);
             animation: blink 2s ease-in-out infinite;
         }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.3
+            }
+        }
+
         .about-hero h1 {
             font-family: 'Fraunces', serif;
             font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 650;
             letter-spacing: -0.03em;
-            background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.72) 100%);
+            background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0.72) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 0.75rem;
         }
+
         .about-hero p {
             color: var(--pl-muted);
             font-size: 1.02rem;
@@ -88,25 +111,30 @@
             gap: 1rem;
             margin-bottom: 2rem;
         }
+
         .team-flipcard {
             perspective: 1000px;
             height: 220px;
             cursor: pointer;
         }
+
         .team-flipcard__inner {
             position: relative;
             width: 100%;
             height: 100%;
-            transition: transform 0.65s cubic-bezier(0.4,0,0.2,1);
+            transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
+
         /* Added Hover Flip Trigger */
         .team-flipcard:hover .team-flipcard__inner,
         .team-flipcard:focus-within .team-flipcard__inner,
-        .team-flipcard.flipped .team-flipcard__inner { 
-            transform: rotateY(180deg); 
+        .team-flipcard.flipped .team-flipcard__inner {
+            transform: rotateY(180deg);
         }
-        .team-flipcard__front, .team-flipcard__back {
+
+        .team-flipcard__front,
+        .team-flipcard__back {
             position: absolute;
             inset: 0;
             backface-visibility: hidden;
@@ -119,25 +147,33 @@
             justify-content: center;
             height: 100%;
         }
+
         .team-flipcard__front {
-            background: rgba(14,16,24,0.75);
+            background: rgba(14, 16, 24, 0.75);
             transition: border-color 0.2s;
         }
-        .team-flipcard:hover .team-flipcard__front { border-color: rgba(108,99,255,0.25); }
+
+        .team-flipcard:hover .team-flipcard__front {
+            border-color: rgba(108, 99, 255, 0.25);
+        }
+
         .team-flipcard__back {
-            background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(45,212,191,0.05));
-            border-color: rgba(108,99,255,0.2);
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(45, 212, 191, 0.05));
+            border-color: rgba(108, 99, 255, 0.2);
             transform: rotateY(180deg);
         }
+
         .team-flipcard.mentor .team-flipcard__back {
-            background: linear-gradient(135deg, rgba(45,212,191,0.15), rgba(108,99,255,0.08));
-            border-color: rgba(45,212,191,0.3);
+            background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(108, 99, 255, 0.08));
+            border-color: rgba(45, 212, 191, 0.3);
         }
+
         .team-flipcard__icon {
             font-size: 2.2rem;
             margin-bottom: 0.75rem;
             text-align: center;
         }
+
         .team-flipcard__name {
             font-size: 1.15rem;
             font-weight: 700;
@@ -145,19 +181,22 @@
             text-align: center;
             margin-bottom: 0.25rem;
         }
+
         .team-flipcard__role {
             font-size: 0.85rem;
             color: var(--pl-muted);
             text-align: center;
             margin-bottom: 0.75rem;
         }
+
         .team-flipcard__hint {
             font-size: 0.75rem;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             text-align: center;
             letter-spacing: 0.05em;
             margin-top: auto;
         }
+
         .team-flipcard__email {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
@@ -165,10 +204,11 @@
             text-align: center;
             margin-bottom: 1rem;
             word-break: break-all;
-            background: rgba(45,212,191,0.1);
+            background: rgba(45, 212, 191, 0.1);
             padding: 0.25rem;
             border-radius: 4px;
         }
+
         .team-flipcard__bio {
             font-size: 0.85rem;
             color: var(--pl-text);
@@ -178,9 +218,10 @@
         }
 
         /* Content cards like revision */
-        .about-section { 
-            margin-bottom: 3.5rem; 
+        .about-section {
+            margin-bottom: 3.5rem;
         }
+
         .about-section-title {
             font-size: 1.45rem;
             font-weight: 700;
@@ -189,46 +230,53 @@
             color: var(--pl-text);
             animation: fadeUp 0.6s ease both;
         }
-        .about-section-sub { 
-            color: var(--pl-muted); 
-            font-size: 0.9rem; 
+
+        .about-section-sub {
+            color: var(--pl-muted);
+            font-size: 0.9rem;
             margin-bottom: 2rem;
             animation: fadeUp 0.6s ease 0.1s both;
         }
+
         .about-card {
             padding: 1.5rem;
             border-radius: 14px;
             border: 1px solid var(--pl-border);
-            background: rgba(14,16,24,0.6);
+            background: rgba(14, 16, 24, 0.6);
             transition: transform 0.2s, border-color 0.2s;
             animation: fadeUp 0.6s ease 0.2s both;
         }
-        .about-card:hover { 
-            transform: translateY(-2px); 
-            border-color: rgba(108,99,255,0.2); 
+
+        .about-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(108, 99, 255, 0.2);
         }
+
         .about-card__head {
             display: flex;
             align-items: center;
             gap: 0.75rem;
             margin-bottom: 1rem;
         }
+
         .about-card__icon {
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
             flex-shrink: 0;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
         }
-        .about-card h3 { 
-            font-size: 1.1rem; 
-            font-weight: 700; 
-            margin-bottom: 0.4rem; 
+
+        .about-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
         }
-        
+
         /* New lists for content enrichment */
         .about-list {
             list-style: none;
@@ -238,6 +286,7 @@
             flex-direction: column;
             gap: 0.75rem;
         }
+
         .about-list li {
             position: relative;
             padding-left: 1.75rem;
@@ -245,6 +294,7 @@
             color: var(--pl-muted);
             line-height: 1.5;
         }
+
         .about-list li::before {
             content: '→';
             position: absolute;
@@ -253,217 +303,265 @@
             font-family: 'JetBrains Mono', monospace;
             font-weight: bold;
         }
+
         .about-list strong {
             color: var(--pl-text);
             font-weight: 600;
         }
 
         /* ── Dropdown Menu ── */
-        .user-dropdown-menu.show { display: flex !important; }
-        .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
+        .user-dropdown-menu.show {
+            display: flex !important;
+        }
+
+        .nav-user-email::after {
+            content: '▼';
+            font-size: 0.6rem;
+            opacity: 0.7;
+            margin-left: 0.3rem;
+            display: inline-block;
+            vertical-align: middle;
+        }
     </style>
     <link rel="stylesheet" href="/static/css/future-pages.css" />
 </head>
+
 <body class="site future-page future-page--about">
-<div class="site-wrap">
+    <div class="site-wrap">
 
-    <main class="site-main">
-        <div class="about-hero hero-parallax-container">
-            <canvas id="heroParticles" class="hero-particles" aria-hidden="true"></canvas>
-            <div class="hero-mesh" aria-hidden="true"></div>
-            <div class="about-hero__bg" aria-hidden="true"></div>
-            <div class="about-hero__noise" aria-hidden="true"></div>
+        <main class="site-main">
+            <div class="about-hero hero-parallax-container">
+                <canvas id="heroParticles" class="hero-particles" aria-hidden="true"></canvas>
+                <div class="hero-mesh" aria-hidden="true"></div>
+                <div class="about-hero__bg" aria-hidden="true"></div>
+                <div class="about-hero__noise" aria-hidden="true"></div>
 
-            <!-- Telemetry-style status elements -->
-            <div class="telemetry-card telemetry-card--north" data-parallax="15" style="top: 15%; left: 10%;">
-                <span class="telemetry-card__label">Project Signal</span>
-                <div class="telemetry-card__bars">
-                    <div class="telemetry-card__bar">
-                        <div class="telemetry-card__bar-label"><span>Completeness</span><span>94%</span></div>
-                        <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 94%"></span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="telemetry-card telemetry-card--south" data-parallax="25" style="bottom: 20%; right: 12%;">
-                <span class="telemetry-card__label">System Health</span>
-                <div class="telemetry-card__grid">
-                    <div class="telemetry-card__stat"><strong>OK</strong><span>API</span></div>
-                    <div class="telemetry-card__stat"><strong>OK</strong><span>AI</span></div>
-                </div>
-            </div>
-
-            <div class="about-hero__inner">
-            <div class="about-hero__eyebrow" data-animate="down">
-                <span class="dot"></span>
-                Meet the builders
-            </div>
-            <h1 data-animate="up" data-delay="100">About PrepLoom</h1>
-            <p data-animate="up" data-delay="200">We believe preparation should feel focused and repeatable—not frantic. PrepLoom is a capstone-grade workspace for mock interviews: technical depth, how you sound, and how you show up.</p>
-            </div>
-        </div>
-
-        <section class="about-section" data-animate="up">
-            <h2 class="about-section-title">Our Building Team</h2>
-            <p class="about-section-sub">The developers, designers, and minds behind PrepLoom. Proudly built as a capstone project.</p>
-
-            <div class="team-grid" data-animate="up" data-delay="100">
-                
-                <div class="team-flipcard mentor" tabindex="0">
-                    <div class="team-flipcard__inner">
-                        <div class="team-flipcard__front">
-                            <div class="team-flipcard__icon">👩‍🏫</div>
-                            <div class="team-flipcard__name">Professor Er. Aditi Mahajan</div>
-                            <div class="team-flipcard__role">Mentor & Guide</div>
-                            <div class="team-flipcard__hint">Hover to flip ⤵</div>
-                        </div>
-                        <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">aditi.mahajan@example.edu</div>
-                            <div class="team-flipcard__bio">Providing academic guidance, evaluating project milestones, and steering our capstone direction.</div>
+                <!-- Telemetry-style status elements -->
+                <div class="telemetry-card telemetry-card--north" data-parallax="15" style="top: 15%; left: 10%;">
+                    <span class="telemetry-card__label">Project Signal</span>
+                    <div class="telemetry-card__bars">
+                        <div class="telemetry-card__bar">
+                            <div class="telemetry-card__bar-label"><span>Completeness</span><span>94%</span></div>
+                            <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill"
+                                    style="width: 94%"></span></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="team-flipcard" tabindex="0">
-                    <div class="team-flipcard__inner">
-                        <div class="team-flipcard__front">
-                            <div class="team-flipcard__icon">👩‍💻</div>
-                            <div class="team-flipcard__name">Ishani Verma</div>
-                            <div class="team-flipcard__role">Full Stack Developer</div>
-                            <div class="team-flipcard__hint">Hover to flip ⤵</div>
-                        </div>
-                        <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">ishani@preploom.dev</div>
-                            <div class="team-flipcard__bio">Driving core frontend features and ensuring robust backend integration across the stack.</div>
-                        </div>
+                <div class="telemetry-card telemetry-card--south" data-parallax="25" style="bottom: 20%; right: 12%;">
+                    <span class="telemetry-card__label">System Health</span>
+                    <div class="telemetry-card__grid">
+                        <div class="telemetry-card__stat"><strong>OK</strong><span>API</span></div>
+                        <div class="telemetry-card__stat"><strong>OK</strong><span>AI</span></div>
                     </div>
                 </div>
 
-                <div class="team-flipcard" tabindex="0">
-                    <div class="team-flipcard__inner">
-                        <div class="team-flipcard__front">
-                            <div class="team-flipcard__icon">👩‍💻</div>
-                            <div class="team-flipcard__name">Shivangi Ranout</div>
-                            <div class="team-flipcard__role">UI/UX Designer</div>
-                            <div class="team-flipcard__hint">Hover to flip ⤵</div>
-                        </div>
-                        <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">shivangi@preploom.dev</div>
-                            <div class="team-flipcard__bio">Crafting the design system, visual identity, and ensuring intuitive user journeys.</div>
-                        </div>
+                <div class="about-hero__inner">
+                    <div class="about-hero__eyebrow" data-animate="down">
+                        <span class="dot"></span>
+                        Meet the builders
                     </div>
+                    <h1 data-animate="up" data-delay="100">About PrepLoom</h1>
+                    <p data-animate="up" data-delay="200">We believe preparation should feel focused and repeatable—not
+                        frantic. PrepLoom is a capstone-grade workspace for mock interviews: technical depth, how you
+                        sound, and how you show up.</p>
                 </div>
-
-                <div class="team-flipcard" tabindex="0">
-                    <div class="team-flipcard__inner">
-                        <div class="team-flipcard__front">
-                            <div class="team-flipcard__icon">👩‍💻</div>
-                            <div class="team-flipcard__name">Sanskriti Sharma</div>
-                            <div class="team-flipcard__role">Frontend Specialist</div>
-                            <div class="team-flipcard__hint">Hover to flip ⤵</div>
-                        </div>
-                        <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">sanskriti@preploom.dev</div>
-                            <div class="team-flipcard__bio">Building responsive layouts, interactive components, and our smooth CSS animations.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-flipcard" tabindex="0">
-                    <div class="team-flipcard__inner">
-                        <div class="team-flipcard__front">
-                            <div class="team-flipcard__icon">👨‍💻</div>
-                            <div class="team-flipcard__name">Suraj Sharma</div>
-                            <div class="team-flipcard__role">Backend Dev & AI Lead</div>
-                            <div class="team-flipcard__hint">Hover to flip ⤵</div>
-                        </div>
-                        <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">suraj@preploom.dev</div>
-                            <div class="team-flipcard__bio">Architecting scalable API endpoints, complex LLM feedback pipelines, and real-time OpenCV integrations.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-flipcard" tabindex="0">
-                    <div class="team-flipcard__inner">
-                        <div class="team-flipcard__front">
-                            <div class="team-flipcard__icon">👨‍💻</div>
-                            <div class="team-flipcard__name">Jigyasu</div>
-                            <div class="team-flipcard__role">DevOps & Integration</div>
-                            <div class="team-flipcard__hint">Hover to flip ⤵</div>
-                        </div>
-                        <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">jigyasu@preploom.dev</div>
-                            <div class="team-flipcard__bio">Managing deployment workflows, system reliability, and streamlining cloud hosting environments.</div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </section>
 
-        <section class="about-section" data-animate="up">
-            <h2 class="about-section-title">Our Mission</h2>
-            <p class="about-section-sub">Give candidates a single place to rehearse under pressure.</p>
-            <div class="about-card">
-                <div class="about-card__head">
-                    <div class="about-card__icon">🎯</div>
-                    <h3 style="margin:0;">Focused Practice</h3>
+            <section class="about-section" data-animate="up">
+                <h2 class="about-section-title">Our Building Team</h2>
+                <p class="about-section-sub">The developers, designers, and minds behind PrepLoom. Proudly built as a
+                    capstone project.</p>
+
+                <div class="team-grid" data-animate="up" data-delay="100">
+
+                    <div class="team-flipcard mentor" tabindex="0">
+                        <div class="team-flipcard__inner">
+                            <div class="team-flipcard__front">
+                                <div class="team-flipcard__icon">👩‍🏫</div>
+                                <div class="team-flipcard__name">Professor Er. Aditi Mahajan</div>
+                                <div class="team-flipcard__role">Project Mentor & Technical Advisor</div>
+                                <div class="team-flipcard__hint">Hover to flip ⤵</div>
+                            </div>
+                            <div class="team-flipcard__back">
+                                <div class="team-flipcard__email">aditi.mahajan@example.edu</div>
+                                <div class="team-flipcard__bio"> Serves as the strategic visionary and technical anchor
+                                    for the entire development team. Provided critical academic
+                                    oversight and guided the integration of full-stack systems and advanced AI models.
+                                    By offering time-to-time engineering feedback,she ensured the project met rigorous
+                                    technical
+                                    standards and successfully achieved its development milestones.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-flipcard" tabindex="0">
+                        <div class="team-flipcard__inner">
+                            <div class="team-flipcard__front">
+                                <div class="team-flipcard__icon">👩‍💻</div>
+                                <div class="team-flipcard__name">Ishani Verma</div>
+                                <div class="team-flipcard__role">AI & Video Analytics developer</div>
+                                <div class="team-flipcard__hint">Hover to flip ⤵</div>
+                            </div>
+                            <div class="team-flipcard__back">
+                                <div class="team-flipcard__email">ishani@preploom.dev</div>
+                                <div class="team-flipcard__bio">Contributor to our project's core intelligence and
+                                    technical framework. She engineered our real-time
+                                    video analysis system using OpenCV and MediaPipe, enabling advanced visual tracking
+                                    and data extraction. Additionally, she is the backend AI architecture
+                                    ensures smooth, high-performance data processing.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-flipcard" tabindex="0">
+                        <div class="team-flipcard__inner">
+                            <div class="team-flipcard__front">
+                                <div class="team-flipcard__icon">👩‍💻</div>
+                                <div class="team-flipcard__name">Shivangi Ranout</div>
+                                <div class="team-flipcard__role">Frontend Developer & Operations Lead</div>
+                                <div class="team-flipcard__hint">Hover to flip ⤵</div>
+                            </div>
+                            <div class="team-flipcard__back">
+                                <div class="team-flipcard__email">shivangi@preploom.dev</div>
+                                <div class="team-flipcard__bio"> Serves as a vital cross-functional contributor,
+                                    driving both the user experience and the project's foundational data. She actively
+                                    developed the frontend interface, transforming project requirements into a
+                                    functional, user-facing application. Alongside she managed all
+                                    critical project documentation required.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-flipcard" tabindex="0">
+                        <div class="team-flipcard__inner">
+                            <div class="team-flipcard__front">
+                                <div class="team-flipcard__icon">👩‍💻</div>
+                                <div class="team-flipcard__name">Sanskriti Sharma</div>
+                                <div class="team-flipcard__role">Frontend Developer & Project Coordinator</div>
+                                <div class="team-flipcard__hint">Hover to flip ⤵</div>
+                            </div>
+                            <div class="team-flipcard__back">
+                                <div class="team-flipcard__email">sanskriti@preploom.dev</div>
+                                <div class="team-flipcard__bio"> Serves as a core driver of our user-facing
+                                    application and operational structure, handling key full-cycle responsibilities. She
+                                    took charge of building out the frontend interface, ensuring a seamless and
+                                    functional user experience. </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-flipcard" tabindex="0">
+                        <div class="team-flipcard__inner">
+                            <div class="team-flipcard__front">
+                                <div class="team-flipcard__icon">👨‍💻</div>
+                                <div class="team-flipcard__name">Suraj Sharma</div>
+                                <div class="team-flipcard__role">Backend Dev & AI Architect</div>
+                                <div class="team-flipcard__hint">Hover to flip ⤵</div>
+                            </div>
+                            <div class="team-flipcard__back">
+                                <div class="team-flipcard__email">suraj@preploom.dev</div>
+                                <div class="team-flipcard__bio"> Architected scalable API endpoints, built complex LLM
+                                    feedback pipelines, and implemented real-time OpenCV integrations to drive core
+                                    system intelligence. Simultaneously,took on full-stack responsibilities by
+                                    developing the frontend application, seamlessly unifying these sophisticated data
+                                    pipelines with a functional, responsive user experience.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="team-flipcard" tabindex="0">
+                        <div class="team-flipcard__inner">
+                            <div class="team-flipcard__front">
+                                <div class="team-flipcard__icon">👨‍💻</div>
+                                <div class="team-flipcard__name">Jigyasu</div>
+                                <div class="team-flipcard__role">Database & Authentication Engineer</div>
+                                <div class="team-flipcard__hint">Hover to flip ⤵</div>
+                            </div>
+                            <div class="team-flipcard__back">
+                                <div class="team-flipcard__email">jigyasu@preploom.dev</div>
+                                <div class="team-flipcard__bio">Handles our system security and data integrity,
+                                    while actively supporting the application's user interface.Engineered the
+                                    database architecture and implemented secure authentication protocols to safeguard
+                                    user data and control system access. Alongside , he regularly contributed to
+                                    frontend development activities, ensuring
+                                    smooth data integration and assisting in time-to-time UI updates.</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                <p style="color: var(--pl-muted); font-size: 0.95rem;">Feedback you can act on the same day—whether you are early in a search or days from a final round.</p>
-                <ul class="about-list">
-                    <li><strong>Real-time awareness:</strong> Connect your camera for posture and presence feedback.</li>
-                    <li><strong>AI-driven insights:</strong> Let the LLM analyze the depth and structure of your answers.</li>
-                    <li><strong>Calm repetitions:</strong> Build muscle memory without the high-stakes anxiety.</li>
-                </ul>
-            </div>
-        </section>
+            </section>
 
-        <section class="about-section" data-animate="up">
-            <h2 class="about-section-title">What's Next</h2>
-            <div class="about-card">
-                <div class="about-card__head">
-                    <div class="about-card__icon">🚀</div>
-                    <h3 style="margin:0;">Coming Soon</h3>
+            <section class="about-section" data-animate="up">
+                <h2 class="about-section-title">Our Mission</h2>
+                <p class="about-section-sub">Give candidates a single place to rehearse under pressure.</p>
+                <div class="about-card">
+                    <div class="about-card__head">
+                        <div class="about-card__icon">🎯</div>
+                        <h3 style="margin:0;">Focused Practice</h3>
+                    </div>
+                    <p style="color: var(--pl-muted); font-size: 0.95rem;">Feedback you can act on the same day—whether
+                        you are early in a search or days from a final round.</p>
+                    <ul class="about-list">
+                        <li><strong>Real-time awareness:</strong> Connect your camera for posture and presence feedback.
+                        </li>
+                        <li><strong>AI-driven insights:</strong> Let the LLM analyze the depth and structure of your
+                            answers.</li>
+                        <li><strong>Calm repetitions:</strong> Build muscle memory without the high-stakes anxiety.</li>
+                    </ul>
                 </div>
-                <p style="color: var(--pl-muted); font-size: 0.95rem;">While the practice room works without a sign-in today, we are actively building out persistent features.</p>
-                <ul class="about-list">
-                    <li><strong>User Accounts:</strong> Securely save your session history and past feedback.</li>
-                    <li><strong>Revision Corner:</strong> Curated technical snippets and cheat sheets to review before testing.</li>
-                    <li><strong>Team Mode:</strong> Collaborative peer-to-peer mock interview scheduling.</li>
-                </ul>
-            </div>
-        </section>
+            </section>
 
-        <section class="about-section" data-animate="up">
-            <h2 class="about-section-title">Get In Touch</h2>
-            <div class="about-card">
-                <div class="about-card__head">
-                    <div class="about-card__icon">📧</div>
-                    <h3 style="margin:0;">Contact</h3>
+            <section class="about-section" data-animate="up">
+                <h2 class="about-section-title">What's Next</h2>
+                <div class="about-card">
+                    <div class="about-card__head">
+                        <div class="about-card__icon">🚀</div>
+                        <h3 style="margin:0;">Coming Soon</h3>
+                    </div>
+                    <p style="color: var(--pl-muted); font-size: 0.95rem;">While the practice room works without a
+                        sign-in today, we are actively building out persistent features.</p>
+                    <ul class="about-list">
+                        <li><strong>User Accounts:</strong> Securely save your session history and past feedback.</li>
+                        <li><strong>Revision Corner:</strong> Curated technical snippets and cheat sheets to review
+                            before testing.</li>
+                        <li><strong>Team Mode:</strong> Collaborative peer-to-peer mock interview scheduling.</li>
+                    </ul>
                 </div>
-                <p style="color: var(--pl-muted); font-size: 0.95rem;">Have questions about the architecture or want to report a bug from a practice run?</p>
-                <ul class="about-list">
-                    <li><strong>Academic Queries:</strong> Please route through official Capstone channels.</li>
-                    <li><strong>Bug Reports:</strong> Reach out to the DevOps or Full Stack leads directly.</li>
-                    <li><strong>Feedback:</strong> We love hearing how the practice room performed for you!</li>
-                </ul>
+            </section>
+
+            <section class="about-section" data-animate="up">
+                <h2 class="about-section-title">Get In Touch</h2>
+                <div class="about-card">
+                    <div class="about-card__head">
+                        <div class="about-card__icon">📧</div>
+                        <h3 style="margin:0;">Contact</h3>
+                    </div>
+                    <p style="color: var(--pl-muted); font-size: 0.95rem;">Have questions about the architecture or want
+                        to report a bug from a practice run?</p>
+                    <ul class="about-list">
+                        <li><strong>Academic Queries:</strong> Please route through official Capstone channels.</li>
+                        <li><strong>Bug Reports:</strong> Reach out to the DevOps or Full Stack leads directly.</li>
+                        <li><strong>Feedback:</strong> We love hearing how the practice room performed for you!</li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="about-cta" data-animate="up">
+                <h2>Ready to practice?</h2>
+                <p>Open the practice room and run a timed mock interview.</p>
+                <a class="btn-hero-primary" href="/app">Start Practice →</a>
             </div>
-        </section>
+        </main>
 
-        <div class="about-cta" data-animate="up">
-            <h2>Ready to practice?</h2>
-            <p>Open the practice room and run a timed mock interview.</p>
-            <a class="btn-hero-primary" href="/app">Start Practice →</a>
-        </div>
-    </main>
+    </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/static/js/supabaseClient.js"></script>
-<script src="/static/js/site.js"></script>
-<script src="/static/js/layout.js"></script>
-<script src="/static/js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/supabaseClient.js"></script>
+    <script src="/static/js/site.js"></script>
+    <script src="/static/js/layout.js"></script>
+    <script src="/static/js/auth.js"></script>
 </body>
+
 </html>

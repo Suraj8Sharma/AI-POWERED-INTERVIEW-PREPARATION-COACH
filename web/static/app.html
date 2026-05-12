@@ -7,6 +7,8 @@
     <title>Practice — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <!-- Monaco Editor CDN -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.min.css" />
     <link rel="stylesheet" href="/static/css/site.css" />
     <style>
 /* ============================================================
@@ -608,9 +610,34 @@ body {
                     <button id="sendTypedBtn" class="act-btn hidden" style="align-self:flex-end;">Send Text</button>
                 </div>
 
+                <!-- Coding Workspace (Monaco Editor) -->
+                <div id="codingWorkspace" class="coding-workspace hidden">
+                    <div class="coding-workspace__header">
+                        <div class="coding-workspace__title">
+                            <span class="coding-workspace__icon">💻</span>
+                            <span>Code Editor</span>
+                        </div>
+                        <div class="coding-workspace__controls">
+                            <select id="codeLangSelect" class="code-lang-select">
+                                <option value="python" selected>Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                                <option value="c">C</option>
+                                <option value="typescript">TypeScript</option>
+                                <option value="go">Go</option>
+                                <option value="rust">Rust</option>
+                            </select>
+                            <button id="resetCodeBtn" class="act-btn act-btn--ghost" style="padding:0.35rem 0.65rem; font-size:0.75rem;" title="Reset editor">🔄 Reset</button>
+                        </div>
+                    </div>
+                    <div id="monacoEditorContainer" class="monaco-editor-container"></div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="action-bar">
                     <button id="speakBtn" class="act-btn"><span id="speakBtnText">🎙️ Speak Answer</span></button>
+                    <button id="codeToggleBtn" class="act-btn act-btn--ghost hidden">💻 Code Editor</button>
                     <button id="submitBtn" class="act-btn act-btn--submit">✅ Submit</button>
                     <button id="nextBtn" class="act-btn act-btn--next" disabled>Next →</button>
                     <button id="repeatBtn" class="act-btn act-btn--ghost">🔁 Repeat</button>
@@ -673,6 +700,11 @@ body {
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
+<!-- Monaco Editor Loader -->
+<script>var require = { paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } };</script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.nls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.js"></script>
 <script src="/static/js/app.js"></script>
 <script>
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
