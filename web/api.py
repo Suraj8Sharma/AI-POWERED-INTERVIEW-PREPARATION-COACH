@@ -29,6 +29,13 @@ from pathlib import Path
 from typing import Any
 from datetime import datetime
 
+# Basic logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
+)
+
 import numpy as np
 from PIL import Image
 from dotenv import load_dotenv
@@ -398,8 +405,8 @@ async def websocket_analyze_posture(websocket: WebSocket):
     """
     await websocket.accept()
     if not VIDEO_MODULES_AVAILABLE:
-        logging.error("Video analysis modules not available")
-        await websocket.send_json({"error": "Video analysis modules not available"})
+        logging.error("Video analysis modules not available. Please install mediapipe.")
+        await websocket.send_json({"error": "Video analysis modules not available. Please install mediapipe."})
         await websocket.close()
         return
 
@@ -444,6 +451,7 @@ async def websocket_analyze_posture(websocket: WebSocket):
                 res["summary"] = f"Live: Openness {o:.0%}, Fidgeting {f:.0%}, Engagement {e:.0%}, Posture {p_:.0%}"
                 return res
             except Exception as e:
+                logging.error(f"Error in process_frame_sync: {e}")
                 return {"error": str(e)}
 
         while True:
@@ -479,15 +487,17 @@ async def websocket_analyze_posture(websocket: WebSocket):
                     logging.error(f"Frame processing error: {e}")
                     await websocket.send_json({"error": f"Frame error: {str(e)}"})
                     if error_count > 50:
+                        logging.error("Too many frame processing errors, closing WebSocket.")
                         break
             except WebSocketDisconnect:
+                logging.info("WebSocket disconnected by client.")
                 break
             except Exception as e:
                 logging.error(f"Loop error: {e}")
                 break
                 
     except WebSocketDisconnect:
-        logging.info("WebSocket disconnected")
+        logging.info("WebSocket disconnected.")
     except Exception as e:
         logging.error(f"WebSocket initialization error: {e}")
         import traceback
@@ -561,7 +571,7 @@ async def get_report(session_id: str, user: dict | None = Depends(get_optional_u
                     report["report_id"] = report.get("id")
                     return report
             except Exception as e:
-                logging.error(f"Error fetching existing report: {e}")
+                logging.error(f"Error fetching existing report: {e}", exc_info=True)
         
         raise HTTPException(404, "Session not found and no saved report exists.")
 
@@ -656,6 +666,8 @@ async def get_report(session_id: str, user: dict | None = Depends(get_optional_u
                 report_data["report_id"] = report_id
         except Exception as e:
             logging.error(f"Failed to save report to Supabase: {e}")
+    else:
+        logging.info("Not authenticated. Report will not be saved.")
 
     return report_data
 
@@ -674,7 +686,8 @@ async def get_user_reports(user: dict | None = Depends(get_optional_user)):
             item["pdf_available"] = bool(item.get("pdf_path"))
         return {"reports": reports}
     except Exception as e:
-        raise HTTPException(500, f"Failed to retrieve reports: {str(e)}")
+        logging.error(f"Failed to retrieve reports for user {user['id']}: {e}", exc_info=True)
+        raise HTTPException(500, "Failed to retrieve reports.")
 
 
 @app.get("/api/user/reports/{report_id}/download")

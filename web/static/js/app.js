@@ -1220,6 +1220,11 @@ async function startContinuousAnalysis() {
         continuousAnalysisSocket.onclose = (event) => {
             console.log("[PrepLoom] Video analysis WebSocket closed:", event.code, event.reason);
             if (isAnalyzingContinuous) {
+                // If an error message is already displayed, don't overwrite it.
+                if (blSummary.textContent.startsWith("⚠️")) {
+                    stopContinuousAnalysis();
+                    return;
+                }
                 // If it wasn't a clean close, show a message but don't loop rapidly
                 if (event.code !== 1000 && event.code !== 1001) {
                     blSummary.textContent = "❌ Connection lost. Re-enabling...";
@@ -1544,6 +1549,16 @@ function renderReport(r) {
     }).join("");
 
     reportTips.innerHTML = r.tips.map(t => `<div class="tip-item">${t}</div>`).join("");
+
+    const reportAuthMessage = document.getElementById("reportAuthMessage");
+    if (reportAuthMessage) {
+        if (!getPreploomToken()) {
+            reportAuthMessage.innerHTML = "This report is not saved. Sign in to save future reports.";
+            reportAuthMessage.style.display = "block";
+        } else {
+            reportAuthMessage.style.display = "none";
+        }
+    }
 }
 
 function toggleBreakdown(header) {
@@ -1600,7 +1615,8 @@ async function showSavedReports() {
         renderReportsHistory(data.reports || []);
         switchView(reportsHistoryView);
     } catch (e) {
-        alert("Could not load saved reports: " + e.message);
+        reportsList.innerHTML = `<div class="panel" style="padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);">Error loading reports: ${e.message}</div>`;
+        switchView(reportsHistoryView);
     }
 }
 
