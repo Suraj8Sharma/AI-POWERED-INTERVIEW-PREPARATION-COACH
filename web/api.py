@@ -21,12 +21,13 @@ import sys
 import uuid
 import time
 import asyncio
+import os
+import base64
+import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
-
-import base64
-import json
+from datetime import datetime
 
 import numpy as np
 from PIL import Image
@@ -36,13 +37,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
-# ...existing code...
-import os
-from fastapi.responses import JSONResponse
-
-# ...existing code (app = FastAPI() etc.) ...
-
-
 
 # ── Path setup (same as frontend.py) ──────────────────────────────────────
 APP_ROOT = Path(__file__).resolve().parents[1]
@@ -57,10 +51,6 @@ from web.auth_routes import get_optional_user, get_supabase_user_from_token, sec
 # Supabase and PDF imports
 from supabase import create_client, Client
 from web.pdf_generator import generate_interview_report_pdf
-import base64
-from datetime import datetime
-
-
 
 from AI_BACKEND.rag_retriever import (
     fetch_questions_for_role_random_mix,
@@ -69,6 +59,19 @@ from AI_BACKEND.rag_retriever import (
 )
 from AI_BACKEND.evaluator import evaluate_technical_answer
 from AI_BACKEND.nlp_analysis import analyze_communication
+
+# Video analysis imports moved to top for performance
+try:
+    from AI_BACKEND.video_capture.video_analysis import (
+        ensure_pose_model_path,
+        BodyLanguageAnalyzer,
+        _np_rgb_to_mp_image
+    )
+    from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions, RunningMode
+    from mediapipe.tasks.python.core import base_options as base_options_lib
+    VIDEO_MODULES_AVAILABLE = True
+except ImportError:
+    VIDEO_MODULES_AVAILABLE = False
 
 # ── Constants ──────────────────────────────────────────────────────────────
 CHROMA_DIR = APP_ROOT / "AI_BACKEND" / "chroma_db"
@@ -392,30 +395,17 @@ async def analyze_posture(image: UploadFile = File(...)):
 async def websocket_analyze_posture(websocket: WebSocket):
     """
     WebSocket endpoint for continuous frame-by-frame posture analysis.
-    
-    Client sends messages with base64-encoded JPEG frames.
-    Server responds with real-time metrics.
-    
-    Message format: {"frame": "base64_jpeg_data"}
-    Response format: {"metrics": {...}, "summary": "...", "timestamp": ...}
     """
     await websocket.accept()
-    frame_count = 0
-    error_count = 0
-    
-    try:
-        from AI_BACKEND.video_capture.video_analysis import (
-            ensure_pose_model_path,
-            BodyLanguageAnalyzer,
-            _np_rgb_to_mp_image
-        )
-        from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions, RunningMode
-        from mediapipe.tasks.python.core import base_options as base_options_lib
-    except ImportError as e:
-        await websocket.send_json({"error": f"Video module import failed: {e}"})
+    if not VIDEO_MODULES_AVAILABLE:
+        logging.error("Video analysis modules not available")
+        await websocket.send_json({"error": "Video analysis modules not available"})
         await websocket.close()
         return
 
+    frame_count = 0
+    error_count = 0
+    
     try:
         model_path = str(ensure_pose_model_path())
         opts = PoseLandmarkerOptions(
@@ -430,83 +420,79 @@ async def websocket_analyze_posture(websocket: WebSocket):
         analyzer = BodyLanguageAnalyzer(history=20)
         frame_timestamp_ms = 0
 
+        # Sync function to process frame, to be run in a thread
+        def process_frame_sync(rgb_data, ts):
+            try:
+                mp_img = _np_rgb_to_mp_image(rgb_data)
+                result = landmarker.detect_for_video(mp_img, ts)
+                if not result.pose_landmarks:
+                    return {
+                        "openness": 0.5, "fidgeting": 0.5, "engagement": 0.5, "posture": 0.5,
+                        "pose_visible_fraction": 0.0,
+                        "summary": "No pose detected. Please ensure your upper body is visible.",
+                    }
+                lm_list = result.pose_landmarks[0]
+                res = analyzer.analyze_pose_landmarks(lm_list)
+                vis_ok = res.get("visibility", 0) >= 0.35
+                res["pose_visible_fraction"] = 1.0 if vis_ok else 0.0
+                
+                o = round(float(res.get("openness", 0.5)), 3)
+                f = round(float(res.get("fidgeting", 0.5)), 3)
+                e = round(float(res.get("engagement", 0.5)), 3)
+                p_ = round(float(res.get("posture", 0.5)), 3)
+                res["probabilities"] = {"openness": o, "fidgeting": f, "engagement": e, "posture": p_}
+                res["summary"] = f"Live: Openness {o:.0%}, Fidgeting {f:.0%}, Engagement {e:.0%}, Posture {p_:.0%}"
+                return res
+            except Exception as e:
+                return {"error": str(e)}
+
         while True:
             try:
-                # Receive frame data
                 data = await websocket.receive_text()
                 msg = json.loads(data)
                 frame_data = msg.get("frame", "")
-                
                 if not frame_data:
-                    await websocket.send_json({"error": "No frame data provided"})
                     continue
                 
-                # Decode base64 JPEG
                 try:
                     image_bytes = base64.b64decode(frame_data)
                     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
                     rgb = np.asarray(img, dtype=np.uint8)
-                except Exception as e:
-                    error_count += 1
-                    await websocket.send_json({"error": f"Could not decode frame: {e}"})
-                    if error_count > 10:
-                        await websocket.close()
-                        break
-                    continue
-                
-                # Analyze pose
-                try:
-                    mp_img = _np_rgb_to_mp_image(rgb)
-                    frame_timestamp_ms += 67  # Approx 15 FPS timing
-                    result = landmarker.detect_for_video(mp_img, frame_timestamp_ms)
                     
-                    if not result.pose_landmarks:
-                        res = {
-                            "openness": 0.5, "fidgeting": 0.5, "engagement": 0.5, "posture": 0.5,
-                            "pose_visible_fraction": 0.0,
-                            "summary": "No pose detected. Please ensure your upper body is visible.",
-                        }
-                    else:
-                        lm_list = result.pose_landmarks[0]
-                        res = analyzer.analyze_pose_landmarks(lm_list)
-                        vis_ok = res.get("visibility", 0) >= 0.35
-                        res["pose_visible_fraction"] = 1.0 if vis_ok else 0.0
-                        
-                        o = round(float(res.get("openness", 0.5)), 3)
-                        f = round(float(res.get("fidgeting", 0.5)), 3)
-                        e = round(float(res.get("engagement", 0.5)), 3)
-                        p_ = round(float(res.get("posture", 0.5)), 3)
-                        res["probabilities"] = {"openness": o, "fidgeting": f, "engagement": e, "posture": p_}
-                        res["summary"] = f"Live: Openness {o:.0%}, Fidgeting {f:.0%}, Engagement {e:.0%}, Posture {p_:.0%}"
-                        
-                    # Add frame counter
+                    frame_timestamp_ms += 67
+                    # Run sync analysis in a thread to keep event loop free
+                    res = await asyncio.to_thread(process_frame_sync, rgb, frame_timestamp_ms)
+                    
+                    if "error" in res:
+                        logging.error(f"Analysis internal error: {res['error']}")
+                        await websocket.send_json(res)
+                        continue
+
                     frame_count += 1
                     res["frame_count"] = frame_count
                     res["timestamp"] = time.time()
-                    
-                    # Send metrics back
                     await websocket.send_json(res)
-                    error_count = 0  # Reset error count on success
+                    error_count = 0
                     
                 except Exception as e:
                     error_count += 1
-                    await websocket.send_json({
-                        "error": f"Analysis failed: {str(e)}",
-                        "frame_count": frame_count,
-                        "timestamp": time.time()
-                    })
-                    if error_count > 10:
-                        await websocket.close()
+                    logging.error(f"Frame processing error: {e}")
+                    await websocket.send_json({"error": f"Frame error: {str(e)}"})
+                    if error_count > 50:
                         break
-                
-            except json.JSONDecodeError:
-                await websocket.send_json({"error": "Invalid JSON format"})
-                continue
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logging.error(f"Loop error: {e}")
+                break
                 
     except WebSocketDisconnect:
-        logging.getLogger("uvicorn.error").info(f"WebSocket disconnected after {frame_count} frames")
+        logging.info("WebSocket disconnected")
     except Exception as e:
-        logging.getLogger("uvicorn.error").error(f"WebSocket error: {e}")
+        logging.error(f"WebSocket initialization error: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
         try:
             await websocket.close()
         except:
@@ -564,7 +550,20 @@ async def get_report(session_id: str, user: dict | None = Depends(get_optional_u
     """Return aggregate report for a finished interview and save to database if user is authenticated."""
     session = _sessions.get(session_id)
     if not session:
-        raise HTTPException(404, "Session not found")
+        # Check if report already exists in DB even if session is gone from memory
+        if user and user.get("id"):
+            try:
+                supabase = get_supabase()
+                existing = supabase.table("interview_reports").select("*").eq("session_id", session_id).eq("user_id", user["id"]).limit(1).execute()
+                if existing.data and len(existing.data) > 0:
+                    report = existing.data[0]
+                    report["pdf_available"] = bool(report.get("pdf_path"))
+                    report["report_id"] = report.get("id")
+                    return report
+            except Exception as e:
+                logging.error(f"Error fetching existing report: {e}")
+        
+        raise HTTPException(404, "Session not found and no saved report exists.")
 
     evals = session["evaluations"]
     if not evals:
@@ -608,6 +607,8 @@ async def get_report(session_id: str, user: dict | None = Depends(get_optional_u
         try:
             supabase = get_supabase()
             user_id = user["id"]
+            logging.info(f"Attempting to save report for user {user_id}, session {session_id}")
+            
             existing = supabase.table("interview_reports").select("id, pdf_path").eq("session_id", session_id).eq("user_id", user_id).limit(1).execute()
             existing_record = (existing.data or [])[0] if existing.data else None
             pdf_path = None
@@ -616,10 +617,17 @@ async def get_report(session_id: str, user: dict | None = Depends(get_optional_u
             if existing_record:
                 report_id = existing_record.get("id")
                 pdf_path = existing_record.get("pdf_path")
+                logging.info(f"Report already exists: {report_id}")
             else:
-                pdf_content = generate_interview_report_pdf(report_data)
-                pdf_path = f"{user_id}/{session_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-                supabase.storage.from_("interview-reports").upload(pdf_path, pdf_content, content_type="application/pdf")
+                try:
+                    pdf_content = generate_interview_report_pdf(report_data)
+                    pdf_path = f"{user_id}/{session_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                    supabase.storage.from_("interview-reports").upload(pdf_path, pdf_content, content_type="application/pdf")
+                    logging.info(f"PDF uploaded to storage: {pdf_path}")
+                except Exception as pdf_err:
+                    logging.error(f"Failed to generate or upload PDF: {pdf_err}")
+                    pdf_path = None
+
                 db_record = {
                     "user_id": user_id,
                     "session_id": session_id,
@@ -634,16 +642,20 @@ async def get_report(session_id: str, user: dict | None = Depends(get_optional_u
                     "tips": tips,
                     "pdf_path": pdf_path,
                 }
+                
                 insert_response = supabase.table("interview_reports").insert(db_record).select("id").execute()
                 new_record = (insert_response.data or [])[0] if insert_response.data else None
                 if new_record:
                     report_id = new_record.get("id")
+                    logging.info(f"Report record inserted: {report_id}")
+                else:
+                    logging.error(f"Failed to insert report record: {insert_response}")
 
             report_data["pdf_available"] = bool(pdf_path)
             if report_id:
                 report_data["report_id"] = report_id
         except Exception as e:
-            print(f"Failed to save report to Supabase: {e}")
+            logging.error(f"Failed to save report to Supabase: {e}")
 
     return report_data
 

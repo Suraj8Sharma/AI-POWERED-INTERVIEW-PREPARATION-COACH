@@ -637,7 +637,7 @@ body {
                 <!-- Action Buttons -->
                 <div class="action-bar">
                     <button id="speakBtn" class="act-btn"><span id="speakBtnText">🎙️ Speak Answer</span></button>
-                    <button id="codeToggleBtn" class="act-btn act-btn--ghost hidden">💻 Code Editor</button>
+                    <button id="codeToggleBtn" class="act-btn act-btn--ghost code-toggle-btn hidden">💻 Code Editor</button>
                     <button id="submitBtn" class="act-btn act-btn--submit">✅ Submit</button>
                     <button id="nextBtn" class="act-btn act-btn--next" disabled>Next →</button>
                     <button id="repeatBtn" class="act-btn act-btn--ghost">🔁 Repeat</button>
@@ -703,8 +703,6 @@ body {
 <!-- Monaco Editor Loader -->
 <script>var require = { paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } };</script>
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.nls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.js"></script>
 <script src="/static/js/app.js"></script>
 <script>
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
