@@ -33,6 +33,11 @@
 
     function clearToken() {
         setToken(null);
+        try {
+            localStorage.removeItem("sb_token");
+        } catch (e) {
+            /* no-op */
+        }
     }
 
     function showEl(el, show) {
@@ -57,6 +62,13 @@
         if (!errEl) return;
         errEl.textContent = message || "";
         showEl(errEl, !!message);
+    }
+
+    function hideUserDropdown() {
+        var trigger = document.getElementById("navUserEmail");
+        var menu = document.getElementById("userDropdownMenu");
+        if (menu) menu.classList.remove("show");
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
     }
 
     function normalizeAuthError(message, mode) {
@@ -147,6 +159,7 @@
             var user = await getCurrentUser();
             if (user && user.email) {
                 await syncSupabaseProfile(user);
+                hideUserDropdown();
                 navBtns.setAttribute("hidden", "");
                 
                 var meta = user.user_metadata || {};
@@ -162,6 +175,7 @@
             clearToken();
         }
 
+        hideUserDropdown();
         navBtns.removeAttribute("hidden");
         emailEl.classList.add("hidden");
         logoutBtn.classList.add("hidden");
@@ -197,6 +211,7 @@
             await window.SB.client.auth.signOut();
         }
         clearToken();
+        hideUserDropdown();
         await refreshAuthUI();
     }
 
@@ -344,6 +359,11 @@
 
     window.addEventListener("supabase:ready", function () {
         initSupabaseSessionSync();
+        refreshAuthUI();
+    });
+
+    window.addEventListener("preploom:layout-injected", function () {
+        initMarketingAuth();
         refreshAuthUI();
     });
 })();
