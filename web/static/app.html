@@ -7,7 +7,13 @@
     <title>Practice — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<<<<<<< HEAD
     <link rel="stylesheet" href="/static/css/site.css?v=5" />
+=======
+    <!-- Monaco Editor CDN -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.min.css" />
+    <link rel="stylesheet" href="/static/css/site.css" />
+>>>>>>> 1f011683f3eb973c0f0020711de665893ad47bf8
     <style>
 /* ============================================================
    PREPLOOM PRACTICE ROOM — REDESIGN
@@ -424,6 +430,7 @@ body {
 
 </style>
     <link rel="stylesheet" href="/static/css/future-pages.css" />
+    <link rel="stylesheet" href="/static/css/practice.css" />
 </head>
 <body class="app-future">
 
@@ -546,101 +553,116 @@ body {
     </section>
 
     <section id="interviewView" class="view hidden">
-        <!-- KPI Header -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--muted); font-weight: 600;">ROLE</div>
-                <div style="font-size: 1.1rem; font-weight: 700;" id="kpiRole">-</div>
-            </div>
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--muted); font-weight: 600;">QUESTION</div>
-                <div style="font-size: 1.1rem; font-weight: 700;" id="kpiQ">-</div>
-            </div>
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--muted); font-weight: 600;">DIFFICULTY</div>
-                <div style="font-size: 1.1rem; font-weight: 700;" id="kpiLevel">-</div>
-            </div>
-            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--muted); font-weight: 600;">TOPIC</div>
-                <div style="font-size: 1.1rem; font-weight: 700;" id="kpiTopic">-</div>
-            </div>
+        <!-- KPI Bar -->
+        <div class="kpi-bar">
+            <div class="kpi-card"><div class="kpi-card__label">Role</div><div class="kpi-card__value" id="kpiRole">-</div></div>
+            <div class="kpi-card"><div class="kpi-card__label">Question</div><div class="kpi-card__value" id="kpiQ">-</div></div>
+            <div class="kpi-card"><div class="kpi-card__label">Difficulty</div><div class="kpi-card__value" id="kpiLevel">-</div></div>
+            <div class="kpi-card"><div class="kpi-card__label">Topic</div><div class="kpi-card__value" id="kpiTopic">-</div></div>
         </div>
 
-        <!-- Question Panel -->
-        <div class="panel">
-            <div class="panel__header">Interview Session</div>
-            <div class="panel__body">
-                <div class="q-bubble" id="questionBubble">
-                    <div class="q-avatar">AI</div>
-                    <div class="q-bubble-text" style="flex: 1;">Loading question…</div>
-                </div>
-
-                <!-- Video Section -->
-                <div style="margin-top: 1.5rem; border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; background: var(--bg-3);">
-                    <video id="videoPreview" autoplay playsinline muted style="width: 100%; height: auto; background: #000; display: block;"></video>
-                    <canvas id="snapshotCanvas" style="display: none;"></canvas>
-                </div>
-
-                <!-- Body Language Analysis -->
-                <div id="bodyMetrics" class="hidden" style="margin-top: 1rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);">
-                    <div style="font-weight: 700; margin-bottom: 0.5rem;">Body Language Metrics</div>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.85rem;">
-                        <div>Openness: <span id="metricOpenness">-</span></div>
-                        <div>Fidgeting: <span id="metricFidgeting">-</span></div>
-                        <div>Engagement: <span id="metricEngage">-</span></div>
-                        <div>Posture: <span id="metricPosture">-</span></div>
+        <!-- Two-Column Interview Grid -->
+        <div class="iv-grid">
+            <!-- Left: Video + Body Metrics -->
+            <div class="iv-left">
+                <div class="video-container" id="videoContainer">
+                    <div class="video-overlay">
+                        <span class="video-badge video-badge--live" id="liveBadge"><span class="video-badge__dot"></span> LIVE</span>
+                        <span class="video-badge video-badge--rec hidden" id="recBadge"><span class="video-badge__dot"></span> REC</span>
                     </div>
-                    <div id="blSummary" style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--muted);"></div>
+                    <video id="videoPreview" autoplay playsinline muted></video>
+                    <canvas id="snapshotCanvas" style="display:none;"></canvas>
+                    <div id="mediaError" class="media-error hidden">
+                        <div class="media-error__icon">📷</div>
+                        <div class="media-error__title">Camera Access Required</div>
+                        <div class="media-error__text">Please allow camera & microphone access to practice your interview.</div>
+                    </div>
                 </div>
 
-                <!-- Live Status -->
-                <div id="liveStatusText" style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">Live Posture Ready</div>
-
-                <!-- Recording Status -->
-                <div id="recordingIndicator" class="hidden" style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: #ef4444; font-weight: 600;">
-                    <span style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 1s infinite;"></span>
+                <!-- Recording Timer -->
+                <div id="recordingIndicator" class="hidden" style="display:flex;align-items:center;gap:0.5rem;color:#ef4444;font-weight:600;font-size:0.85rem;">
+                    <span style="width:8px;height:8px;background:#ef4444;border-radius:50%;animation:pulse 1s infinite;display:inline-block;"></span>
                     Recording: <span id="recordingTimer">0:00</span>
                 </div>
 
-                <!-- STT Status -->
-                <div id="sttStatus" class="hidden" style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(45, 212, 191, 0.1); border-left: 3px solid var(--teal); border-radius: 4px; font-size: 0.85rem; color: var(--muted);">-</div>
-
-                <!-- Transcript Display -->
-                <textarea id="transcriptArea" class="hidden" style="margin-top: 0.75rem; width: 100%; min-height: 80px; padding: 0.75rem; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; resize: vertical;" readonly></textarea>
-
-                <!-- Text Input -->
-                <textarea id="typeInput" class="hidden" style="margin-top: 0.75rem; width: 100%; min-height: 100px; padding: 0.75rem; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; resize: vertical;" placeholder="Type your answer here..."></textarea>
-
-                <!-- Ideal Answer Section -->
-                <div id="idealAnswer" class="hidden" style="margin-top: 1rem; padding: 1rem; background: rgba(34, 197, 94, 0.05); border-left: 3px solid var(--green); border-radius: 4px;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-weight: 700;">
-                        <input type="checkbox" id="showIdealCheck" />
-                        <label for="showIdealCheck" style="cursor: pointer;">Show Ideal Answer</label>
+                <!-- Body Language Metrics -->
+                <div id="bodyMetrics" class="hidden">
+                    <div style="font-weight:700;font-size:0.8rem;color:var(--faint);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Body Language</div>
+                    <div class="bl-metrics">
+                        <div class="bl-metric"><span class="bl-metric__label">Openness</span><span class="bl-metric__value" id="metricOpenness">-</span></div>
+                        <div class="bl-metric"><span class="bl-metric__label">Fidgeting</span><span class="bl-metric__value" id="metricFidgeting">-</span></div>
+                        <div class="bl-metric"><span class="bl-metric__label">Engagement</span><span class="bl-metric__value" id="metricEngage">-</span></div>
+                        <div class="bl-metric"><span class="bl-metric__label">Posture</span><span class="bl-metric__value" id="metricPosture">-</span></div>
                     </div>
-                    <div id="idealText" style="font-size: 0.9rem; color: var(--muted); max-height: 0; overflow: hidden; transition: max-height 0.3s ease;"></div>
+                    <div id="blSummary" class="bl-summary-text" style="margin-top:0.5rem;"></div>
+                </div>
+                <div id="liveStatusText" style="font-size:0.78rem;color:var(--faint);">Live Posture Ready</div>
+            </div>
+
+            <!-- Right: Question + Answer + Controls -->
+            <div class="iv-right">
+                <!-- Question Card -->
+                <div class="q-card">
+                    <div class="q-card__header"><div class="q-card__avatar">AI</div> Interview Question</div>
+                    <div class="q-card__text" id="questionBubble">Loading question…</div>
                 </div>
 
-                <!-- Feedback Section -->
-                <div id="feedbackContent" style="margin-top: 1rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);">
-                    <p class="caption" style="font-size: 0.85rem; color: var(--muted);">Speak or type your answer, then Submit for evaluation.</p>
+                <!-- Answer Area -->
+                <div class="answer-area">
+                    <div id="sttStatus" class="stt-pill hidden">-</div>
+                    <textarea id="transcriptArea" class="hidden" readonly placeholder="Your transcribed answer will appear here…"></textarea>
+                    <textarea id="typeInput" placeholder="Type your answer here…"></textarea>
+                    <button id="sendTypedBtn" class="act-btn hidden" style="align-self:flex-end;">Send Text</button>
                 </div>
 
-                <div id="feedbackScores" class="hidden" style="margin-top: 1rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);">
-                    <div id="scoreRow"></div>
-                    <div id="feedbackDetails" style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--muted);"></div>
+                <!-- Coding Workspace (Monaco Editor) -->
+                <div id="codingWorkspace" class="coding-workspace hidden">
+                    <div class="coding-workspace__header">
+                        <div class="coding-workspace__title">
+                            <span class="coding-workspace__icon">💻</span>
+                            <span>Code Editor</span>
+                        </div>
+                        <div class="coding-workspace__controls">
+                            <select id="codeLangSelect" class="code-lang-select">
+                                <option value="python" selected>Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                                <option value="c">C</option>
+                                <option value="typescript">TypeScript</option>
+                                <option value="go">Go</option>
+                                <option value="rust">Rust</option>
+                            </select>
+                            <button id="resetCodeBtn" class="act-btn act-btn--ghost" style="padding:0.35rem 0.65rem; font-size:0.75rem;" title="Reset editor">🔄 Reset</button>
+                        </div>
+                    </div>
+                    <div id="monacoEditorContainer" class="monaco-editor-container"></div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="action-row" style="margin-top: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button id="speakBtn" class="act-btn" style="flex: 1; min-width: 120px;">
-                        <span id="speakBtnText">Speak Answer</span>
-                    </button>
-                    <button id="sendTypedBtn" class="act-btn hidden" style="flex: 1; min-width: 120px;">Send Text</button>
-                    <button id="submitBtn" class="act-btn act-btn--submit" style="flex: 1; min-width: 120px;">Submit</button>
-                    <button id="nextBtn" class="act-btn act-btn--next hidden" style="flex: 1; min-width: 120px;">Next Question</button>
-                    <button id="repeatBtn" class="act-btn act-btn--ghost" style="flex: 1; min-width: 120px;">Repeat Question</button>
-                    <button id="continuousAnalysisBtn" class="act-btn act-btn--ghost" style="flex: 1; min-width: 120px;">🎥 Posture Analysis</button>
-                    <button id="postureBtn" class="act-btn act-btn--ghost hidden" style="flex: 1; min-width: 120px;">📊 Analyze Posture</button>
+                <div class="action-bar">
+                    <button id="speakBtn" class="act-btn"><span id="speakBtnText">🎙️ Speak Answer</span></button>
+                    <button id="codeToggleBtn" class="act-btn act-btn--ghost code-toggle-btn hidden">💻 Code Editor</button>
+                    <button id="submitBtn" class="act-btn act-btn--submit">✅ Submit</button>
+                    <button id="nextBtn" class="act-btn act-btn--next" disabled>Next →</button>
+                    <button id="repeatBtn" class="act-btn act-btn--ghost">🔁 Repeat</button>
+                    <button id="continuousAnalysisBtn" class="act-btn act-btn--ghost">🎥 Posture</button>
+                    <button id="postureBtn" class="act-btn act-btn--ghost hidden">📊 Snapshot</button>
+                </div>
+
+                <!-- Ideal Answer -->
+                <div id="idealAnswer" class="ideal-section hidden">
+                    <label><input type="checkbox" id="showIdealCheck" /> Show Ideal Answer</label>
+                    <div id="idealText" class="ideal-section__text"></div>
+                </div>
+
+                <!-- Feedback -->
+                <div id="feedbackContent" class="eval-panel">
+                    <p class="eval-panel__prompt">Speak or type your answer, then Submit for evaluation.</p>
+                </div>
+                <div id="feedbackScores" class="eval-panel hidden">
+                    <div id="scoreRow"></div>
+                    <div id="feedbackDetails" style="margin-top:0.75rem;font-size:0.88rem;color:var(--muted);"></div>
                 </div>
             </div>
         </div>
@@ -654,6 +676,7 @@ body {
                 <div id="reportScores" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;"></div>
                 <div id="reportBreakdown" style="margin-bottom: 1rem;"></div>
                 <div id="reportTips" style="padding: 1rem; background: var(--surface); border-left: 3px solid var(--accent); border-radius: 4px; margin-bottom: 1.5rem;"></div>
+                <div id="reportAuthMessage" style="padding: 1rem; background: var(--surface); border-left: 3px solid var(--amber); border-radius: 4px; margin-bottom: 1.5rem; display: none;"></div>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
                     <button id="downloadReportBtn" class="act-btn act-btn--submit hidden" style="min-width: 170px;">Download PDF</button>
                     <button id="openReportsBtn" class="act-btn act-btn--ghost" style="min-width: 170px;">View Saved Reports</button>
@@ -683,6 +706,9 @@ body {
 <script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
+<!-- Monaco Editor Loader -->
+<script>var require = { paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } };</script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
 <script src="/static/js/app.js"></script>
 
 <div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">

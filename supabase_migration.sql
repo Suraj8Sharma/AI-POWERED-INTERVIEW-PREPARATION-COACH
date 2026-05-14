@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS interview_reports (
     avg_confidence INTEGER,
     evaluations JSONB NOT NULL,
     tips TEXT[],
-    pdf_url TEXT,    pdf_path TEXT,    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    pdf_path TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
