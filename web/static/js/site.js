@@ -463,7 +463,8 @@ const PrepLoom = (function () {
     function initNavDropdown() {
         var trigger = document.getElementById("navUserEmail");
         var menu = document.getElementById("userDropdownMenu");
-        if (!trigger || !menu) return;
+        if (!trigger || !menu || trigger.dataset.dropdownBound === "true") return;
+        trigger.dataset.dropdownBound = "true";
 
         function closeMenu() {
             menu.classList.remove("show");
@@ -519,6 +520,8 @@ const PrepLoom = (function () {
         initNavDropdown();
         initIntroLoader();
     });
+
+    window.addEventListener("preploom:layout-injected", initNavDropdown);
 
     return {
         getPrefs: getPrefs,
@@ -578,6 +581,12 @@ const PrepLoom = (function () {
         document.querySelectorAll(".modal-overlay.is-open").forEach(closeModal);
     });
 })();
+
+document.addEventListener('preploom:layout-injected', function() {
+    if (window.PrepLoom && typeof window.PrepLoom.applyGlobalPreferences === 'function') {
+        window.PrepLoom.applyGlobalPreferences();
+    }
+});
 
 function toggleTheme() {
     if (typeof PrepLoom !== "undefined") {

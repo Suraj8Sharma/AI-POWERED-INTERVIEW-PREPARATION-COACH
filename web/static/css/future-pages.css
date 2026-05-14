@@ -301,9 +301,17 @@ html.theme-light .future-page .settings-section,
 html.theme-light .future-page .rev-cta,
 html.theme-light .future-page .about-cta,
 html.theme-light .future-page .compare-table-wrap {
-    background: rgba(255, 255, 255, 0.88);
-    border-color: rgba(0, 0, 0, 0.07);
-    box-shadow: 0 20px 50px rgba(30, 41, 59, 0.06);
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(15, 23, 42, 0.06);
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.04);
+}
+
+html.theme-light .future-page .about-cta,
+html.theme-light .future-page .rev-cta,
+html.theme-light .future-page .cta-band {
+    background:
+        linear-gradient(120deg, rgba(108, 99, 255, 0.12), rgba(45, 212, 191, 0.05) 60%, rgba(255, 255, 255, 0.16)),
+        rgba(255, 255, 255, 0.96);
 }
 
 html.theme-light .future-page .feat-hero__line1,
@@ -313,18 +321,32 @@ html.theme-light .future-page .settings-header h1 {
     color: var(--pl-text) !important;
 }
 
-html.theme-light .future-page .feat-hero__line2,
-html.theme-light .future-page .settings-header h1,
-html.theme-light .future-page .accent-gradient-text {
-    background: linear-gradient(135deg, #1e293b 0%, #4b5563 48%, #0d9488 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+html.theme-light .future-page .feat-hero__lead,
+html.theme-light .future-page .about-hero p,
+html.theme-light .future-page .rev-hero p,
+html.theme-light .future-page .settings-header p {
+    color: var(--pl-muted) !important;
+}
+
+html.theme-light .future-page .feat-hero,
+html.theme-light .future-page .about-hero,
+html.theme-light .future-page .rev-hero,
+html.theme-light .future-page .settings-header {
+    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
+}
+
+html.theme-light .future-page .feat-hero::before,
+html.theme-light .future-page .about-hero::before,
+html.theme-light .future-page .rev-hero::before,
+html.theme-light .future-page .settings-header::before {
+    mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.75));
+    opacity: 0.35;
 }
 
 html.theme-light .future-page .hero-mesh {
     background:
-        radial-gradient(circle at 20% 20%, rgba(108, 99, 255, 0.06), transparent 20%),
-        radial-gradient(circle at 80% 15%, rgba(45, 212, 191, 0.04), transparent 20%),
-        linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.2));
+        radial-gradient(circle at 20% 20%, rgba(108, 99, 255, 0.04), transparent 20%),
+        radial-gradient(circle at 80% 15%, rgba(45, 212, 191, 0.03), transparent 20%),
+        linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.08));
+    opacity: 0.5;
 }

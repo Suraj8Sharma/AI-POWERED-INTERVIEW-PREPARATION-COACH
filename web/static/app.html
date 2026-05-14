@@ -7,7 +7,7 @@
     <title>Practice — PrepLoom</title>
     <link rel="icon" href="/static/logo.png" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/css/site.css" />
+    <link rel="stylesheet" href="/static/css/site.css?v=5" />
     <style>
 /* ============================================================
    PREPLOOM PRACTICE ROOM — REDESIGN
@@ -54,7 +54,7 @@ html.theme-light {
     --border-md:   rgba(0,0,0,0.12);
     --border-hi:   rgba(0,0,0,0.2);
     --text:        #1f2937;
-    --muted:       rgba(55, 65, 81, 0.7);
+    --muted:       rgba(55, 65, 81, 0.9);
     --faint:       rgba(55, 65, 81, 0.4);
     --accent-glow: rgba(108,99,255,0.15);
     color-scheme:  light;
@@ -503,8 +503,7 @@ body {
             <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
                 <span data-theme-icon aria-hidden="true"></span>
             </button>
-            <a href="/settings" class="btn-nav-outline" title="Settings" style="padding: 0.45rem 0.7rem; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
-            <div style="position: relative; display: inline-block;">
+            <div class="nav-user-menu" style="position: relative; display: inline-block;">
                 <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;"></button>
                 <div id="userDropdownMenu" class="user-dropdown-menu">
                     <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
@@ -685,6 +684,59 @@ body {
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/app.js"></script>
+
+<div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signin-title">Sign in</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">&times;</button>
+        </div>
+        <p class="modal__note">Sign in with Supabase to manage your settings and preferences.</p>
+        <p id="signinError" class="modal-error" hidden></p>
+        <form id="formSignin">
+            <div class="modal__field">
+                <label for="signin-email">Email</label>
+                <input id="signin-email" name="email" type="email" autocomplete="username" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signin-password">Password</label>
+                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="At least 8 characters" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Sign in</button>
+        </form>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
+    </div>
+</div>
+
+<div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 id="signup-title">Create account</h2>
+            <button type="button" class="modal__close" data-close-modal aria-label="Close">&times;</button>
+        </div>
+        <p class="modal__note">Create an account to save your progress and settings.</p>
+        <p id="signupError" class="modal-error" hidden></p>
+        <form id="formSignup">
+            <div class="modal__field">
+                <label for="signup-name">Name <span class="modal-optional">(optional)</span></label>
+                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Your name" maxlength="120" />
+            </div>
+            <div class="modal__field">
+                <label for="signup-email">Email</label>
+                <input id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            </div>
+            <div class="modal__field">
+                <label for="signup-password">Password</label>
+                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required minlength="8" />
+            </div>
+            <button type="submit" class="btn-modal-primary">Create account</button>
+        </form>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
+        <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
+    </div>
+</div>
+
 <script>
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
 </script>

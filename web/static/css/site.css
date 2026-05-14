@@ -47,6 +47,7 @@ body.site {
     width: 100%;
     height: 100%;
     display: block;
+    stroke: currentColor;
 }
 
 /* ── Animated ambient background ─────────────────────────────── */
@@ -276,6 +277,79 @@ body.site::after {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+}
+
+.nav-user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-user-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: var(--pl-text);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.nav-user-email:hover,
+.nav-user-email[aria-expanded="true"] {
+    border-color: rgba(108,99,255,0.3);
+    background: rgba(108,99,255,0.12);
+    transform: translateY(-1px);
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    min-width: 190px;
+    padding: 0.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(9,12,20,0.96);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+    backdrop-filter: blur(18px);
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    z-index: 130;
+}
+
+.user-dropdown-menu.show {
+    display: flex;
+}
+
+.user-dropdown-menu__link,
+.user-dropdown-menu__button {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 0.85rem;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--pl-text);
+    font: inherit;
+    font-size: 0.86rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.user-dropdown-menu__link:hover,
+.user-dropdown-menu__button:hover {
+    background: rgba(108,99,255,0.12);
+}
+
+.user-dropdown-menu__button {
+    color: #f87171;
 }
 
 .btn-nav-outline {
@@ -1111,7 +1185,8 @@ body.site.theme-light::after {
 }
 
 .theme-light .site-nav {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: none !important;
 }
 
 .theme-light .site-nav__link {
