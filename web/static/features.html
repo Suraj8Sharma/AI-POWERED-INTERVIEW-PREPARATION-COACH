@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="PrepLoom features — Technical practice, communication analysis, and video presence feedback for interview prep." />
     <title>Features — PrepLoom</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="/static/logo.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/site.css" />
+    <link rel="stylesheet" href="/static/css/layout.css" />
     <style>
         /* ── Features hero ────────────────────────────────────── */
         .feat-hero {
@@ -24,8 +25,8 @@
             z-index: 0;
             background:
                 radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108,99,255,0.28), transparent),
-                radial-gradient(ellipse 50% 40% at 85% 30%, rgba(45,212,191,0.09), transparent),
-                radial-gradient(ellipse 40% 30% at 5% 50%, rgba(108,99,255,0.07), transparent);
+                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(45,212,191,0.1), transparent),
+                radial-gradient(ellipse 40% 30% at 10% 60%, rgba(108,99,255,0.08), transparent);
         }
 
         .feat-hero__noise {
@@ -57,7 +58,6 @@
             text-transform: uppercase;
             color: #2dd4bf;
             margin-bottom: 2rem;
-            animation: fadeSlideDown 0.6s ease both;
         }
 
         .hero-eyebrow-pill::before {
@@ -83,7 +83,6 @@
             letter-spacing: -0.03em;
             line-height: 1.07;
             color: #fff;
-            animation: fadeSlideDown 0.65s 0.1s ease both;
         }
 
         .feat-hero__line2 {
@@ -98,7 +97,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 1.5rem;
-            animation: fadeSlideDown 0.65s 0.18s ease both;
         }
 
         .feat-hero__lead {
@@ -107,7 +105,6 @@
             max-width: 52ch;
             margin: 0 auto 2.5rem;
             line-height: 1.65;
-            animation: fadeSlideDown 0.65s 0.26s ease both;
         }
 
         /* Filter pills (like revision tabs) */
@@ -117,7 +114,6 @@
             gap: 0.6rem;
             justify-content: center;
             margin-bottom: 0;
-            animation: fadeSlideDown 0.65s 0.34s ease both;
         }
 
         .feat-pill {
@@ -152,7 +148,7 @@
             margin: 3rem 0;
         }
 
-        /* ── Scroll reveal ────────────────────────────────────── */
+        /* ── Feature blocks ───────────────────────────────────── */
         .section-eyebrow {
             font-size: 0.72rem;
             font-weight: 700;
@@ -160,12 +156,7 @@
             text-transform: uppercase;
             color: #2dd4bf;
             margin-bottom: 0.75rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-        .section-eyebrow.visible { opacity: 1; transform: translateY(0); }
 
         .section-title-large {
             font-family: 'Fraunces', serif;
@@ -175,38 +166,22 @@
             line-height: 1.12;
             color: #fff;
             margin-bottom: 0.75rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s 0.08s ease, transform 0.5s 0.08s ease;
         }
-
-        .section-title-large.visible { opacity: 1; transform: translateY(0); }
 
         .section-subtitle {
             color: rgba(244,244,247,0.55);
             font-size: 0.95rem;
             max-width: 50ch;
             margin-bottom: 2.25rem;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.5s 0.14s ease, transform 0.5s 0.14s ease;
         }
 
-        .section-subtitle.visible { opacity: 1; transform: translateY(0); }
-
-        /* ── Big feature blocks ───────────────────────────────── */
         .feature-block {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 3rem;
             align-items: center;
             margin-bottom: 4rem;
-            opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
         }
-
-        .feature-block.visible { opacity: 1; transform: translateY(0); }
 
         .feature-block--reverse { direction: rtl; }
         .feature-block--reverse > * { direction: ltr; }
@@ -218,8 +193,6 @@
             }
             .feature-block--reverse > * { direction: ltr; }
         }
-
-        .feature-block__text {}
 
         .feature-block__num {
             display: inline-flex;
@@ -301,13 +274,6 @@
             justify-content: center;
         }
 
-        .feature-block__visual::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(108,99,255,0.08), transparent 60%);
-        }
-
         .visual-icon-large {
             font-size: 4.5rem;
             position: relative;
@@ -368,14 +334,6 @@
         }
 
         /* ── Comparison table ─────────────────────────────────── */
-        .compare-table-wrap {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .compare-table-wrap.visible { opacity: 1; transform: translateY(0); }
-
         .compare-table {
             width: 100%;
             border-collapse: collapse;
@@ -452,12 +410,7 @@
             background: linear-gradient(135deg, rgba(108,99,255,0.1) 0%, rgba(14,16,24,0.8) 60%, rgba(45,212,191,0.06) 100%);
             text-align: center;
             overflow: hidden;
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
         }
-
-        .cta-band.visible { opacity: 1; transform: translateY(0); }
 
         .cta-band::before {
             content: '';
@@ -491,78 +444,67 @@
             position: relative;
         }
 
-        .btn-hero-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.9rem 1.8rem;
-            border-radius: 999px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            font-family: inherit;
-            border: none;
-            background: linear-gradient(135deg, #6c63ff 0%, #8b84ff 100%);
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(108,99,255,0.4);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .btn-hero-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 44px rgba(108,99,255,0.5);
-        }
-
-        @keyframes fadeSlideDown {
-            from { opacity: 0; transform: translateY(-12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
         @media (max-width: 640px) {
             .feat-hero { padding: 3.5rem 0.5rem 3rem; }
         }
-    </style>
-</head>
-<body class="site">
-<div class="site-wrap">
 
-    <header class="site-nav" role="navigation" aria-label="Primary">
-        <a class="site-nav__brand" href="/">
-            <span class="site-nav__mark" aria-hidden="true">PL</span>
-            PrepLoom
-        </a>
-        <nav class="site-nav__links" aria-label="Main">
-            <a class="site-nav__link" href="/">Home</a>
-            <a class="site-nav__link site-nav__link--active" href="/features">Features</a>
-            <a class="site-nav__link" href="/revision">Revision</a>
-            <a class="site-nav__link" href="/about">About</a>
-            <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
-        </nav>
-        <div class="site-nav__auth" id="navAuthSlot">
-            <span id="navUserEmail" class="nav-user-email hidden" aria-live="polite"></span>
-            <button type="button" id="navLogout" class="btn-nav-outline hidden">Log out</button>
-            <div id="navAuthButtons">
-                <button type="button" class="btn-nav-outline" data-open-modal="modal-signin">Sign in</button>
-                <button type="button" class="btn-nav-primary" data-open-modal="modal-signup">Sign up</button>
-            </div>
-        </div>
-    </header>
+        /* ── Light theme text visibility & modal fixes ── */
+        html.theme-light .feat-hero__line1, html.theme-light .section-title-large, html.theme-light .feature-block__title, html.theme-light .cta-band h2, html.theme-light .compare-table th { color: var(--pl-text, #1f2937) !important; background: none !important; -webkit-text-fill-color: initial !important; }
+        html.theme-light .feat-hero__lead, html.theme-light .section-subtitle, html.theme-light .feature-block__body, html.theme-light .feature-block__bullets li, html.theme-light .cta-band p, html.theme-light .compare-table td { color: var(--pl-muted, #4b5563) !important; }
+        html.theme-light .feature-block__visual, html.theme-light .cta-band, html.theme-light .compare-table-wrap { background: var(--pl-surface, rgba(255,255,255,0.9)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
+        html.theme-light .site-nav__link { color: var(--pl-text, #1f2937) !important; }
+        html.theme-light .col-preploom { color: #6c63ff !important; background: rgba(108,99,255,0.06) !important; }
+        html.theme-light .feat-pill { color: var(--pl-text, #1f2937); background: var(--pl-surface, rgba(255,255,255,0.8)); border-color: var(--pl-border, rgba(0,0,0,0.1)); }
+        html.theme-light .feat-pill:hover, html.theme-light .feat-pill.active { color: #fff !important; background: var(--pl-accent, #6c63ff) !important; }
+        html.theme-light .modal { background: var(--pl-surface, rgba(255,255,255,0.95)) !important; border-color: var(--pl-border, rgba(0,0,0,0.1)) !important; }
+        html.theme-light .modal__header h2, html.theme-light .modal__field label { color: var(--pl-text, #1f2937) !important; }
+        html.theme-light .modal__note, html.theme-light .modal__footer-text { color: var(--pl-muted, #4b5563) !important; }
+        
+        /* ── Dropdown Menu ── */
+        .user-dropdown-menu.show { display: flex !important; }
+        .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
+    </style>
+    <link rel="stylesheet" href="/static/css/future-pages.css" />
+</head>
+<body class="site future-page future-page--features">
+<div class="site-wrap">
 
     <main class="site-main">
 
         <!-- ═══ HERO ═══ -->
-        <section class="feat-hero" aria-labelledby="feat-title">
+        <section class="feat-hero hero-parallax-container" aria-labelledby="feat-title">
+            <canvas id="heroParticles" class="hero-particles" aria-hidden="true"></canvas>
+            <div class="hero-mesh" aria-hidden="true"></div>
             <div class="feat-hero__bg" aria-hidden="true"></div>
             <div class="feat-hero__noise" aria-hidden="true"></div>
+
+            <!-- Telemetry-style status elements -->
+            <div class="telemetry-card telemetry-card--north" data-parallax="20" style="top: 15%; right: 10%;">
+                <span class="telemetry-card__label">Analysis Pipeline</span>
+                <div class="telemetry-card__bars">
+                    <div class="telemetry-card__bar">
+                        <div class="telemetry-card__bar-label"><span>Accuracy</span><span>98%</span></div>
+                        <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 98%"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="telemetry-card telemetry-card--south" data-parallax="12" style="bottom: 20%; left: 8%;">
+                <span class="telemetry-card__label">Real-time Signals</span>
+                <div class="telemetry-card__grid">
+                    <div class="telemetry-card__stat"><strong>Live</strong><span>Voice</span></div>
+                    <div class="telemetry-card__stat"><strong>Live</strong><span>Video</span></div>
+                </div>
+            </div>
+
             <div class="feat-hero__inner">
-                <span class="hero-eyebrow-pill">What's inside</span>
+                <span class="hero-eyebrow-pill" data-animate="down">What's inside</span>
                 <h1 id="feat-title">
-                    <span class="feat-hero__line1">Every tool you need</span>
-                    <span class="feat-hero__line2">to walk in ready.</span>
+                    <span class="feat-hero__line1" data-animate="down" data-delay="100">Every tool you need</span>
+                    <span class="feat-hero__line2" data-animate="down" data-delay="200">to walk in ready.</span>
                 </h1>
-                <p class="feat-hero__lead">PrepLoom is built around how real interviews are scored — substance, signal, and presence. Here's what you get in the practice room today.</p>
-                <div class="feat-pills" role="navigation" aria-label="Jump to section">
+                <p class="feat-hero__lead" data-animate="up" data-delay="300">PrepLoom is built around how real interviews are scored — substance, signal, and presence. Here's what you get in the practice room today.</p>
+                <div class="feat-pills" role="navigation" aria-label="Jump to section" data-animate="up" data-delay="400">
                     <a class="feat-pill" href="#questions">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                         Questions
@@ -587,11 +529,11 @@
 
         <!-- ═══ FEATURES DETAIL ═══ -->
         <section id="questions" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Role-aware questions</p>
-            <h2 class="section-title-large js-reveal">Questions built around your target role.</h2>
-            <p class="section-subtitle js-reveal">Pull from a structured RAG-powered bank aligned to your target role. Each session mixes behavioural and technical prompts.</p>
+            <p class="section-eyebrow" data-animate="up">Role-aware questions</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">Questions built around your target role.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Pull from a structured RAG-powered bank aligned to your target role. Each session mixes behavioural and technical prompts.</p>
 
-            <div class="feature-block js-reveal-block">
+            <div class="feature-block" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>01</span> Question bank</div>
                     <h3 class="feature-block__title">Structured, role-specific question sets.</h3>
@@ -619,11 +561,11 @@
         <div class="section-divider" aria-hidden="true"></div>
 
         <section id="evaluation" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Answer evaluation</p>
-            <h2 class="section-title-large js-reveal">LLM scoring that actually explains itself.</h2>
-            <p class="section-subtitle js-reveal">Submit spoken or typed answers for feedback on reasoning and accuracy. Ideal answers reveal a strong baseline to compare against.</p>
+            <p class="section-eyebrow" data-animate="up">Answer evaluation</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">LLM scoring that actually explains itself.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Submit spoken or typed answers for feedback on reasoning and accuracy. Ideal answers reveal a strong baseline to compare against.</p>
 
-            <div class="feature-block feature-block--reverse js-reveal-block">
+            <div class="feature-block feature-block--reverse" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>02</span> Evaluation</div>
                     <h3 class="feature-block__title">Strengths, gaps, and what you missed.</h3>
@@ -651,11 +593,11 @@
         <div class="section-divider" aria-hidden="true"></div>
 
         <section id="communication" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Communication signals</p>
-            <h2 class="section-title-large js-reveal">Notice how you sound before the real room does.</h2>
-            <p class="section-subtitle js-reveal">Filler words, pacing, and structure — the signals a hiring manager notices without naming them.</p>
+            <p class="section-eyebrow" data-animate="up">Communication signals</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">Notice how you sound before the real room does.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Filler words, pacing, and structure — the signals a hiring manager notices without naming them.</p>
 
-            <div class="feature-block js-reveal-block">
+            <div class="feature-block" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>03</span> Communication</div>
                     <h3 class="feature-block__title">NLP analysis on every answer.</h3>
@@ -683,11 +625,11 @@
         <div class="section-divider" aria-hidden="true"></div>
 
         <section id="presence" style="padding: 2rem 0;">
-            <p class="section-eyebrow js-reveal">Video &amp; posture</p>
-            <h2 class="section-title-large js-reveal">Presence is a skill. Practice it.</h2>
-            <p class="section-subtitle js-reveal">Optional camera-based signals on openness, engagement, and posture — a nudge, not a verdict. Comfort still comes first.</p>
+            <p class="section-eyebrow" data-animate="up">Video &amp; posture</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">Presence is a skill. Practice it.</h2>
+            <p class="section-subtitle" data-animate="up" data-delay="200">Optional camera-based signals on openness, engagement, and posture — a nudge, not a verdict. Comfort still comes first.</p>
 
-            <div class="feature-block feature-block--reverse js-reveal-block">
+            <div class="feature-block feature-block--reverse" data-animate="up" data-delay="300">
                 <div class="feature-block__text">
                     <div class="feature-block__num"><span>04</span> Presence</div>
                     <h3 class="feature-block__title">Live body language via MediaPipe.</h3>
@@ -716,10 +658,10 @@
 
         <!-- ═══ COMPARISON TABLE ═══ -->
         <section style="padding: 2rem 0 3rem;">
-            <p class="section-eyebrow js-reveal">At a glance</p>
-            <h2 class="section-title-large js-reveal">PrepLoom vs the alternatives.</h2>
+            <p class="section-eyebrow" data-animate="up">At a glance</p>
+            <h2 class="section-title-large" data-animate="up" data-delay="100">PrepLoom vs the alternatives.</h2>
 
-            <div class="compare-table-wrap js-reveal-block" style="overflow-x:auto; border-radius:16px; border:1px solid rgba(255,255,255,0.06); background: rgba(14,16,24,0.6);">
+            <div class="compare-table-wrap" data-animate="up" data-delay="200" style="overflow-x:auto; border-radius:16px; border:1px solid rgba(255,255,255,0.06); background: rgba(14,16,24,0.6);">
                 <table class="compare-table">
                     <thead>
                         <tr>
@@ -778,7 +720,7 @@
         </section>
 
         <!-- ═══ CTA ═══ -->
-        <div class="cta-band js-reveal-card" role="complementary">
+        <div class="cta-band" data-animate="up" role="complementary">
             <h2>Open the practice room.</h2>
             <p>Select a role, answer questions at your own pace, and walk away with a full report in under 20 minutes.</p>
             <a class="btn-hero-primary" href="/app">
@@ -789,88 +731,14 @@
 
     </main>
 
-    <footer class="site-footer">
-        <div class="site-footer__inner">
-            <span>© 2026 PrepLoom. All rights reserved.</span>
-            <div class="site-footer__links">
-                <a href="/features">Features</a>
-                <a href="/revision">Revision</a>
-                <a href="/about">About</a>
-                <a href="/app">Practice</a>
-            </div>
-        </div>
-    </footer>
 </div>
 
-<!-- Sign in modal -->
-<div id="modal-signin" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signin-title">
-    <div class="modal">
-        <div class="modal__header">
-            <h2 id="signin-title">Sign in</h2>
-            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
-        </div>
-        <p class="modal__note">MongoDB stores your account; you receive a JWT stored in this browser.</p>
-        <p id="signinError" class="modal-error" hidden></p>
-        <form id="formSignin">
-            <div class="modal__field">
-                <label for="signin-email">Email</label>
-                <input id="signin-email" name="email" type="email" autocomplete="username" placeholder="you@example.com" required />
-            </div>
-            <div class="modal__field">
-                <label for="signin-password">Password</label>
-                <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" />
-            </div>
-            <button type="submit" class="btn-modal-primary">Sign in</button>
-        </form>
-        <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
-    </div>
-</div>
-
-<!-- Sign up modal -->
-<div id="modal-signup" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="signup-title">
-    <div class="modal">
-        <div class="modal__header">
-            <h2 id="signup-title">Create account</h2>
-            <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
-        </div>
-        <p class="modal__note">Password must be at least 8 characters. You can use Practice without an account.</p>
-        <p id="signupError" class="modal-error" hidden></p>
-        <form id="formSignup">
-            <div class="modal__field">
-                <label for="signup-name">Name <span class="modal-optional">(optional)</span></label>
-                <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Your name" maxlength="120" />
-            </div>
-            <div class="modal__field">
-                <label for="signup-email">Email</label>
-                <input id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
-            </div>
-            <div class="modal__field">
-                <label for="signup-password">Password</label>
-                <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required minlength="8" />
-            </div>
-            <button type="submit" class="btn-modal-primary">Create account</button>
-        </form>
-        <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
-    </div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
+<script src="/static/js/layout.js"></script>
 <script src="/static/js/auth.js"></script>
 <script>
-    // Scroll-reveal observer
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.js-reveal, .js-reveal-card, .js-reveal-block').forEach(el => {
-        revealObserver.observe(el);
-    });
-
     // Smooth-scroll for anchor pills
     document.querySelectorAll('.feat-pill[href^="#"]').forEach(link => {
         link.addEventListener('click', e => {

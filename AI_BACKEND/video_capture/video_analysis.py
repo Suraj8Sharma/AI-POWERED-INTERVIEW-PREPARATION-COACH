@@ -84,9 +84,9 @@ def _pose_landmarker_image(model_path: str) -> PoseLandmarker:
         base_options=base_options_lib.BaseOptions(model_asset_path=model_path),
         running_mode=RunningMode.IMAGE,
         num_poses=1,
-        min_pose_detection_confidence=0.5,
-        min_pose_presence_confidence=0.5,
-        min_tracking_confidence=0.5,
+        min_pose_detection_confidence=0.65,
+        min_pose_presence_confidence=0.65,
+        min_tracking_confidence=0.65,
     )
     return PoseLandmarker.create_from_options(opts)
 
@@ -128,7 +128,7 @@ def _body_scale(ls: np.ndarray, rs: np.ndarray) -> float:
 
 @dataclass
 class BodyLanguageAnalyzer:
-    history: int = 30
+    history: int = 24
     _nose_hist: deque = field(init=False)
     _lw_hist: deque = field(init=False)
     _rw_hist: deque = field(init=False)
@@ -143,11 +143,14 @@ class BodyLanguageAnalyzer:
         self._lw_hist.clear()
         self._rw_hist.clear()
 
-    def analyze_pose_landmarks(self, landmark_list: list) -> dict[str, float]:
+    def analyze_pose_landmarks(self, landmark_list: list) -> dict[str, Any]:
         """
         ``landmark_list``: 33 ``NormalizedLandmark`` from MediaPipe Tasks.
+        Returns a dict of metrics and specific observations for grounding.
         """
         PL = PoseLandmark
+        
+        # Core landmarks for posture and body language
         nose, v_n = _lm_xyv_list(landmark_list, PL.NOSE)
         ls, v_ls = _lm_xyv_list(landmark_list, PL.LEFT_SHOULDER)
         rs, v_rs = _lm_xyv_list(landmark_list, PL.RIGHT_SHOULDER)
@@ -157,63 +160,72 @@ class BodyLanguageAnalyzer:
         rw, v_rw = _lm_xyv_list(landmark_list, PL.RIGHT_WRIST)
         lh, v_lh = _lm_xyv_list(landmark_list, PL.LEFT_HIP)
         rh, v_rh = _lm_xyv_list(landmark_list, PL.RIGHT_HIP)
+        
+        # Face landmarks for head tilt and hand-to-face detection
+        le_eye, v_le_eye = _lm_xyv_list(landmark_list, PL.LEFT_EYE)
+        re_eye, v_re_eye = _lm_xyv_list(landmark_list, PL.RIGHT_EYE)
+        l_ear, v_l_ear = _lm_xyv_list(landmark_list, PL.LEFT_EAR)
+        r_ear, v_r_ear = _lm_xyv_list(landmark_list, PL.RIGHT_EAR)
 
-        vis = min(v_n, v_ls, v_rs, v_le, v_re, v_lw, v_rw)
-        if vis < 0.35:
+        vis_core = min(v_n, v_ls, v_rs)
+        if vis_core < 0.35:
             return {
-                "visibility": vis,
+                "visibility": float(vis_core),
                 "openness": 0.5,
                 "fidgeting": 0.5,
                 "engagement": 0.5,
                 "posture": 0.5,
+                "observations": [],
             }
 
         scale = _body_scale(ls, rs)
         mid_sh = (ls + rs) / 2.0
         mid_hip = (lh + rh) / 2.0
 
+        # --- Openness ---
         ang_l = _angle_deg_2d(ls, le, lw)
         ang_r = _angle_deg_2d(rs, re, rw)
         elbow_open = (
-            np.clip((ang_l - 55.0) / 95.0, 0.0, 1.0)
-            + np.clip((ang_r - 55.0) / 95.0, 0.0, 1.0)
+            np.clip((ang_l - 60.0) / 120.0, 0.0, 1.0)
+            + np.clip((ang_r - 60.0) / 120.0, 0.0, 1.0)
         ) / 2.0
 
         wrist_sep = float(np.linalg.norm(lw[:2] - rw[:2])) / scale
-        spread = float(np.clip((wrist_sep - 0.35) / 1.35, 0.0, 1.0))
+        spread = float(np.clip((wrist_sep - 0.3) / 1.2, 0.0, 1.0))
 
         cx = 0.5 * (min(ls[0], rs[0]) + max(ls[0], rs[0]))
         wrists_center_x = 0.5 * (lw[0] + rw[0])
         crossed_x = abs(wrists_center_x - cx) < 0.08 * scale * 10.0
         wrists_high = lw[1] < mid_sh[1] + 0.12 and rw[1] < mid_sh[1] + 0.12
         tight_sep = wrist_sep < 0.55
-        cross_penalty = 0.45 if (crossed_x and tight_sep and wrists_high) else 0.0
+        is_crossing = bool(crossed_x and tight_sep and wrists_high)
+        cross_penalty = 0.45 if is_crossing else 0.0
 
-        openness = float(
-            np.clip(0.55 * elbow_open + 0.45 * spread - cross_penalty, 0.0, 1.0)
-        )
+        openness = float(np.clip(0.55 * elbow_open + 0.45 * spread - cross_penalty, 0.0, 1.0))
 
+        # --- Fidgeting ---
         self._lw_hist.append(lw.copy())
         self._rw_hist.append(rw.copy())
         self._nose_hist.append(nose.copy())
 
-        fidget = 0.35
+        fidget = 0.0
         if len(self._lw_hist) >= 2:
             d_l = float(np.linalg.norm(self._lw_hist[-1] - self._lw_hist[-2]))
             d_r = float(np.linalg.norm(self._rw_hist[-1] - self._rw_hist[-2]))
             inst = (d_l + d_r) / (2.0 * scale + 1e-6)
-            fidget = float(np.clip((inst - 0.004) / 0.06, 0.0, 1.0))
+            fidget = float(np.clip((inst - 0.025) / 0.20, 0.0, 1.0))
 
         if len(self._lw_hist) >= 4:
-            buf_l = list(self._lw_hist)[-8:]
-            buf_r = list(self._rw_hist)[-8:]
+            buf_l = list(self._lw_hist)[-12:]
+            buf_r = list(self._rw_hist)[-12:]
             vars_ = []
             for buf in (buf_l, buf_r):
                 arr = np.stack(buf, axis=0)
                 vars_.append(float(np.var(arr, axis=0).mean()))
             var_m = float(np.mean(vars_)) / (scale**2 + 1e-6)
-            fidget = max(fidget, float(np.clip(1.2 * var_m / 0.015, 0.0, 1.0)))
+            fidget = max(fidget, float(np.clip((var_m-0.005)/ 0.02, 0.0, 1.0)))
 
+        # --- Engagement ---
         shoulder_mid_x = mid_sh[0]
         off = abs(nose[0] - shoulder_mid_x) / (scale + 1e-6)
         facing = float(np.clip(1.0 - 2.8 * off, 0.0, 1.0))
@@ -222,37 +234,57 @@ class BodyLanguageAnalyzer:
         if len(self._nose_hist) >= 3:
             arr = np.stack(list(self._nose_hist)[-10:], axis=0)
             nvar = float(np.var(arr, axis=0).mean()) / (scale**2 + 1e-6)
-            stability = float(np.clip(1.0 - 22.0 * nvar, 0.0, 1.0))
+            stability = float(np.clip(1.0 - 30.0 * nvar, 0.0, 1.0))
 
-        lean_fwd = float(
-            np.clip((mid_sh[1] - nose[1]) / (scale * 3.0 + 1e-6), -0.3, 0.5)
-        )
+        lean_fwd = float(np.clip((mid_sh[1] - nose[1]) / (scale * 3.0 + 1e-6), -0.3, 0.5))
         lean_bonus = float(np.clip(0.25 + lean_fwd, 0.0, 1.0))
-        engagement = float(
-            np.clip(0.55 * facing + 0.35 * stability + 0.10 * lean_bonus, 0.0, 1.0)
-        )
+        engagement = float(np.clip(0.55 * facing + 0.35 * stability + 0.10 * lean_bonus, 0.0, 1.0))
 
+        # --- Posture ---
         shoulder_tilt = abs(ls[1] - rs[1]) / (scale + 1e-6)
         level = float(np.clip(1.0 - 12.0 * shoulder_tilt, 0.0, 1.0))
 
         upright = float(mid_sh[1] - nose[1])
         upright_score = float(np.clip((upright - 0.01) / 0.12, 0.0, 1.0))
 
-        spine_tilt = float(
-            np.arctan2(mid_hip[1] - mid_sh[1], abs(mid_hip[0] - mid_sh[0]) + 1e-6)
-        )
+        spine_tilt = float(np.arctan2(mid_hip[1] - mid_sh[1], abs(mid_hip[0] - mid_sh[0]) + 1e-6))
         lean_side = float(np.clip(1.0 - abs(spine_tilt) / 0.35, 0.0, 1.0))
 
-        posture = float(
-            np.clip(0.45 * level + 0.40 * upright_score + 0.15 * lean_side, 0.0, 1.0)
-        )
+        posture = float(np.clip(0.45 * level + 0.40 * upright_score + 0.15 * lean_side, 0.0, 1.0))
+
+        # --- Grounded Observations ---
+        obs = []
+        if is_crossing:
+            obs.append("Arms crossed: can signal defensiveness.")
+        if spread < 0.2 and not is_crossing:
+            obs.append("Closed posture: try to keep hands visible and relaxed.")
+        if fidget > 0.6:
+            obs.append("High fidgeting: may indicate nervousness.")
+        if facing < 0.6:
+            obs.append("Facing away: try to face the camera more directly.")
+        if upright_score < 0.3:
+            obs.append("Slouching: sitting upright projects more confidence.")
+        
+        # Head tilt check
+        if v_le_eye > 0.5 and v_re_eye > 0.5:
+            eye_vec = re_eye - le_eye
+            head_tilt = abs(np.degrees(np.arctan2(eye_vec[1], eye_vec[0])))
+            if head_tilt > 12.0:
+                obs.append("Head tilted: keep your head level for a more professional look.")
+
+        # Hand-to-face check
+        dist_l_face = np.linalg.norm(lw - nose)
+        dist_r_face = np.linalg.norm(rw - nose)
+        if (dist_l_face < 0.25 * scale and v_lw > 0.5) or (dist_r_face < 0.25 * scale and v_rw > 0.5):
+            obs.append("Hands near face: can be perceived as a lack of confidence.")
 
         return {
-            "visibility": vis,
+            "visibility": float(vis_core),
             "openness": openness,
             "fidgeting": fidget,
             "engagement": engagement,
             "posture": posture,
+            "observations": obs,
         }
 
 
@@ -332,7 +364,8 @@ def analyze_camera_snapshot_rgb(
         return out
 
     lm_list = result.pose_landmarks[0]
-    analyzer = BodyLanguageAnalyzer(history=8)
+    analyzer = BodyLanguageAnalyzer(history=20)
+
     m = analyzer.analyze_pose_landmarks(lm_list)
 
 uv    annotated = (
@@ -344,16 +377,16 @@ uv    annotated = (
     f = round(float(m["fidgeting"]), 3)
     e = round(float(m["engagement"]), 3)
     p_ = round(float(m["posture"]), 3)
+    obs = m.get("observations", [])
 
-    summary = (
-        f"Snapshot — openness {o:.0%}, fidgeting {f:.0%}, engagement {e:.0%}, "
-        f"posture {p_:.0%}. "
-        + (
-            "(Fidgeting is more reliable in the multi-second sample.)"
-            if vis_ok
-            else ""
-        )
-    )
+    summary_parts = [
+        f"Snapshot — openness {o:.0%}, fidgeting {f:.0%}, engagement {e:.0%}, posture {p_:.0%}."
+    ]
+    if obs:
+        summary_parts.append("Observations: " + " ".join(obs))
+    
+    if not vis_ok:
+        summary_parts.append("(Low visibility may affect accuracy.)")
 
     return {
         "openness": o,
@@ -366,10 +399,11 @@ uv    annotated = (
             "engagement": e,
             "posture": p_,
         },
+        "observations": obs,
         "pose_visible_fraction": 1.0 if vis_ok else 0.0,
         "frames_processed": 1,
         "duration_seconds": 0.0,
-        "summary": summary.strip(),
+        "summary": " ".join(summary_parts).strip(),
         "error": None,
         "annotated_rgb": annotated,
         "_source": "snapshot",
@@ -416,14 +450,15 @@ def analyze_webcam_session(
         base_options=base_options_lib.BaseOptions(model_asset_path=model_path),
         running_mode=RunningMode.VIDEO,
         num_poses=1,
-        min_pose_detection_confidence=0.5,
-        min_pose_presence_confidence=0.5,
-        min_tracking_confidence=0.5,
+        min_pose_detection_confidence=0.65,
+        min_pose_presence_confidence=0.65,
+        min_tracking_confidence=0.65,
     )
     landmarker = PoseLandmarker.create_from_options(opts)
 
     analyzer = BodyLanguageAnalyzer(history=36)
     sums = {k: 0.0 for k in ("openness", "fidgeting", "engagement", "posture")}
+    obs_counts: dict[str, int] = {}
     pose_frames = 0
     total_frames = 0
     frame_ms = 0
@@ -448,6 +483,8 @@ def analyze_webcam_session(
                     pose_frames += 1
                     for k in sums:
                         sums[k] += m[k]
+                    for ob in m.get("observations", []):
+                        obs_counts[ob] = obs_counts.get(ob, 0) + 1
                     metrics = {k: m[k] for k in sums}
             if frame_callback is not None:
                 frame_callback(frame, metrics)
@@ -471,17 +508,23 @@ def analyze_webcam_session(
             "engagement": out["engagement"],
             "posture": out["posture"],
         }
+        
+        # Grounded summary
         parts = [
             f"Openness {out['openness']:.0%}",
             f"fidgeting {out['fidgeting']:.0%}",
             f"engagement {out['engagement']:.0%}",
             f"posture {out['posture']:.0%}",
         ]
-        out["summary"] = (
-            f"Pose visible in {out['pose_visible_fraction']:.0%} of frames. "
-            + ", ".join(parts)
-            + "."
-        )
+        
+        top_obs = [ob for ob, count in obs_counts.items() if (count / pose_frames) > 0.25]
+        
+        summary = f"Session — {', '.join(parts)}."
+        if top_obs:
+            summary += " Key observations: " + " ".join(top_obs)
+        
+        out["summary"] = summary
+        out["observations"] = top_obs
     else:
         out["summary"] = (
             "Upper body not detected reliably — sit centered, brighten the room, "

@@ -1,9 +1,10 @@
-# PrepLoom Redesign Task Progress
+# Settings Page Functional Implementation
 
-## Plan Breakdown
-- [ ] 1. Create redesigned `web/static/index.html` (modern hero, stats-strip, grid-3 cards, animations, CTA)
-- [ ] 2. Enhance `web/static/features.html` (deeper content, glow-divider, stats-strip)
-- [ ] 3. Verify modals/scripts unchanged
-- [ ] 4. Complete task
+## Plan
+- [x] Create TODO.md
+- [x] Fix `settings.html` - Add IDs to all inputs, rewrite save/load logic
+- [x] Enhance `site.js` - Add reduceMotion, ambientOrbs, global helper
+- [x] Fix `app.html` - Add data-theme, include site.js
+- [x] Enhance `app.js` - Remove conflicting logic, add clean applyAppSettings()
+- [x] Test and verify all settings persist across pages
 
-**Current Step:** 1/4 - Redesigning index.html

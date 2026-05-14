@@ -35,6 +35,21 @@ body.site {
     -webkit-font-smoothing: antialiased;
 }
 
+[data-theme-icon] {
+    width: 1rem;
+    height: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-theme-icon] svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+}
+
 /* ── Animated ambient background ─────────────────────────────── */
 body.site::before {
     content: '';
@@ -88,9 +103,22 @@ body.site::after {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    opacity: 1;
+    transform: none;
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────────── */
+.site-wrap.is-revealing {
+    animation: contentReveal 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes contentReveal {
+    0% { opacity: 0; transform: scale(0.96) translateY(10px); filter: blur(4px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+
+/* ... existing scrollbar styles ... */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -264,6 +292,79 @@ body.site::after {
     gap: 0.4rem;
 }
 
+.nav-user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-user-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: var(--pl-text);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.nav-user-email:hover,
+.nav-user-email[aria-expanded="true"] {
+    border-color: rgba(108,99,255,0.3);
+    background: rgba(108,99,255,0.12);
+    transform: translateY(-1px);
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    min-width: 190px;
+    padding: 0.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(9,12,20,0.96);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+    backdrop-filter: blur(18px);
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    z-index: 130;
+}
+
+.user-dropdown-menu.show {
+    display: flex;
+}
+
+.user-dropdown-menu__link,
+.user-dropdown-menu__button {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 0.85rem;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--pl-text);
+    font: inherit;
+    font-size: 0.86rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.user-dropdown-menu__link:hover,
+.user-dropdown-menu__button:hover {
+    background: rgba(108,99,255,0.12);
+}
+
+.user-dropdown-menu__button {
+    color: #f87171;
+}
+
 .btn-nav-outline {
     padding: 0.45rem 1rem;
     border-radius: var(--pl-radius-sm);
@@ -361,16 +462,170 @@ body.site::after {
     animation: fadeUp 0.7s ease 0.3s both;
 }
 
-/* ── Entrance animations ─────────────────────────────────────── */
+/* ── Entrance animations utility ─────────────────────────────── */
+[data-animate] {
+    opacity: 0;
+    visibility: hidden;
+    animation-fill-mode: both;
+    animation-duration: 0.7s;
+    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-animate].visible {
+    visibility: visible;
+}
+
+[data-animate].visible[data-animate="up"] { animation-name: fadeUp; }
+[data-animate].visible[data-animate="down"] { animation-name: fadeDown; }
+[data-animate].visible[data-animate="fade"] { animation-name: fadeIn; }
+
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(24px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-12px); }
+    from { opacity: 0; transform: translateY(-16px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Delay utilities */
+[data-delay="50"] { animation-delay: 50ms; }
+[data-delay="100"] { animation-delay: 100ms; }
+[data-delay="150"] { animation-delay: 150ms; }
+[data-delay="200"] { animation-delay: 200ms; }
+[data-delay="250"] { animation-delay: 250ms; }
+[data-delay="300"] { animation-delay: 300ms; }
+[data-delay="400"] { animation-delay: 400ms; }
+[data-delay="500"] { animation-delay: 500ms; }
+
+/* ── Global Hero Particles ───────────────────────────────────── */
+.hero-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Premium UI Components ───────────────────────────────────── */
+.telemetry-card {
+    position: absolute;
+    min-width: 188px;
+    padding: 1rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(9, 14, 24, 0.82);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(20px);
+    z-index: 2;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.telemetry-card:hover {
+    border-color: rgba(108, 99, 255, 0.22);
+}
+
+.telemetry-card strong {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.7rem;
+}
+
+.telemetry-card__label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--pl-teal);
+    margin-bottom: 0.4rem;
+}
+
+.telemetry-card__meta {
+    color: rgba(244, 244, 247, 0.68);
+    font-size: 0.78rem;
+    line-height: 1.6;
+}
+
+.telemetry-card__bars {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.telemetry-card__bar {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.telemetry-card__bar-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.72rem;
+    color: rgba(244, 244, 247, 0.64);
+}
+
+.telemetry-card__bar-track {
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.telemetry-card__bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #6c63ff, #2dd4bf);
+}
+
+.telemetry-card__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.telemetry-card__stat {
+    padding: 0.7rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.telemetry-card__stat strong {
+    margin-bottom: 0.2rem;
+    font-size: 1.05rem;
+}
+
+.telemetry-card__stat span {
+    color: rgba(244, 244, 247, 0.62);
+    font-size: 0.72rem;
+}
+
+/* Light theme support for telemetry */
+html.theme-light .telemetry-card {
+    background: rgba(255, 255, 255, 0.88);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 20px 50px rgba(30, 41, 59, 0.08);
+}
+
+html.theme-light .telemetry-card strong { color: var(--pl-text); }
+html.theme-light .telemetry-card__meta,
+html.theme-light .telemetry-card__bar-label,
+html.theme-light .telemetry-card__stat span { color: rgba(31, 41, 55, 0.72); }
+html.theme-light .telemetry-card__bar-track { background: rgba(0, 0, 0, 0.06); }
+html.theme-light .telemetry-card__stat { background: rgba(0, 0, 0, 0.03); border-color: rgba(0, 0, 0, 0.03); }
+
+/* ── Intro Loader ──────────────────────────────────────────────
+   Styles moved to layout.css (Global Layout Component)
+   ──────────────────────────────────────────────────────────── */
 
 /* ── Buttons ─────────────────────────────────────────────────── */
 .btn-hero-primary {
@@ -901,4 +1156,98 @@ a.glow-link {
 a.glow-link:hover {
     color: #fff;
     text-shadow: 0 0 12px rgba(108,99,255,0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* LIGHT THEME                                                    */
+/* ═══════════════════════════════════════════════════════════════ */
+
+:root.theme-light {
+    --pl-bg: #ffffff;
+    --pl-bg-elevated: #f9fafb;
+    --pl-surface: rgba(249, 250, 251, 0.9);
+    --pl-border: rgba(0, 0, 0, 0.08);
+    --pl-border-strong: rgba(0, 0, 0, 0.14);
+    --pl-text: #1f2937;
+    --pl-muted: rgba(31, 41, 55, 0.62);
+    --pl-faint: rgba(31, 41, 55, 0.38);
+    --pl-accent: #6c63ff;
+    --pl-accent-soft: rgba(108, 99, 255, 0.15);
+    --pl-accent-glow: rgba(108, 99, 255, 0.25);
+    --pl-accent-light: #a78bfa;
+    --pl-teal: #2dd4bf;
+    --pl-teal-soft: rgba(45, 212, 191, 0.12);
+}
+
+body.site.theme-light {
+    background: var(--pl-bg);
+    color: var(--pl-text);
+}
+
+body.site.theme-light::before {
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 99, 255, 0.08), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(45, 212, 191, 0.04), transparent),
+        radial-gradient(ellipse 50% 30% at 0% 30%, rgba(108, 99, 255, 0.05), transparent);
+}
+
+body.site.theme-light::after {
+    background:
+        radial-gradient(circle 300px at 15% 60%, rgba(108,99,255,0.04), transparent),
+        radial-gradient(circle 250px at 85% 80%, rgba(45,212,191,0.02), transparent);
+}
+
+.theme-light .site-nav {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: none !important;
+}
+
+.theme-light .site-nav__link {
+    color: rgba(31, 41, 55, 0.62);
+}
+
+.theme-light .site-nav__link:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--pl-text);
+}
+
+.theme-light .btn-nav-outline {
+    border-color: rgba(0, 0, 0, 0.14);
+    background: transparent;
+    color: var(--pl-text);
+}
+
+.theme-light .btn-nav-outline:hover {
+    border-color: rgba(0, 0, 0, 0.28);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.theme-light .card-pl {
+    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.theme-light .card-pl:hover {
+    border-color: rgba(108, 99, 255, 0.18);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(108,99,255,0.08);
+}
+
+.theme-light .modal-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.theme-light .modal {
+    background: var(--pl-bg-elevated);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 32px 96px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(108,99,255,0.08);
+}
+
+.theme-light .modal__close {
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(31, 41, 55, 0.62);
+}
+
+.theme-light .modal__close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--pl-text);
 }

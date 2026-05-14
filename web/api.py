@@ -21,19 +21,27 @@ import sys
 import uuid
 import time
 import asyncio
+import os
+import base64
+import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
+from datetime import datetime
 
-import base64
-import json
+# Basic logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
+)
 
 import numpy as np
 from PIL import Image
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Form, UploadFile, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 
@@ -45,20 +53,11 @@ if str(APP_ROOT) not in sys.path:
 load_dotenv(APP_ROOT / ".ENV")
 load_dotenv(APP_ROOT / ".env")
 
-from web.auth_routes import get_optional_user, router as auth_router
-from web.mongo_db import get_db
+from web.auth_routes import get_optional_user, get_supabase_user_from_token, security, router as auth_router
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    try:
-        db = get_db()
-        await asyncio.wait_for(db.users.create_index("email", unique=True), timeout=3)
-    except Exception as e:
-        logging.getLogger("uvicorn.error").warning("MongoDB users index: %s", e)
-    yield
-
-
+# Supabase and PDF imports
+from supabase import create_client, Client
+from web.pdf_generator import generate_interview_report_pdf
 
 from AI_BACKEND.rag_retriever import (
     fetch_questions_for_role_random_mix,
@@ -68,9 +67,46 @@ from AI_BACKEND.rag_retriever import (
 from AI_BACKEND.evaluator import evaluate_technical_answer
 from AI_BACKEND.nlp_analysis import analyze_communication
 
+# Video analysis imports moved to top for performance
+try:
+    from AI_BACKEND.video_capture.video_analysis import (
+        ensure_pose_model_path,
+        BodyLanguageAnalyzer,
+        _np_rgb_to_mp_image
+    )
+    from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions, RunningMode
+    from mediapipe.tasks.python.core import base_options as base_options_lib
+    VIDEO_MODULES_AVAILABLE = True
+except ImportError:
+    VIDEO_MODULES_AVAILABLE = False
+
 # ── Constants ──────────────────────────────────────────────────────────────
 CHROMA_DIR = APP_ROOT / "AI_BACKEND" / "chroma_db"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+# ── Supabase client ───────────────────────────────────────────────────────
+_supabase: Client | None = None
+
+def get_supabase() -> Client:
+    global _supabase
+    if _supabase is None:
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")  # Use service role for server-side operations
+        if not url or not key:
+            raise HTTPException(500, "Supabase not configured")
+        _supabase = create_client(url, key)
+    return _supabase
+
+
+async def get_current_user(token: str = Depends(security)):
+    """Dependency to get the current authenticated user."""
+    if not token:
+        raise HTTPException(401, "Authentication required")
+
+    user = await get_supabase_user_from_token(token.credentials)
+    if not user:
+        raise HTTPException(401, "Invalid or expired token")
+    return user
 
 # ── In-memory session store ────────────────────────────────────────────────
 _sessions: dict[str, dict[str, Any]] = {}
@@ -86,8 +122,18 @@ def _get_vectordb():
     return _vectordb
 
 
+def _question_to_dict(q, index: int) -> dict:
+    return {
+        "index": index,
+        "question_text": q.question_text,
+        "role_tag": q.role_tag,
+        "difficulty_level": q.difficulty_level,
+        "subtopic": q.subtopic,
+        "ideal_answer": q.ideal_answer,
+    }
+
 # ── FastAPI app ────────────────────────────────────────────────────────────
-app = FastAPI(title="PrepLoom API", lifespan=lifespan)
+app = FastAPI(title="PrepLoom API")
 app.include_router(auth_router)
 
 app.add_middleware(
@@ -124,8 +170,31 @@ async def serve_app():
     return FileResponse(STATIC_DIR / "app.html")
 
 
+@app.get("/settings")
+async def serve_settings():
+    return FileResponse(STATIC_DIR / "settings.html")
+
+
 # Mount static files AFTER the root route so /api/* takes precedence
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+@app.get("/api/public-config")
+async def get_public_config():
+    return {
+        "supabase_url": (
+            os.getenv("SUPABASE_URL")
+            or os.getenv("SUPABASE_PROJECT_URL")
+            or os.getenv("supabase_url")
+            or ""
+        ).strip().strip('"').strip("'").rstrip("/"),
+        "supabase_anon_key": (
+            os.getenv("SUPABASE_ANON_KEY")
+            or os.getenv("SUPABASE_PUBLISHABLE_KEY")
+            or os.getenv("supabase_anon_key")
+            or ""
+        ).strip().strip('"').strip("'"),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -163,9 +232,10 @@ async def start_interview(
         questions = fetch_questions_for_role_random_mix(
             vectordb=vectordb,
             role_tag=role,
-            technical_min=6,
+            technical_min=7,
             technical_max=7,
             behavioural_count=3,
+            coding_count=2,
             seed=None,
         )
     except Exception as e:
@@ -178,8 +248,8 @@ async def start_interview(
     _sessions[session_id] = {
         "name": name,
         "role": role,
-        "user_id": user["id"] if user else None,
-        "user_email": user["email"] if user else None,
+        "user_id": user.get("sub") or user.get("id") if user else None,
+        "user_email": user.get("email") if user else None,
         "questions": questions,
         "question_idx": 0,
         "evaluations": [],
@@ -205,6 +275,7 @@ async def submit_answer(payload: dict):
     answer = payload.get("answer", "").strip()
     duration = float(payload.get("duration", 7.0))
     bl_data = payload.get("body_language")
+    code_submission = payload.get("code_submission", "")
 
     idx = session["question_idx"]
     questions = session["questions"]
@@ -213,21 +284,10 @@ async def submit_answer(payload: dict):
 
     q = questions[idx]
 
-    # 1. Technical score (LLM / heuristic)
-    tech_eval = evaluate_technical_answer(
-        question_text=q.question_text,
-        ideal_answer=q.ideal_answer or "",
-        user_answer=answer,
-        role_tag=q.role_tag,
-        difficulty_level=q.difficulty_level,
-    )
-
-    # 2. Communication score (NLP)
-    comm_eval = analyze_communication(answer, duration)
-
-    # 3. Confidence score (body language)
+    # 1. Confidence score (body language) - Calculated first for use in technical evaluation
     confidence_score = None
     bl_summary = "No body language data captured for this question."
+    bl_obs = []
     if bl_data and not bl_data.get("error") and bl_data.get("pose_visible_fraction", 0) > 0:
         o = float(bl_data.get("openness", 0.5))
         e = float(bl_data.get("engagement", 0.5))
@@ -235,6 +295,21 @@ async def submit_answer(payload: dict):
         f = float(bl_data.get("fidgeting", 0.5))
         confidence_score = int(round(np.clip((o + e + p + (1.0 - f)) / 4.0, 0.0, 1.0) * 100))
         bl_summary = bl_data.get("summary", "")
+        bl_obs = bl_data.get("observations", [])
+
+    # 2. Technical score (LLM / heuristic)
+    tech_eval = evaluate_technical_answer(
+        question_text=q.question_text,
+        ideal_answer=q.ideal_answer or "",
+        user_answer=answer,
+        code_submission=code_submission,
+        role_tag=q.role_tag,
+        difficulty_level=q.difficulty_level,
+        body_language_summary=bl_summary,
+    )
+
+    # 3. Communication score (NLP)
+    comm_eval = analyze_communication(answer, duration)
 
     combined = {
         "question_text": q.question_text,
@@ -245,11 +320,13 @@ async def submit_answer(payload: dict):
         "missing_points": tech_eval.get("missing_points", []),
         "short_feedback": tech_eval.get("short_feedback", ""),
         "communication_score": comm_eval.get("communication_score"),
+        "filler_words": comm_eval.get("filler_words", []),
         "filler_count": comm_eval.get("filler_count", 0),
         "wpm": comm_eval.get("wpm", 0),
-        "comm_details": comm_eval.get("details", ""),
+        "comm_details": comm_eval.get("comm_details", ""),
         "confidence_score": confidence_score,
         "bl_summary": bl_summary,
+        "bl_observations": bl_obs,
     }
 
     session["evaluations"].append(combined)
@@ -410,94 +487,178 @@ async def analyze_posture(image: UploadFile = File(...)):
 async def websocket_analyze_posture(websocket: WebSocket):
     """
     WebSocket endpoint for continuous frame-by-frame posture analysis.
-    
-    Client sends messages with base64-encoded JPEG frames.
-    Server responds with real-time metrics.
-    
-    Message format: {"frame": "base64_jpeg_data"}
-    Response format: {"metrics": {...}, "summary": "...", "timestamp": ...}
     """
     await websocket.accept()
+    if not VIDEO_MODULES_AVAILABLE:
+        logging.error("Video analysis modules not available. Please install mediapipe.")
+        await websocket.send_json({"error": "Video analysis modules not available. Please install mediapipe."})
+        await websocket.close()
+        return
+
     frame_count = 0
     error_count = 0
     
     try:
-        from AI_BACKEND.video_capture import analyze_camera_snapshot_rgb
-    except ImportError as e:
-        await websocket.send_json({"error": f"Video module import failed: {e}"})
-        await websocket.close()
-        return
+        model_path = str(ensure_pose_model_path())
+        opts = PoseLandmarkerOptions(
+            base_options=base_options_lib.BaseOptions(model_asset_path=model_path),
+            running_mode=RunningMode.VIDEO,
+            num_poses=1,
+            min_pose_detection_confidence=0.5,
+            min_pose_presence_confidence=0.5,
+            min_tracking_confidence=0.5,
+        )
+        landmarker = PoseLandmarker.create_from_options(opts)
+        analyzer = BodyLanguageAnalyzer(history=20)
+        frame_timestamp_ms = 0
 
-    try:
+        # Sync function to process frame, to be run in a thread
+        def process_frame_sync(rgb_data, ts):
+            try:
+                mp_img = _np_rgb_to_mp_image(rgb_data)
+                result = landmarker.detect_for_video(mp_img, ts)
+                if not result.pose_landmarks:
+                    return {
+                        "openness": 0.5, "fidgeting": 0.5, "engagement": 0.5, "posture": 0.5,
+                        "pose_visible_fraction": 0.0,
+                        "summary": "No pose detected. Please ensure your upper body is visible.",
+                    }
+                lm_list = result.pose_landmarks[0]
+                res = analyzer.analyze_pose_landmarks(lm_list)
+                vis_ok = res.get("visibility", 0) >= 0.35
+                res["pose_visible_fraction"] = 1.0 if vis_ok else 0.0
+                
+                o = round(float(res.get("openness", 0.5)), 3)
+                f = round(float(res.get("fidgeting", 0.5)), 3)
+                e = round(float(res.get("engagement", 0.5)), 3)
+                p_ = round(float(res.get("posture", 0.5)), 3)
+                res["probabilities"] = {"openness": o, "fidgeting": f, "engagement": e, "posture": p_}
+                res["summary"] = f"Live: Openness {o:.0%}, Fidgeting {f:.0%}, Engagement {e:.0%}, Posture {p_:.0%}"
+                return res
+            except Exception as e:
+                logging.error(f"Error in process_frame_sync: {e}")
+                return {"error": str(e)}
+
         while True:
             try:
-                # Receive frame data
                 data = await websocket.receive_text()
                 msg = json.loads(data)
                 frame_data = msg.get("frame", "")
-                
                 if not frame_data:
-                    await websocket.send_json({"error": "No frame data provided"})
                     continue
                 
-                # Decode base64 JPEG
                 try:
                     image_bytes = base64.b64decode(frame_data)
                     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
                     rgb = np.asarray(img, dtype=np.uint8)
-                except Exception as e:
-                    error_count += 1
-                    await websocket.send_json({"error": f"Could not decode frame: {e}"})
-                    if error_count > 10:
-                        await websocket.close()
-                        break
-                    continue
-                
-                # Analyze pose
-                try:
-                    raw = analyze_camera_snapshot_rgb(rgb, draw_skeleton=False)
-                    result = {k: v for k, v in raw.items() if k not in ("annotated_rgb",)}
                     
-                    # Add frame counter
+                    frame_timestamp_ms += 67
+                    # Run sync analysis in a thread to keep event loop free
+                    res = await asyncio.to_thread(process_frame_sync, rgb, frame_timestamp_ms)
+                    
+                    if "error" in res:
+                        logging.error(f"Analysis internal error: {res['error']}")
+                        await websocket.send_json(res)
+                        continue
+
                     frame_count += 1
-                    result["frame_count"] = frame_count
-                    result["timestamp"] = time.time()
-                    
-                    # Send metrics back
-                    await websocket.send_json(result)
-                    error_count = 0  # Reset error count on success
+                    res["frame_count"] = frame_count
+                    res["timestamp"] = time.time()
+                    await websocket.send_json(res)
+                    error_count = 0
                     
                 except Exception as e:
                     error_count += 1
-                    await websocket.send_json({
-                        "error": f"Analysis failed: {str(e)}",
-                        "frame_count": frame_count,
-                        "timestamp": time.time()
-                    })
-                    if error_count > 10:
-                        await websocket.close()
+                    logging.error(f"Frame processing error: {e}")
+                    await websocket.send_json({"error": f"Frame error: {str(e)}"})
+                    if error_count > 50:
+                        logging.error("Too many frame processing errors, closing WebSocket.")
                         break
-                
-            except json.JSONDecodeError:
-                await websocket.send_json({"error": "Invalid JSON format"})
-                continue
+            except WebSocketDisconnect:
+                logging.info("WebSocket disconnected by client.")
+                break
+            except Exception as e:
+                logging.error(f"Loop error: {e}")
+                break
                 
     except WebSocketDisconnect:
-        logging.getLogger("uvicorn.error").info(f"WebSocket disconnected after {frame_count} frames")
+        logging.info("WebSocket disconnected.")
     except Exception as e:
-        logging.getLogger("uvicorn.error").error(f"WebSocket error: {e}")
+        logging.error(f"WebSocket initialization error: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
         try:
             await websocket.close()
         except:
             pass
 
 
+@app.get("/api/user/stats")
+async def get_user_stats(user: dict | None = Depends(get_optional_user)):
+    """Return aggregate statistics across all sessions for the current user."""
+    if not user:
+        return {"sessions": 0, "avg_score": 0, "practice_time": "0.0h", "roles": 0}
+
+    user_id = user.get("sub") or user.get("id")
+    user_email = user.get("email")
+
+    user_sessions = []
+    for sid, s in _sessions.items():
+        if s.get("user_id") == user_id or (user_email and s.get("user_email") == user_email):
+            user_sessions.append(s)
+
+    total_sessions = len(user_sessions)
+    roles = len(set(s.get("role") for s in user_sessions if s.get("role")))
+
+    # Assuming an average of 2.5 minutes per question evaluation
+    total_evals = sum(len(s.get("evaluations", [])) for s in user_sessions)
+    practice_hours = round((total_evals * 2.5) / 60, 1)
+
+    scores = []
+    for s in user_sessions:
+        evals = s.get("evaluations", [])
+        if not evals:
+            continue
+        tech = [e["technical_score"] for e in evals if e.get("technical_score") is not None]
+        comm = [e["communication_score"] for e in evals if e.get("communication_score") is not None]
+        conf = [e["confidence_score"] for e in evals if e.get("confidence_score") is not None]
+
+        avg_tech = sum(tech) / max(1, len(tech)) if tech else 0
+        avg_comm = sum(comm) / max(1, len(comm)) if comm else 0
+        avg_conf = sum(conf) / max(1, len(conf)) if conf else 0
+        overall = int(round(avg_tech * 0.45 + avg_comm * 0.30 + avg_conf * 0.25))
+        scores.append(overall)
+
+    avg_score = int(round(sum(scores) / len(scores))) if scores else 0
+
+    return {
+        "sessions": total_sessions,
+        "avg_score": avg_score,
+        "practice_time": f"{practice_hours}h",
+        "roles": roles
+    }
+
+
 @app.get("/api/report/{session_id}")
-async def get_report(session_id: str):
-    """Return aggregate report for a finished interview."""
+async def get_report(session_id: str, user: dict | None = Depends(get_optional_user)):
+    """Return aggregate report for a finished interview and save to database if user is authenticated."""
     session = _sessions.get(session_id)
     if not session:
-        raise HTTPException(404, "Session not found")
+        # Check if report already exists in DB even if session is gone from memory
+        if user and user.get("id"):
+            try:
+                supabase = get_supabase()
+                existing = supabase.table("interview_reports").select("*").eq("session_id", session_id).eq("user_id", user["id"]).limit(1).execute()
+                if existing.data and len(existing.data) > 0:
+                    report = existing.data[0]
+                    report["pdf_available"] = bool(report.get("pdf_path"))
+                    report["report_id"] = report.get("id")
+                    return report
+            except Exception as e:
+                logging.error(f"Error fetching existing report: {e}", exc_info=True)
+        
+        raise HTTPException(404, "Session not found and no saved report exists.")
 
     evals = session["evaluations"]
     if not evals:
@@ -522,7 +683,7 @@ async def get_report(session_id: str):
     if not tips:
         tips.append("🌟 Great performance! Keep practicing to maintain consistency.")
 
-    return {
+    report_data = {
         "name": session.get("name", ""),
         "role": session.get("role", ""),
         "user_id": session.get("user_id"),
@@ -533,17 +694,119 @@ async def get_report(session_id: str):
         "avg_confidence": avg_conf,
         "evaluations": evals,
         "tips": tips,
+        "created_at": datetime.now().isoformat(),
+        "pdf_available": False,
     }
 
+    if user and user.get("id"):
+        try:
+            supabase = get_supabase()
+            user_id = user["id"]
+            logging.info(f"Attempting to save report for user {user_id}, session {session_id}")
+            
+            existing = supabase.table("interview_reports").select("id, pdf_path").eq("session_id", session_id).eq("user_id", user_id).limit(1).execute()
+            existing_record = (existing.data or [])[0] if existing.data else None
+            pdf_path = None
+            report_id = None
 
-# ── Helpers ────────────────────────────────────────────────────────────────
+            if existing_record:
+                report_id = existing_record.get("id")
+                pdf_path = existing_record.get("pdf_path")
+                logging.info(f"Report already exists: {report_id}")
+            else:
+                try:
+                    pdf_content = generate_interview_report_pdf(report_data)
+                    pdf_path = f"{user_id}/{session_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                    supabase.storage.from_("interview-reports").upload(pdf_path, pdf_content, content_type="application/pdf")
+                    logging.info(f"PDF uploaded to storage: {pdf_path}")
+                except Exception as pdf_err:
+                    logging.error(f"Failed to generate or upload PDF: {pdf_err}")
+                    pdf_path = None
 
-def _question_to_dict(q, idx: int) -> dict:
-    return {
-        "index": idx,
-        "question_text": q.question_text,
-        "difficulty_level": q.difficulty_level or "—",
-        "subtopic": q.subtopic or "—",
-        "role_tag": q.role_tag or "—",
-        "ideal_answer": q.ideal_answer or "",
-    }
+                db_record = {
+                    "user_id": user_id,
+                    "session_id": session_id,
+                    "candidate_name": session.get("name", ""),
+                    "role": session.get("role", ""),
+                    "total_questions": len(evals),
+                    "overall_score": overall,
+                    "avg_technical": avg_tech,
+                    "avg_communication": avg_comm,
+                    "avg_confidence": avg_conf,
+                    "evaluations": evals,
+                    "tips": tips,
+                    "pdf_path": pdf_path,
+                }
+                
+                insert_response = supabase.table("interview_reports").insert(db_record).select("id").execute()
+                new_record = (insert_response.data or [])[0] if insert_response.data else None
+                if new_record:
+                    report_id = new_record.get("id")
+                    logging.info(f"Report record inserted: {report_id}")
+                else:
+                    logging.error(f"Failed to insert report record: {insert_response}")
+
+            report_data["pdf_available"] = bool(pdf_path)
+            if report_id:
+                report_data["report_id"] = report_id
+        except Exception as e:
+            logging.error(f"Failed to save report to Supabase: {e}")
+    else:
+        logging.info("Not authenticated. Report will not be saved.")
+
+    return report_data
+
+
+@app.get("/api/user/reports")
+async def get_user_reports(user: dict | None = Depends(get_optional_user)):
+    """Get all interview reports for the authenticated user."""
+    if not user or not user.get("id"):
+        raise HTTPException(401, "Authentication required")
+
+    try:
+        supabase = get_supabase()
+        response = supabase.table("interview_reports").select("id, session_id, candidate_name, role, overall_score, avg_technical, avg_communication, avg_confidence, created_at, pdf_path").eq("user_id", user["id"]).order("created_at", desc=True).execute()
+        reports = response.data or []
+        for item in reports:
+            item["pdf_available"] = bool(item.get("pdf_path"))
+        return {"reports": reports}
+    except Exception as e:
+        logging.error(f"Failed to retrieve reports for user {user['id']}: {e}", exc_info=True)
+        raise HTTPException(500, "Failed to retrieve reports.")
+
+
+@app.get("/api/user/reports/{report_id}/download")
+async def download_report_pdf(report_id: str, user: dict | None = Depends(get_optional_user)):
+    """Download a specific report PDF for the authenticated user."""
+    if not user or not user.get("id"):
+        raise HTTPException(401, "Authentication required")
+
+    try:
+        supabase = get_supabase()
+        report_response = supabase.table("interview_reports").select("pdf_path").eq("id", report_id).eq("user_id", user["id"]).limit(1).execute()
+        report_row = (report_response.data or [])[0] if report_response.data else None
+        if not report_row:
+            raise HTTPException(404, "Report not found")
+
+        pdf_path = report_row.get("pdf_path")
+        if not pdf_path:
+            raise HTTPException(404, "PDF not available for this report")
+
+        download_result = supabase.storage.from_("interview-reports").download(pdf_path)
+        if isinstance(download_result, dict):
+            pdf_bytes = download_result.get("data") or None
+        else:
+            pdf_bytes = getattr(download_result, "data", None) or download_result
+
+        if not pdf_bytes:
+            raise HTTPException(500, "Failed to download report PDF from storage")
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=interview_report_{report_id}.pdf"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Failed to download PDF: {str(e)}")

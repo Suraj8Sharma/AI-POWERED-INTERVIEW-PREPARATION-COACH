@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="About PrepLoom — Our mission is to make rigorous, calm interview practice accessible before the high-stakes moment." />
     <title>About — PrepLoom</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C63FF'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3EPL%3C/text%3E%3C/svg%3E" />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="icon" href="/static/logo.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;650&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+<<<<<<< HEAD
+    <link rel="stylesheet" href="/static/css/site.css?v=6" />
+    <link rel="stylesheet" href="/static/css/layout.css" />
+=======
     <link rel="stylesheet" href="/static/css/site.css" />
+>>>>>>> 1f011683f3eb973c0f0020711de665893ad47bf8
     <style>
         /* ── About-specific styles matching revision ── */
         .about-hero {
@@ -16,12 +21,28 @@
             padding: 3.5rem 0 3rem;
             overflow: hidden;
         }
-        .about-hero::before {
-            content: '';
+        .about-hero__bg {
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(108,99,255,0.18), transparent);
             pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 70% 60% at 50% -10%, rgba(108,99,255,0.28), transparent),
+                radial-gradient(ellipse 50% 40% at 80% 20%, rgba(45,212,191,0.1), transparent),
+                radial-gradient(ellipse 40% 30% at 10% 60%, rgba(108,99,255,0.08), transparent);
+        }
+        .about-hero__noise {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+        .about-hero__inner {
+            position: relative;
+            z-index: 1;
         }
         .about-hero__eyebrow {
             display: inline-flex;
@@ -46,7 +67,6 @@
             animation: blink 2s ease-in-out infinite;
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        @keyframes fadeDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
         .about-hero h1 {
             font-family: 'Fraunces', serif;
             font-size: clamp(2rem, 5vw, 3rem);
@@ -57,15 +77,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 0.75rem;
-            animation: fadeUp 0.7s ease 0.1s both;
         }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         .about-hero p {
             color: var(--pl-muted);
             font-size: 1.02rem;
             max-width: 50ch;
             margin: 0 auto 2rem;
-            animation: fadeUp 0.7s ease 0.2s both;
         }
 
         /* Team flipcards like revision flashcards */
@@ -245,43 +262,17 @@
             font-weight: 600;
         }
 
-        /* Animated entrance */
-        [data-animate] {
-            opacity: 0;
-            transform: translateY(18px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        [data-animate].visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .about-cta {
-            text-align: center;
-            padding: 3rem 0 1rem;
-        }
-        .about-cta h2 {
-            font-family: 'Fraunces', serif;
-            font-size: 1.6rem;
-            font-weight: 650;
-            margin-bottom: 0.5rem;
-        }
-        .about-cta p { 
-            color: var(--pl-muted); 
-            margin-bottom: 1.5rem; 
-            font-size: 0.9rem; 
-        }
-
-        @media (max-width: 600px) {
-            .team-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-        }
+        /* ── Dropdown Menu ── */
+        .user-dropdown-menu.show { display: flex !important; }
+        .nav-user-email::after { content: '▼'; font-size: 0.6rem; opacity: 0.7; margin-left: 0.3rem; display: inline-block; vertical-align: middle; }
     </style>
+    <link rel="stylesheet" href="/static/css/future-pages.css" />
 </head>
-<body class="site">
+<body class="site future-page future-page--about">
 <div class="site-wrap">
     <header class="site-nav" role="navigation" aria-label="Primary">
         <a class="site-nav__brand" href="/">
-            <span class="site-nav__mark" aria-hidden="true">PL</span>
+            <img src="/static/logo.png" alt="PrepLoom Logo" style="height: 32px; width: auto; border-radius: 6px;" />
             PrepLoom
         </a>
         <nav class="site-nav__links" aria-label="Main">
@@ -292,8 +283,23 @@
             <a class="site-nav__link site-nav__link--cta" href="/app">Practice</a>
         </nav>
         <div class="site-nav__auth" id="navAuthSlot">
-            <span id="navUserEmail" class="nav-user-email hidden" aria-live="polite"></span>
-            <button type="button" id="navLogout" class="btn-nav-outline hidden">Log out</button>
+            <button type="button" id="themeToggle" class="btn-nav-outline" title="Toggle theme" style="padding: 0.45rem 0.7rem; font-size: 1.1rem;">
+                <span data-theme-icon aria-hidden="true"></span>
+            </button>
+            <a href="/settings" class="btn-nav-outline" title="Settings" style="padding: 0.45rem 0.7rem; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">⚙️</a>
+            <div style="position: relative; display: inline-block;">
+                <button type="button" id="navUserEmail" class="nav-user-email hidden" aria-live="polite" title="Account Menu" style="background:transparent; border:none; color:inherit; display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:600; transition: color 0.15s ease; font-size: 0.95rem; font-family: inherit; padding: 0.45rem 0.5rem; margin: 0;"></button>
+                <div id="userDropdownMenu" class="user-dropdown-menu">
+                    <a href="/settings" style="padding: 0.75rem 1rem; color: var(--pl-text, #f4f4f7); text-decoration: none; font-size: 0.85rem; border-bottom: 1px solid var(--pl-border, rgba(255,255,255,0.05)); transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(108,99,255,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Settings
+                    </a>
+                    <button type="button" id="navLogout" class="hidden" style="padding: 0.75rem 1rem; color: #ef4444; background: transparent; border: none; text-align: left; font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: background 0.2s; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='transparent'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log out
+                    </button>
+                </div>
+            </div>
             <div id="navAuthButtons">
                 <button type="button" class="btn-nav-outline" data-open-modal="modal-signin">Sign in</button>
                 <button type="button" class="btn-nav-primary" data-open-modal="modal-signup">Sign up</button>
@@ -302,31 +308,57 @@
     </header>
 
     <main class="site-main">
-        <div class="about-hero">
-            <div class="about-hero__eyebrow">
+        <div class="about-hero hero-parallax-container">
+            <canvas id="heroParticles" class="hero-particles" aria-hidden="true"></canvas>
+            <div class="hero-mesh" aria-hidden="true"></div>
+            <div class="about-hero__bg" aria-hidden="true"></div>
+            <div class="about-hero__noise" aria-hidden="true"></div>
+
+            <!-- Telemetry-style status elements -->
+            <div class="telemetry-card telemetry-card--north" data-parallax="15" style="top: 15%; left: 10%;">
+                <span class="telemetry-card__label">Project Signal</span>
+                <div class="telemetry-card__bars">
+                    <div class="telemetry-card__bar">
+                        <div class="telemetry-card__bar-label"><span>Completeness</span><span>94%</span></div>
+                        <div class="telemetry-card__bar-track"><span class="telemetry-card__bar-fill" style="width: 94%"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="telemetry-card telemetry-card--south" data-parallax="25" style="bottom: 20%; right: 12%;">
+                <span class="telemetry-card__label">System Health</span>
+                <div class="telemetry-card__grid">
+                    <div class="telemetry-card__stat"><strong>OK</strong><span>API</span></div>
+                    <div class="telemetry-card__stat"><strong>OK</strong><span>AI</span></div>
+                </div>
+            </div>
+
+            <div class="about-hero__inner">
+            <div class="about-hero__eyebrow" data-animate="down">
                 <span class="dot"></span>
                 Meet the builders
             </div>
-            <h1>About PrepLoom</h1>
-            <p>We believe preparation should feel focused and repeatable—not frantic. PrepLoom is a capstone-grade workspace for mock interviews: technical depth, how you sound, and how you show up.</p>
+            <h1 data-animate="up" data-delay="100">About PrepLoom</h1>
+            <p data-animate="up" data-delay="200">We believe preparation should feel focused and repeatable—not frantic. PrepLoom is a capstone-grade workspace for mock interviews: technical depth, how you sound, and how you show up.</p>
+            </div>
         </div>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">Our Building Team</h2>
             <p class="about-section-sub">The developers, designers, and minds behind PrepLoom. Proudly built as a capstone project.</p>
 
-            <div class="team-grid" data-animate>
+            <div class="team-grid" data-animate="up" data-delay="100">
                 
                 <div class="team-flipcard mentor" tabindex="0">
                     <div class="team-flipcard__inner">
                         <div class="team-flipcard__front">
                             <div class="team-flipcard__icon">👩‍🏫</div>
                             <div class="team-flipcard__name">Professor Er. Aditi Mahajan</div>
-                            <div class="team-flipcard__role">Mentor & Guide</div>
+                            <div class="team-flipcard__role">Project Mentor</div>
                             <div class="team-flipcard__hint">Hover to flip ⤵</div>
                         </div>
                         <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">aditi.mahajan@example.edu</div>
+                            <div class="team-flipcard__email">eraditimahajan@gmail.com</div>
                             <div class="team-flipcard__bio">Providing academic guidance, evaluating project milestones, and steering our capstone direction.</div>
                         </div>
                     </div>
@@ -337,12 +369,12 @@
                         <div class="team-flipcard__front">
                             <div class="team-flipcard__icon">👩‍💻</div>
                             <div class="team-flipcard__name">Ishani Verma</div>
-                            <div class="team-flipcard__role">Full Stack Developer</div>
+                            <div class="team-flipcard__role">Open CV & MediaPipe Engineer</div>
                             <div class="team-flipcard__hint">Hover to flip ⤵</div>
                         </div>
                         <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">ishani@preploom.dev</div>
-                            <div class="team-flipcard__bio">Driving core frontend features and ensuring robust backend integration across the stack.</div>
+                            <div class="team-flipcard__email">ishaniverma847@gmail.com</div>
+                            <div class="team-flipcard__bio">Bridges complex, real-time facial and behavioral analysis with an intuitive user experience. Ensures the visual processing pipelines run seamlessly to provide immediate, interactive feedback.</div>
                         </div>
                     </div>
                 </div>
@@ -352,12 +384,12 @@
                         <div class="team-flipcard__front">
                             <div class="team-flipcard__icon">👩‍💻</div>
                             <div class="team-flipcard__name">Shivangi Ranout</div>
-                            <div class="team-flipcard__role">UI/UX Designer</div>
+                            <div class="team-flipcard__role">Frontend Developer </div>
                             <div class="team-flipcard__hint">Hover to flip ⤵</div>
                         </div>
                         <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">shivangi@preploom.dev</div>
-                            <div class="team-flipcard__bio">Crafting the design system, visual identity, and ensuring intuitive user journeys.</div>
+                            <div class="team-flipcard__email">shivangiranout1406@gmail.com</div>
+                            <div class="team-flipcard__bio">Crafts clean, accessible user interfaces while maintaining crystal-clear project documentation. Ensures the system's architecture, codebase, and user workflows are perfectly organized and easy to navigate.</div>
                         </div>
                     </div>
                 </div>
@@ -367,12 +399,12 @@
                         <div class="team-flipcard__front">
                             <div class="team-flipcard__icon">👩‍💻</div>
                             <div class="team-flipcard__name">Sanskriti Sharma</div>
-                            <div class="team-flipcard__role">Frontend Specialist</div>
+                            <div class="team-flipcard__role">Frontend Developer</div>
                             <div class="team-flipcard__hint">Hover to flip ⤵</div>
                         </div>
                         <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">sanskriti@preploom.dev</div>
-                            <div class="team-flipcard__bio">Building responsive layouts, interactive components, and our smooth CSS animations.</div>
+                            <div class="team-flipcard__email">sanskriti345sharma@gmail.com</div>
+                            <div class="team-flipcard__bio">Building responsive layouts, interactive components, and our smooth CSS animations along  with the curation of a perfect dataset for the model to learn from.</div>
                         </div>
                     </div>
                 </div>
@@ -382,12 +414,12 @@
                         <div class="team-flipcard__front">
                             <div class="team-flipcard__icon">👨‍💻</div>
                             <div class="team-flipcard__name">Suraj Sharma</div>
-                            <div class="team-flipcard__role">Backend Dev & AI Lead</div>
+                            <div class="team-flipcard__role">Backend & AI Developer</div>
                             <div class="team-flipcard__hint">Hover to flip ⤵</div>
                         </div>
                         <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">suraj@preploom.dev</div>
-                            <div class="team-flipcard__bio">Architecting scalable API endpoints, complex LLM feedback pipelines, and real-time OpenCV integrations.</div>
+                            <div class="team-flipcard__email">suraj43446sharma@gmail.com</div>
+                            <div class="team-flipcard__bio">Drives the intelligent core of the application by developing and integrating Retrieval-Augmented Generation (RAG) pipelines. Seamlessly connects sophisticated backend conversational AI with responsive, user-facing dashboards</div>
                         </div>
                     </div>
                 </div>
@@ -397,12 +429,12 @@
                         <div class="team-flipcard__front">
                             <div class="team-flipcard__icon">👨‍💻</div>
                             <div class="team-flipcard__name">Jigyasu</div>
-                            <div class="team-flipcard__role">DevOps & Integration</div>
+                            <div class="team-flipcard__role">Authentication and Frontend Engineer</div>
                             <div class="team-flipcard__hint">Hover to flip ⤵</div>
                         </div>
                         <div class="team-flipcard__back">
-                            <div class="team-flipcard__email">jigyasu@preploom.dev</div>
-                            <div class="team-flipcard__bio">Managing deployment workflows, system reliability, and streamlining cloud hosting environments.</div>
+                            <div class="team-flipcard__email">jigyasukashyap70@gmail.com</div>
+                            <div class="team-flipcard__bio">Designs the secure and scalable storage infrastructure required to manage user profiles and performance metrics. Acts as the critical link ensuring smooth data flow across all system modules.</div>
                         </div>
                     </div>
                 </div>
@@ -410,7 +442,7 @@
             </div>
         </section>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">Our Mission</h2>
             <p class="about-section-sub">Give candidates a single place to rehearse under pressure.</p>
             <div class="about-card">
@@ -427,7 +459,7 @@
             </div>
         </section>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">What's Next</h2>
             <div class="about-card">
                 <div class="about-card__head">
@@ -443,7 +475,7 @@
             </div>
         </section>
 
-        <section class="about-section" data-animate>
+        <section class="about-section" data-animate="up">
             <h2 class="about-section-title">Get In Touch</h2>
             <div class="about-card">
                 <div class="about-card__head">
@@ -459,7 +491,7 @@
             </div>
         </section>
 
-        <div class="about-cta" data-animate>
+        <div class="about-cta" data-animate="up">
             <h2>Ready to practice?</h2>
             <p>Open the practice room and run a timed mock interview.</p>
             <a class="btn-hero-primary" href="/app">Start Practice →</a>
@@ -485,7 +517,7 @@
             <h2 id="signin-title">Sign in</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
         </div>
-        <p class="modal__note">MongoDB stores your account; you receive a JWT stored in this browser.</p>
+        <p class="modal__note">Sign in with Supabase to manage your settings and preferences.</p>
         <p id="signinError" class="modal-error" hidden></p>
         <form id="formSignin">
             <div class="modal__field">
@@ -498,6 +530,7 @@
             </div>
             <button type="submit" class="btn-modal-primary">Sign in</button>
         </form>
+        <button type="button" data-auth-provider="google" data-error-target="signinError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
         <p class="modal__footer-text">No account? <button type="button" data-open-modal="modal-signup">Sign up</button></p>
     </div>
 </div>
@@ -508,7 +541,7 @@
             <h2 id="signup-title">Create account</h2>
             <button type="button" class="modal__close" data-close-modal aria-label="Close">×</button>
         </div>
-        <p class="modal__note">Password must be at least 8 characters. You can use Practice without an account.</p>
+        <p class="modal__note">Create an account to save your progress and settings.</p>
         <p id="signupError" class="modal-error" hidden></p>
         <form id="formSignup">
             <div class="modal__field">
@@ -525,28 +558,18 @@
             </div>
             <button type="submit" class="btn-modal-primary">Create account</button>
         </form>
+        <button type="button" data-auth-provider="google" data-error-target="signupError" class="btn-modal-primary" style="width:100%;margin-top:0.75rem;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.18);">Continue with Google</button>
         <p class="modal__footer-text">Already have an account? <button type="button" data-open-modal="modal-signin">Sign in</button></p>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/static/js/supabaseClient.js"></script>
 <script src="/static/js/site.js"></script>
 <script src="/static/js/auth.js"></script>
 <script>
-(function() {
-    // Intersection observer for data-animate (matching revision)
-    var els = document.querySelectorAll('[data-animate]');
-    var io = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                var el = entry.target;
-                var delay = el.getAttribute('data-delay') || 0;
-                setTimeout(function() { el.classList.add('visible'); }, delay);
-                io.unobserve(el);
-            }
-        });
-    }, { threshold: 0.08 });
-    els.forEach(function(el) { io.observe(el); });
-})();
+    // Theme toggle
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
 </script>
 </body>
 </html>
