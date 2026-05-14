@@ -175,16 +175,22 @@ def _is_coding(q: RetrievedQuestion) -> bool:
 def fetch_questions_for_role_random_mix(
     vectordb: Chroma,
     role_tag: str,
-    technical_min: int = 6,
+    technical_min: int = 7,
     technical_max: int = 7,
     behavioural_count: int = 3,
+    coding_count: int = 2,
     seed: int | None = None,
     limit: int = 2000,
 ) -> list[RetrievedQuestion]:
     """
-    Fetch a random interview set for a role using metadata-only filtering:
-    - technical questions: difficulty_level in {Easy, Medium, Hard, ...} (i.e., not Behavioural)
-    - behavioural questions: difficulty_level contains "Behavioural"
+    Fetch a random interview set for a role using metadata-only filtering.
+
+    Returns exactly (technical + behavioural) questions, where
+    `technical` = randint(technical_min, technical_max) and includes
+    `coding_count` coding-style questions.  The rest are standard
+    conceptual / theory questions.
+
+    Default: 7 technical (5 standard + 2 coding) + 3 behavioural = 10 total.
     """
     rng = random.Random(seed)
 
@@ -231,7 +237,7 @@ def fetch_questions_for_role_random_mix(
     print(f"\n[DEBUG] Found {len(coding)} coding questions for role: {role_tag}")
 
     n_behavioural = min(behavioural_count, len(behavioural))
-    n_coding = 2 # Force exactly 2 coding questions
+    n_coding = coding_count  # Use the parameter instead of a hardcoded value
     
     # Fill the rest of the quota with standard technical questions
     n_standard_tech = rng.randint(technical_min, technical_max) - n_coding
@@ -303,4 +309,7 @@ def fetch_questions_for_role_random_mix(
 
     # Return the questions in the exact requested order: 
     # Standard Technical -> Coding -> Behavioural
-    return chosen_standard_tech + chosen_coding + chosen_behavioural
+    final = chosen_standard_tech + chosen_coding + chosen_behavioural
+    print(f"[DEBUG] Interview set: {len(chosen_standard_tech)} standard tech + {len(chosen_coding)} coding + {len(chosen_behavioural)} behavioural = {len(final)} total")
+    return final
+

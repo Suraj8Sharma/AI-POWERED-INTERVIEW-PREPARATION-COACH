@@ -10,6 +10,16 @@
     <link rel="stylesheet" href="/static/css/site.css" />
     <link rel="stylesheet" href="/static/css/layout.css" />
     <link rel="stylesheet" href="/static/css/home.css" />
+    <script>
+        (function() {
+            if (sessionStorage.getItem("pl-intro-seen")) {
+                document.documentElement.classList.add("pl-intro-skip");
+            }
+        })();
+    </script>
+    <style>
+        .pl-intro-skip .intro-loader { display: none !important; }
+    </style>
 </head>
 <body class="site home-page">
 <div class="site-wrap">

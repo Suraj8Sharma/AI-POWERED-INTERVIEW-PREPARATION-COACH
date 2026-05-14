@@ -488,20 +488,66 @@ const PrepLoom = (function () {
     }
 
     // ── Intro Loader Controller ───────────────────────────
-    function initIntroLoader() {
-        var loader = document.getElementById("introLoader");
-        if (!loader) return;
+    let isLoaderTransitioning = false;
 
+    function initIntroLoader() {
+        if (isLoaderTransitioning) return;
+        
+        var loader = document.getElementById("introLoader");
+        var siteWrap = document.getElementById("siteWrap");
+        
+        // Check if user has already seen the intro in this session
+        var hasSeenIntro = sessionStorage.getItem("pl-intro-seen");
+        
+        if (hasSeenIntro) {
+            if (loader) {
+                loader.style.display = "none";
+                loader.remove();
+            }
+            if (siteWrap) {
+                siteWrap.style.opacity = "1";
+                siteWrap.style.transform = "none";
+            }
+            return;
+        }
+
+        // If we are on a page without the loader, mark it as seen anyway
+        if (!loader) {
+            sessionStorage.setItem("pl-intro-seen", "true");
+            return;
+        }
+
+        // Prepare site-wrap for reveal
+        if (siteWrap) {
+            siteWrap.style.opacity = "0";
+            siteWrap.style.transform = "scale(0.98) translateY(10px)";
+        }
+
+        isLoaderTransitioning = true;
         var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        var duration = reducedMotion ? 1200 : 2800; // Shorter for reduced motion
+        var duration = reducedMotion ? 800 : 3200; 
 
         setTimeout(function() {
-            loader.classList.add("intro-loader--hidden");
-            
-            // Cleanup from DOM after transition
-            setTimeout(function() {
-                loader.remove();
-            }, 800);
+            if (loader) {
+                loader.classList.add("intro-loader--hidden");
+                
+                // Trigger premium reveal for the main content
+                if (siteWrap) {
+                    siteWrap.classList.add("is-revealing");
+                    siteWrap.style.opacity = "1";
+                    siteWrap.style.transform = "none";
+                }
+
+                // Mark as seen immediately when animation starts fading
+                sessionStorage.setItem("pl-intro-seen", "true");
+                
+                setTimeout(function() {
+                    if (loader.parentNode) {
+                        loader.remove();
+                    }
+                    isLoaderTransitioning = false;
+                }, 1000);
+            }
         }, duration);
     }
 
@@ -512,12 +558,14 @@ const PrepLoom = (function () {
     });
 
     document.addEventListener("DOMContentLoaded", function() {
+        // Run loader check first to ensure immediate visibility handling
+        initIntroLoader();
+
         applyGlobalPreferences();
         initGlobalAnimations();
         initHeroParticles();
         initHeroParallax();
         initNavDropdown();
-        initIntroLoader();
     });
 
     return {
