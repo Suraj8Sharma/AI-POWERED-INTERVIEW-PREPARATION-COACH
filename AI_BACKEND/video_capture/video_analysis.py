@@ -368,7 +368,7 @@ def analyze_camera_snapshot_rgb(
 
     m = analyzer.analyze_pose_landmarks(lm_list)
 
-uv    annotated = (
+    annotated = (
         _draw_pose_on_rgb(rgb_u8, lm_list) if draw_skeleton else rgb_u8.copy()
     )
 
