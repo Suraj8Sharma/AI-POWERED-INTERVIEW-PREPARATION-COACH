@@ -74,7 +74,7 @@ marshmallow==3.26.2
 matplotlib==3.10.8
 matplotlib-inline==0.2.1
 mdurl==0.1.2
-mediapipe==0.10.32
+
 mmh3==5.2.1
 more-itertools==10.8.0
 mpmath==1.3.0
@@ -88,8 +88,8 @@ numpy==2.4.2
 oauthlib==3.3.1
 onnxruntime==1.24.4
 openai-whisper==20250625
-opencv-contrib-python==4.13.0.92
-opencv-python==4.13.0.92
+
+
 opentelemetry-api==1.40.0
 opentelemetry-exporter-otlp-proto-common==1.40.0
 opentelemetry-exporter-otlp-proto-grpc==1.40.0
@@ -121,8 +121,7 @@ PyPika==0.51.1
 pypiwin32==223
 pyproject_hooks==1.2.0
 python-dateutil==2.9.0.post0
-pyttsx3==2.99
-pytz==2026.1.post1
+pyttsx3==2.99pytz==2026.1.post1
 pywin32==311
 PyYAML==6.0.3
 pyzmq==27.1.0

@@ -2,10 +2,9 @@
 
 ## Overview
 This guide deploys PrepLoom to **free-tier** cloud services without Docker. We'll use:
-- **Backend**: Render or Railway (FastAPI)
-- **Frontend**: Vercel or Netlify (Static HTML/JS)
-- **Database**: MongoDB Atlas (free tier)
-- **Vector DB**: Supabase (already configured)
+- **Backend**: Render (FastAPI)
+- **Frontend**: Vercel (Static HTML/JS)
+- **Database**: Supabase (already configured)
 - **AI Models**: HuggingFace Inference API (free)
 
 ---
@@ -15,8 +14,8 @@ This guide deploys PrepLoom to **free-tier** cloud services without Docker. We'l
 - [ ] Git repository created (push to GitHub)
 - [ ] Python 3.9+ installed locally
 - [ ] GitHub account
-- [ ] Free cloud accounts (Render/Railway)
-- [ ] MongoDB Atlas account
+- [ ] Free cloud accounts (Render, Vercel)
+- [ ] HuggingFace token (you already have this)
 - [ ] All API keys in `.env` (not committed to git)
 
 ---
@@ -61,25 +60,18 @@ Keep only:
 - Uvicorn
 - LangChain
 - OpenAI Whisper (lighter, or use API)
-- ChromaDB
-- Supabase
-
 ---
 
-## Part 2: Set Up Free Cloud Database
+## Part 2: Database Setup (Already Done!)
 
-### Step 2.1: MongoDB Atlas Setup
-1. Go to [mongodb.com/cloud/atlas](https://mongodb.com/cloud/atlas)
-2. Sign up (free)
-3. Create a cluster (free tier, `M0`)
-4. Get connection string: `mongodb+srv://user:password@cluster.mongodb.net/dbname`
-5. Add IP address: `0.0.0.0/0` (Allow all - risky but works for demo)
+Your project uses **Supabase** for all persistent data storage. Your credentials are already in `.env`:
+- ✅ SUPABASE_URL
+- ✅ SUPABASE_ANON_KEY
+- ✅ SUPABASE_SERVICE_ROLE_KEY
 
-### Step 2.2: Update `.env`
-```env
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/preploom?retryWrites=true&w=majority
-MONGODB_DB=preploom
-```
+**MongoDB is NOT needed** - Supabase handles all user profiles, sessions, and results storage.
+
+See [MONGODB_EXPLAINED.md](./MONGODB_EXPLAINED.md) for details.
 
 ---
 
@@ -288,12 +280,11 @@ curl https://preploom-api.onrender.com/api/questions?role=Data%20Scientist&limit
 Before going live:
 
 - [ ] Change JWT_SECRET to a strong random string (32+ chars)
-- [ ] Set MONGODB URI to use a restricted IP or VPN
 - [ ] Enable HTTPS (automatic on Vercel/Render)
 - [ ] Set up error logging (Sentry, LogRocket)
 - [ ] Test with real users
-- [ ] Monitor database usage (free tier: 512 MB)
-- [ ] Set up backups for MongoDB
+- [ ] Monitor Supabase storage (free tier: 2 GB)
+- [ ] Test all API endpoints thoroughly
 
 ---
 
@@ -303,7 +294,6 @@ Before going live:
 |---------|-----------|------|
 | Render | 750 hours/month | $0/month* |
 | Vercel | 100 GB bandwidth/month | $0/month |
-| MongoDB Atlas | 512 MB storage | $0/month |
 | Supabase | 2 GB storage | $0/month |
 | HuggingFace | 30k requests/month | $0/month |
 | **Total** | | **$0/month** |

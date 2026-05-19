@@ -6,8 +6,7 @@
 - GitHub account (free)
 - Render account (free - render.com)
 - Vercel account (free - vercel.com)
-- MongoDB Atlas account (free - mongodb.com/cloud/atlas)
-- HuggingFace token (free - huggingface.co)
+- HuggingFace token (free - huggingface.co) ← You already have this!
 
 **Cost: $0/month** ✅
 
@@ -45,10 +44,10 @@ git push -u origin main
 ## 📋 Detailed Timeline
 
 ### ⏱️ 5 min - Set Up Secrets
-1. Edit `.env` file
-2. Get MongoDB URI from [mongodb.com/cloud/atlas](https://mongodb.com/cloud/atlas)
-3. Use HF_TOKEN you already have
-4. Keep Supabase keys (already provided)
+1. Edit `.env` file (already has what you need!)
+2. Verify HF_TOKEN is present (you already have this)
+3. Keep Supabase keys (already provided)
+4. **Note**: MongoDB NOT needed - using Supabase instead ✅
 
 ### ⏱️ 10 min - Push to GitHub
 ```bash
@@ -134,7 +133,7 @@ Share the **frontend URL** with users!
 | Issue | Fix |
 |-------|-----|
 | 503 Unavailable | Render free tier sleeps. Wait 30 sec & refresh |
-| Database connection error | Check MongoDB whitelist is `0.0.0.0/0` |
+| Database connection error | Check Supabase keys in .env are correct |
 | CORS error | Add frontend URL to CORS in `web/api.py` |
 | Can't reach backend | Check Render deployment logs |
 | Frontend shows 404 | Check API_URL in `web/static/index.html` |
@@ -143,12 +142,12 @@ Share the **frontend URL** with users!
 
 ## 📊 Free Tier Limits
 
-| Service | Limit | Upgrade Price |
-|---------|-------|---------------|
-| Render | 750 hrs/month (1 app always) | $7/month |
-| Vercel | 100 GB bandwidth | $20/month |
-| MongoDB | 512 MB storage | $57/month (M2) |
-| Supabase | 2 GB storage | $25/month |
+| Service | Limit | Note |
+|---------|-------|------|
+| Render | 750 hrs/month (1 app always) | $7/month to upgrade |
+| Vercel | 100 GB bandwidth | $20/month to upgrade |
+| Supabase | 2 GB storage | $25/month to upgrade |
+| HuggingFace | 30k API calls/month | Pay-as-you-go after |
 | HuggingFace | 30k inference/month | Pay-as-you-go |
 
 ---
