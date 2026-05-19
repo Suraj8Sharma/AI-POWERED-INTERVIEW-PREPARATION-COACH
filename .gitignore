@@ -40,3 +40,17 @@ AI_BACKEND/video_capture/models/*.task
 # ── Misc ───────────────────────────────────────────────
 *.log
 check.txt
+__pycache__/
+*.pyc
+.env
+myenv/
+.DS_Store
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+*.db
+chroma.sqlite3
+*.ipynb_checkpoints
+node_modules/
+.streamlit/

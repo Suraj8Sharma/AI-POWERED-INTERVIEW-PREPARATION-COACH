@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "web/static/index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://preploom-api.onrender.com/api/$1"
+    },
+    {
+      "src": "/(.*)(?!\\.js$|\\.css$|\\.png$|\\.jpg$|\\.svg$)",
+      "dest": "/index.html"
+    }
+  ]
+}
