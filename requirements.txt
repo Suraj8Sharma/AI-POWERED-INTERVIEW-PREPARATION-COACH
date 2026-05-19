@@ -121,7 +121,7 @@ PyPika==0.51.1
 pypiwin32==223
 pyproject_hooks==1.2.0
 python-dateutil==2.9.0.post0
-pyttsx3==2.99pytz==2026.1.post1
+pytz==2026.1.post1
 pywin32==311
 PyYAML==6.0.3
 pyzmq==27.1.0
