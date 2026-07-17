@@ -1,45 +1,44 @@
-# PrepLoom Production Requirements (Optimized for Render)
-# Remove heavy/desktop-only dependencies
+# PrepLoom production requirements — for the Docker image (web/api.py only).
+#
+# This is a curated subset of requirements.txt: only what web/api.py and the
+# AI_BACKEND modules it imports actually need at runtime. It deliberately
+# excludes dev/notebook-only tooling (streamlit, jupyter, ipykernel, the
+# frontend_interface/ Streamlit prototype's deps, etc.) to keep the image small.
+#
+# torch (openai-whisper's hard dependency) is installed separately in the
+# Dockerfile from PyTorch's CPU-only index — see Dockerfile comment. Do not
+# add it here: mixing --extra-index-url into this file lets pip resolve
+# unrelated packages against the PyTorch index too, which caused hash
+# mismatches during image builds.
 
-# Core Framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
+# Web framework
+fastapi==0.135.3
+uvicorn==0.42.0
+python-multipart==0.0.24
+python-dotenv==1.2.2
+pydantic==2.12.5
+email-validator==2.3.0
 
-# API & HTTP
-httpx==0.25.2
-python-multipart==0.0.6
-aiofiles==23.2.1
+# Auth / DB / storage
+supabase==2.10.0
 
-# Database & Auth
-pymongo==4.6.0
-supabase==1.0.3
-python-jose==3.3.0
-passlib==1.7.4
-python-dotenv==1.0.0
+# RAG (question retrieval)
+chromadb==1.5.5
+langchain-community==0.4.1
+langchain-huggingface==1.2.1
 
-# LLM & NLP
-langchain==0.0.354
-langchain-community==0.1.0
-langchain-openai==0.0.7
-openai==1.3.9
-huggingface-hub==0.19.4
-sentence-transformers==2.2.2
+# Technical scoring (LLM via HuggingFace Inference)
+# (uses langchain-huggingface above)
 
-# Vector DB
-chromadb==0.4.10
+# Speech-to-text
+openai-whisper==20250625
+scipy==1.17.1
 
-# Data Processing
-numpy==1.24.3
-pandas==2.1.3
+# Body-language / pose analysis
+mediapipe==0.10.35
+opencv-contrib-python==5.0.0.93
 
-# Audio/Speech (minimal)
-# Removed: pyttsx3 (desktop-only)
-# Removed: librosa (heavy dependencies)
-
-# Optional: Lightweight monitoring
-sentry-sdk==1.38.0
-
-# For development only (remove in production if needed)
-python-json-logger==2.0.7
+# Image handling + PDF report generation
+numpy==2.4.2
+pillow==12.1.1
+reportlab==4.2.5

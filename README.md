@@ -1,3 +1,13 @@
+---
+title: PrepLoom
+emoji: 🎯
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # PrepLoom: AI-Powered Interview Preparation Coach
 
 PrepLoom is a comprehensive, multimodal AI-driven platform designed to help candidates master their interview skills. By combining Large Language Models (LLMs), Computer Vision, and Speech Processing, PrepLoom provides a realistic interview experience with deep, actionable feedback across three critical dimensions: Technical Proficiency, Communication Quality, and Body Language Confidence.

@@ -1,0 +1,64 @@
+# Version control / editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Python environments & caches
+venv/
+.venv/
+myenv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Notebooks & dev-only scripts (not used by the deployed web/api.py)
+*.ipynb
+.ipynb_checkpoints/
+AI_BACKEND/dataset_csv.ipynb
+AI_BACKEND/rag_backend.ipynb
+AI_BACKEND/debug_whisper.py
+AI_BACKEND/test.py
+AI_BACKEND/test_stt.py
+AI_BACKEND/test_voice.py
+AI_BACKEND/HELLO.py
+AI_BACKEND/add_coding_questions.py
+
+# Streamlit prototype — not part of the deployed container
+frontend_interface/
+
+# Runtime-generated / local-only data
+AI_BACKEND/audio_capture/audio_inputs/
+*.log
+check.txt
+
+# Large docs not needed at runtime
+*.docx
+*.pdf
+DEPLOYMENT_*.md
+README_DEPLOYMENT.md
+QUICK_START.md
+LOCAL_VS_PRODUCTION.md
+MONGODB_EXPLAINED.md
+WHY_NO_MONGODB.md
+WHY_REMOVE_PACKAGES.md
+SETTINGS_IMPLEMENTATION.md
+VIVA_PREPARATION_GUIDE.md
+TODO.md
+
+# Dev-only dependency list (image uses requirements-prod.txt)
+requirements.txt
+
+# Deployment configs for other targets (not used inside the container)
+deploy.sh
+deploy.bat
+Procfile
+vercel.json
+runtime.txt
+
+# Secrets — never bake into the image; injected at runtime via Space secrets
+.env
+.ENV
+*.env
