@@ -28,9 +28,6 @@ Thumbs.db
 # ── Jupyter ────────────────────────────────────────────
 .ipynb_checkpoints/
 
-# ── ChromaDB (generated vector store — regenerate via rag_backend.ipynb) ──
-AI_BACKEND/chroma_db/
-
 # ── Audio recordings (generated at runtime) ───────────
 AI_BACKEND/audio_capture/audio_inputs/
 
@@ -49,8 +46,6 @@ myenv/
 dist/
 build/
 .pytest_cache/
-*.db
-chroma.sqlite3
 *.ipynb_checkpoints
 node_modules/
 .streamlit/
