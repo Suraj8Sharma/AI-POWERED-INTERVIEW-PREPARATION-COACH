@@ -90,7 +90,10 @@
       const { data, error } = await window.supabaseClient.auth.signUp({
         email,
         password,
-        options: { data: { name: name || '' } }
+        options: {
+          data: { name: name || '' },
+          emailRedirectTo: window.location.origin
+        }
       });
       if (error) throw error;
       if (data && data.session && data.session.access_token) {
