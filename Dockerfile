@@ -40,4 +40,7 @@ COPY AI_BACKEND/ AI_BACKEND/
 
 EXPOSE 7860
 
-CMD ["python", "-m", "uvicorn", "web.api:app", "--host", "0.0.0.0", "--port", "7860"]
+# Shell form (not exec-form JSON array) so $PORT is actually expanded — hosts
+# like Railway inject their own PORT env var at runtime and expect the
+# container to bind to it. Falls back to 7860 for local `docker run`.
+CMD python -m uvicorn web.api:app --host 0.0.0.0 --port ${PORT:-7860}
