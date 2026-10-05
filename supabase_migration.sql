@@ -59,3 +59,4 @@ CREATE POLICY "Users can view their own report PDFs" ON storage.objects
         bucket_id = 'interview-reports'
         AND auth.uid()::text = (storage.foldername(name))[1]
     );
+    

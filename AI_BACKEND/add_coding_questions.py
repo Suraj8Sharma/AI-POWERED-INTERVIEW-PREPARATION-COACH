@@ -126,7 +126,7 @@ def inject_coding_questions():
     # Persist the changes so they are not lost after the script exits
     if hasattr(db, "persist"):
         db.persist()
-    print("✅ Successfully added! You can now start an interview for ANY role to test them out.")
+    print("Successfully added! You can now start an interview for ANY role to test them out.")
 
 if __name__ == "__main__":
     inject_coding_questions()
